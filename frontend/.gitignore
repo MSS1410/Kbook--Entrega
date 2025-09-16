@@ -1,5 +1,5 @@
 # Logs
-logs
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -7,18 +7,49 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Dependencias y builds
+node_modules/
+dist/
+dist-ssr/
+build/
+coverage/
+*.tsbuildinfo
+.eslintcache
+.parcel-cache/
+
+# Frameworks (usa las que apliquen)
+.next/
+.nuxt/
+.output/
+.svelte-kit/
+.storybook-static/
+.gatsby/
+.cache/
+public/
+.turbo/
+.vercel/
+.netlify/
+
+# Variables de entorno (mantén un .env.example)
+.env
+.env.*
+!.env.example
+
+# Archivos locales
 *.local
 
-# Editor directories and files
+# Editor / SO
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+.pnp.*
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
