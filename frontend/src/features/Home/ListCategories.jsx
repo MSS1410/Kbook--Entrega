@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import HomeCarrusel from '../../components/HomeCarrusels'
+import HomeCarrusel from '../../components/carrouseles/HomeCarrusels'
 import api from '../../api/index'
 
 const Section = styled.section`

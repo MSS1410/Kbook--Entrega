@@ -57,13 +57,15 @@ const bookSchema = new mongoose.Schema(
         }
       }
     ],
+
+    soldCount: {
+      type: Number, // URL a la foto del autor (Cloudinary o similar)
+      default: 0,
+      min: 0
+    },
     featured: {
       type: Boolean, // URL a la foto del autor (Cloudinary o similar)
       default: false
-    },
-    soldCount: {
-      type: Number, // URL a la foto del autor (Cloudinary o similar)
-      default: 0
     }
   },
   {

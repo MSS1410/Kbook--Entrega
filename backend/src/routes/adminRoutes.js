@@ -16,7 +16,7 @@ import {
   adminToggleAuthorFeatured,
   adminListOrders,
   adminGetOrderById,
-  adminUpdateOrderStatus, // usa: 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled'
+  adminUpdateOrderStatus,
   adminListReviews,
   adminDeleteReview,
   adminEditReview,
@@ -27,8 +27,18 @@ import {
   adminUpdateUserRole
 } from '../controllers/adminController.js'
 
-const router = express.Router()
+import {
+  adminInbox,
+  adminListMessagesToUser,
+  adminSendMessage,
+  adminGetThreadWithUser,
+  adminMarkMessageRead,
+  adminMarkAllFromUserRead,
+  adminDeleteMessage,
+  adminDeleteThreadWithUser
+} from '../controllers/messageController.js'
 
+const router = express.Router()
 router.use(isAuth, isAdmin)
 
 /* Dashboard */
@@ -38,7 +48,7 @@ router.get('/dashboard', adminDashboard)
 router.post('/books', adminCreateBook)
 router.put('/books/:id', adminUpdateBook)
 router.delete('/books/:id', adminDeleteBook)
-router.patch('/books/:id/cover', adminUpdateBookCover)
+// router.patch('/books/:id/cover', adminUpdateBookCover)
 router.patch('/books/:id/featured', adminToggleBookFeatured)
 
 /* Autores */
@@ -64,5 +74,19 @@ router.put('/users/:id', adminUpdateUser)
 router.delete('/users/:id', adminDeleteUser)
 router.patch('/users/:id/block', adminToggleUserBlock)
 router.patch('/users/:id/role', adminUpdateUserRole)
+
+/* Mensajería interna (admin) */
+router.get('/inbox', adminInbox)
+router.get('/users/:id/messages', adminListMessagesToUser)
+router.post('/users/:id/messages', adminSendMessage)
+
+/* === NUEVOS (admin, mensajería) === */
+console.log('[adminRoutes] registrando rutas de mensajería admin') // <-- ponlo
+
+router.get('/users/:id/thread', adminGetThreadWithUser)
+router.patch('/messages/:id/read', adminMarkMessageRead)
+router.patch('/users/:id/messages/read', adminMarkAllFromUserRead)
+router.delete('/messages/:id', adminDeleteMessage)
+router.delete('/users/:id/thread', adminDeleteThreadWithUser)
 
 export default router

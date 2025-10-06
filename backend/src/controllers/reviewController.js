@@ -6,36 +6,68 @@ import Order from '../models/Order.js'
 const countWords = (text = '') =>
   String(text).trim().split(/\s+/).filter(Boolean).length
 
-// Obtener reseñas de un libro (solo ese libro), con user y book poblados
+// Obtener reseñas de un libro (solo ese libro), con user(name,avatar) y book(title,coverImage)
 export const getReviewsByBook = async (req, res, next) => {
   try {
-    const reviews = await Review.find({ book: req.params.bookId })
-      .populate('user', 'name') // nombre del usuario
-      .populate({ path: 'book', select: 'title coverImage' }) // título y portada
-
-    console.log(
-      `📝 Fetched ${reviews.length} reviews for book ${req.params.bookId}`
+    const hasPaging = 'page' in req.query || 'limit' in req.query
+    const page = Math.max(1, parseInt(req.query.page || '1', 10))
+    const limit = Math.min(
+      50,
+      Math.max(1, parseInt(req.query.limit || '10', 10))
     )
-    res.json(reviews)
+    const skip = (page - 1) * limit
+
+    const baseQuery = Review.find({ book: req.params.bookId })
+      .sort(req.query.sort || '-createdAt')
+      .populate('user', 'name avatar')
+      .populate({ path: 'book', select: 'title coverImage' })
+
+    if (!hasPaging) {
+      const reviews = await baseQuery.exec()
+      return res.json(reviews)
+    }
+
+    const [items, total] = await Promise.all([
+      baseQuery.skip(skip).limit(limit).exec(),
+      Review.countDocuments({ book: req.params.bookId })
+    ])
+
+    res.json({ items, total, page, limit })
   } catch (err) {
     next(err)
   }
 }
 
-// Obtener todas las reseñas (ej. para el home), con user y book poblados
+// Obtener todas las reseñas (listado global), con user(name,avatar) y book(title,coverImage)
 export const getAllReviews = async (req, res, next) => {
   try {
-    const limit = parseInt(req.query.limit) || 10
+    const hasPaging = 'page' in req.query || 'limit' in req.query
+    const page = Math.max(1, parseInt(req.query.page || '1', 10))
+    const limit = Math.min(
+      50,
+      Math.max(1, parseInt(req.query.limit || '10', 10))
+    )
+    const skip = (page - 1) * limit
     const sort = req.query.sort || '-createdAt'
 
-    const reviews = await Review.find()
+    const baseQuery = Review.find()
       .sort(sort)
-      .limit(limit)
-      .populate('user', 'name')
+      .populate('user', 'name avatar')
       .populate({ path: 'book', select: 'title coverImage' })
 
-    console.log(`📝 Fetched ${reviews.length} reviews (all)`)
-    res.json(reviews)
+    if (!hasPaging) {
+      const reviews = await baseQuery
+        .limit(parseInt(req.query.limit || '10', 10))
+        .exec()
+      return res.json(reviews)
+    }
+
+    const [items, total] = await Promise.all([
+      baseQuery.skip(skip).limit(limit).exec(),
+      Review.countDocuments({})
+    ])
+
+    res.json({ items, total, page, limit })
   } catch (err) {
     next(err)
   }
@@ -70,16 +102,19 @@ export const createReview = async (req, res, next) => {
         .json({ message: 'Solo puedes reseñar libros que compraste.' })
     }
 
-    // ✅ Upsert: si ya existe reseña del mismo user/libro, se actualiza
-    const savedReview = await Review.findOneAndUpdate(
+    // ✅ Upsert
+    const saved = await Review.findOneAndUpdate(
       { user: req.user._id, book },
       { rating: r, comment, avatar },
       { new: true, upsert: true, setDefaultsOnInsert: true }
     )
 
-    res.status(201).json(savedReview)
+    const populated = await Review.findById(saved._id)
+      .populate('user', 'name avatar')
+      .populate({ path: 'book', select: 'title coverImage' })
+
+    res.status(201).json(populated)
   } catch (err) {
-    // si hay índice único y hay carrera, capturará E11000 (duplicate key)
     next(err)
   }
 }
@@ -110,10 +145,14 @@ export const updateReview = async (req, res, next) => {
           .status(400)
           .json({ message: 'rating debe estar entre 1 y 5.' })
     }
+
     const updated = await Review.findByIdAndUpdate(req.params.id, updates, {
       new: true,
       runValidators: true
     })
+      .populate('user', 'name avatar')
+      .populate({ path: 'book', select: 'title coverImage' })
+
     res.json(updated)
   } catch (err) {
     next(err)

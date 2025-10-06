@@ -85,7 +85,8 @@ const slides = [
     btnLink: '/books?sort=createdAt'
   },
   {
-    bg: 'https://unsplash.com/es/fotos/letreros-de-libros-colgados-junto-a-la-pared-blanca-693RRbiTAaI?utm_content=creditShareLink&utm_medium=referral&utm_source=unsplash',
+    bg: 'https://unsplash.com/es/fotos/una-persona-parada-en-una-habitacion-con-estantes-de-libros-bw-nDU5MTKs',
+
     title: 'Ofertas Especiales',
     subtitle: 'Descubre descuentos exclusivos',
     btnText: 'Ofertas',

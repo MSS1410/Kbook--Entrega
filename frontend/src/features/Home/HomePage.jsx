@@ -2,40 +2,46 @@ import React, { useState, useEffect } from 'react'
 import BannerSect from './BannerSect'
 import BestsellerSection from './BestSeller'
 import NewArrivalsSect from './NewArrivals'
-import AuthorsCarousel from '../../components/AuthorsCarousel'
-import CategoriesCarousel from '../../components/CategoriesCarrusel'
+import AuthorsCarousel from '../../components/authors/AuthorsCarousel'
+import CategoriesCarousel from '../../components/carrouseles/CategoriesCarrusel'
 import ListCategories from './ListCategories'
-import ReviewsCarrusel from '../../components/ReviewCarrusel'
+import ReviewsCarrusel from '../../components/review/ReviewCarrusel'
 import api from '../../api'
 
 export default function HomePage() {
-  const [reviews, setReviews] = useState([])
+  const [homeReviews, setHomeReviews] = useState([])
+  const [loadingReviews, setLoadingReviews] = useState(false)
 
   useEffect(() => {
-    async function fetchReviews() {
+    ;(async () => {
       try {
-        // Cargar las últimas 15 reseñas (para el carrusel)
-        const res = await api.get('/api/reviews?limit=15&sort=-createdAt')
-        const data = Array.isArray(res.data) ? res.data : res.data.reviews || []
-        setReviews(data)
-      } catch (err) {
-        console.error('Error al cargar reseñas:', err)
+        setLoadingReviews(true)
+        const { data } = await api.get('/api/reviews', {
+          params: { limit: 20, sort: '-createdAt' }
+        })
+        // 👇 desenvuelve: puede venir como array, o {items}, o {reviews}
+        const list = Array.isArray(data)
+          ? data
+          : data?.items || data?.reviews || []
+        setHomeReviews(Array.isArray(list) ? list : [])
+      } catch (e) {
+        console.error('Error cargando reseñas del Home:', e)
+        setHomeReviews([])
+      } finally {
+        setLoadingReviews(false)
       }
-    }
-    fetchReviews()
+    })()
   }, [])
 
   return (
     <>
       <BannerSect />
       <BestsellerSection />
-      <NewArrivalsSect />
-
       {/* Carrusel de autores: sólo foto + nombre */}
       <AuthorsCarousel />
+      <NewArrivalsSect />
 
-      <CategoriesCarousel />
-
+      <CategoriesCarousel itemDiameter={150} />
       {/* Secciones por categoría */}
       <ListCategories
         category='Ciencia Ficción'
@@ -74,10 +80,13 @@ export default function HomePage() {
       />
 
       {/* Carrusel de reseñas */}
-      <section style={{ margin: '2rem 0' }}>
-        <h2>Reseñas Destacadas</h2>
-        <ReviewsCarrusel reviews={reviews} />
-      </section>
+      {!loadingReviews && (
+        <ReviewsCarrusel
+          reviews={homeReviews}
+          title='Reseñas destacadas'
+          viewAllLink='/reviews'
+        />
+      )}
     </>
   )
 }

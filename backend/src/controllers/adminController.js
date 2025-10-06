@@ -6,6 +6,8 @@ import Author from '../models/Author.js'
 import Order from '../models/Order.js'
 import Review from '../models/Review.js'
 
+import crypto from 'crypto'
+
 /* ========== Helpers ========== */
 const startOfToday = () => {
   const d = new Date()
@@ -23,40 +25,36 @@ const startOfToday = () => {
  * ============================================================ */
 export const adminDashboard = async (req, res, next) => {
   try {
-    const dayStart = startOfToday()
+    const dayStart = new Date()
+    dayStart.setHours(0, 0, 0, 0)
     const doneStatuses = ['paid', 'shipped', 'completed']
 
     // pedidos de hoy (pagados/en tránsito/completados)
-    const pedidosHoy = await Order.countDocuments({
-      createdAt: { $gte: dayStart },
-      status: { $in: doneStatuses }
-    })
-
-    // ingresos de hoy (∑ totalPrice)
-    const ingresosAgg = await Order.aggregate([
-      {
-        $match: {
-          createdAt: { $gte: dayStart },
-          status: { $in: doneStatuses }
-        }
-      },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: '$totalPrice' }
-        }
-      }
+    const [pedidosHoy, ingresosAgg] = await Promise.all([
+      Order.countDocuments({
+        createdAt: { $gte: dayStart },
+        status: { $in: doneStatuses }
+      }),
+      Order.aggregate([
+        {
+          $match: {
+            createdAt: { $gte: dayStart },
+            status: { $in: doneStatuses }
+          }
+        },
+        { $group: { _id: null, total: { $sum: '$totalPrice' } } }
+      ])
     ])
     const ingresosHoy = ingresosAgg?.[0]?.total || 0
 
-    // top libros por soldCount
-    const topBooks = await Book.find({})
-      .sort({ soldCount: -1 })
+    // top libros por soldCount (solo con ventas reales)
+    const topBooks = await Book.find({ soldCount: { $gt: 0 } })
+      .sort({ soldCount: -1, createdAt: -1 })
       .limit(5)
       .select('title coverImage soldCount author')
       .populate('author', 'name')
 
-    // totales
+    // totales (sin tocar)
     const [totalUsuarios, totalLibros, totalAutores, totalPedidos] =
       await Promise.all([
         User.countDocuments(),
@@ -64,6 +62,21 @@ export const adminDashboard = async (req, res, next) => {
         Author.countDocuments(),
         Order.countDocuments()
       ])
+
+    // 💡 ventas totales (todos los pedidos, cualquier estado)
+    const salesAllAgg = await Order.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalAmount: { $sum: '$totalPrice' },
+          totalOrders: { $sum: 1 }
+        }
+      }
+    ])
+    const salesAll = {
+      totalAmount: salesAllAgg?.[0]?.totalAmount || 0,
+      totalOrders: salesAllAgg?.[0]?.totalOrders || 0
+    }
 
     res.json({
       pedidosHoy,
@@ -74,7 +87,9 @@ export const adminDashboard = async (req, res, next) => {
         libros: totalLibros,
         autores: totalAutores,
         pedidos: totalPedidos
-      }
+      },
+      // 👉 nuevo bloque robusto:
+      salesAll
     })
   } catch (err) {
     next(err)
@@ -101,7 +116,8 @@ export const adminCreateBook = async (req, res, next) => {
       category,
       coverImage: coverImage || '',
       formats: Array.isArray(formats) ? formats : [],
-      featured: !!featured
+      featured: !!featured,
+      soldCount: 0
     })
 
     res.status(201).json(book)
@@ -259,7 +275,9 @@ export const adminToggleAuthorFeatured = async (req, res, next) => {
  * 4) PEDIDOS (listar, detalle, cambiar status)
  * ============================================================ */
 
-// GET /api/admin/orders?status=&page=&limit=
+// GET /api/admin/orders?page=&limit=&order=asc|desc
+// También soporta: ?sort=createdAt | ?sort=-createdAt
+// GET /api/admin/orders?page=&limit=&order=asc|desc&userId=&bookId=
 export const adminListOrders = async (req, res, next) => {
   try {
     const page = Math.max(1, parseInt(req.query.page || '1', 10))
@@ -268,17 +286,34 @@ export const adminListOrders = async (req, res, next) => {
       Math.max(1, parseInt(req.query.limit || '20', 10))
     )
     const skip = (page - 1) * limit
-    const status = req.query.status
 
+    // Orden: order=asc|desc tiene prioridad; si no, admite sort=createdAt|-createdAt
+    let sortDir = -1
+    const orderParam = (req.query.order || '').toString().toLowerCase()
+    if (orderParam === 'asc') sortDir = 1
+    if (orderParam === 'desc') sortDir = -1
+    if (!orderParam) {
+      const sortQ = (req.query.sort || '').toString()
+      if (sortQ === 'createdAt') sortDir = 1
+      if (sortQ === '-createdAt') sortDir = -1
+    }
+
+    // 🔎 FILTROS
+    const { userId, bookId } = req.query
     const filter = {}
-    if (status) filter.status = status
+    if (userId && mongoose.Types.ObjectId.isValid(userId)) {
+      filter.user = userId
+    }
+    if (bookId && mongoose.Types.ObjectId.isValid(bookId)) {
+      filter['items.book'] = bookId
+    }
 
     const [orders, total] = await Promise.all([
       Order.find(filter)
-        .sort({ createdAt: -1 })
+        .sort({ createdAt: sortDir })
         .skip(skip)
         .limit(limit)
-        .populate('user', 'name email')
+        .populate('user', 'name email avatar')
         .populate('items.book', 'title coverImage'),
       Order.countDocuments(filter)
     ])
@@ -327,6 +362,7 @@ export const adminUpdateOrderStatus = async (req, res, next) => {
  * 5) RESEÑAS (listar + eliminar + (opcional) editar)
  * ============================================================ */
 
+// GET /api/admin/reviews?userId=&bookId=&order=asc|desc&page=&limit=
 export const adminListReviews = async (req, res, next) => {
   try {
     const page = Math.max(1, parseInt(req.query.page || '1', 10))
@@ -336,14 +372,28 @@ export const adminListReviews = async (req, res, next) => {
     )
     const skip = (page - 1) * limit
 
+    const { userId, bookId } = req.query
+    const orderParam = String(req.query.order || 'desc').toLowerCase()
+    const sortDir = orderParam === 'asc' ? 1 : -1
+
+    const filter = {}
+    // Filtrar por usuario (si viene y es un ObjectId válido)
+    if (userId && mongoose.Types.ObjectId.isValid(userId)) {
+      filter.user = userId
+    }
+    // Filtrar por libro (si viene y es un ObjectId válido)
+    if (bookId && mongoose.Types.ObjectId.isValid(bookId)) {
+      filter.book = bookId
+    }
+
     const [reviews, total] = await Promise.all([
-      Review.find({})
-        .sort({ createdAt: -1 })
+      Review.find(filter)
+        .sort({ createdAt: sortDir })
         .skip(skip)
         .limit(limit)
-        .populate('user', 'name email')
+        .populate('user', 'name email avatar')
         .populate('book', 'title coverImage'),
-      Review.countDocuments({})
+      Review.countDocuments(filter)
     ])
 
     res.json({ reviews, total, page, limit })
@@ -406,7 +456,9 @@ export const adminListUsers = async (req, res, next) => {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .select('name email role isBlocked createdAt'),
+        .select(
+          'name email role isBlocked createdAt avatar description lastLogin'
+        ),
       User.countDocuments(filter)
     ])
 
@@ -418,25 +470,34 @@ export const adminListUsers = async (req, res, next) => {
 
 export const adminUpdateUser = async (req, res, next) => {
   try {
-    const { name, email } = req.body
+    const { name, email, description, avatar } = req.body
     const user = await User.findById(req.params.id)
     if (!user) return res.status(404).json({ message: 'Usuario no encontrado' })
 
+    // email único (si cambia)
     if (email && email.toLowerCase() !== user.email) {
       const exists = await User.exists({ email: email.toLowerCase() })
-      if (exists)
+      if (exists) {
         return res.status(409).json({ message: 'Ese email ya está en uso' })
+      }
       user.email = email.toLowerCase()
     }
-    if (name) user.name = name
+
+    if (typeof name === 'string' && name.trim()) user.name = name.trim()
+    if (typeof description === 'string') user.description = description
+    // opcional: si alguna vez decides pasar avatar por PUT, lo contemplamos
+    if (typeof avatar === 'string' && avatar.trim()) user.avatar = avatar.trim()
 
     await user.save()
+
     res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
       role: user.role,
-      isBlocked: user.isBlocked
+      isBlocked: user.isBlocked,
+      avatar: user.avatar,
+      description: user.description
     })
   } catch (err) {
     next(err)
@@ -445,7 +506,7 @@ export const adminUpdateUser = async (req, res, next) => {
 
 export const adminDeleteUser = async (req, res, next) => {
   try {
-    const target = await User.findById(req.params.id).select('role')
+    const target = await User.findById(req.params.id)
     if (!target)
       return res.status(404).json({ message: 'Usuario no encontrado' })
 
@@ -467,11 +528,30 @@ export const adminDeleteUser = async (req, res, next) => {
       }
     }
 
-    // (opcional) limpiar reseñas del usuario
-    // await Review.deleteMany({ user: target._id })
+    // ✅ Anonimización + bloqueo (soft delete)
+    const surrogateEmail = `deleted+${target._id}@example.invalid`
+    const randomPwd = crypto.randomBytes(24).toString('hex')
 
-    await User.findByIdAndDelete(target._id)
-    res.json({ message: 'Usuario eliminado' })
+    target.name = 'Usuario eliminado'
+    target.email = surrogateEmail
+    target.password = randomPwd // se re-hashea por el pre('save')
+    target.avatar = ''
+    target.description = ''
+    target.firstName = ''
+    target.lastName = ''
+    target.shipping = {}
+    target.payment = {}
+    target.isBlocked = true
+    target.role = 'user'
+    target.isDeleted = true // si añadiste el campo
+    target.lastLogin = undefined
+
+    await target.save()
+
+    // (opcional) marcar mensajes como leídos o añadir un flag, si tu UI lo necesita
+    // await Message.updateMany({ fromUser: target._id }, { $set: { fromUserDeleted: true } })
+
+    res.json({ message: 'Usuario anonimizado y acceso revocado' })
   } catch (err) {
     next(err)
   }

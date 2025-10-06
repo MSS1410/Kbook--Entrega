@@ -42,20 +42,22 @@ const userSchema = new mongoose.Schema(
       enum: ['user', 'admin'],
       default: 'user'
     },
-    avatar: {
-      type: String,
-      default: ''
-    },
+    avatar: { type: String, default: '' },
+
+    // NUEVOS
+    description: { type: String, default: '' },
+    lastLogin: { type: Date },
+
     firstName: { type: String, default: '' },
     lastName: { type: String, default: '' },
+
     shipping: { type: shippingSchema, default: () => ({}) },
     payment: { type: paymentSchema, default: () => ({}) },
-    isBlocked: { type: Boolean, default: false }
-  },
 
-  {
-    timestamps: true
-  }
+    isBlocked: { type: Boolean, default: false },
+    isDeleted: { type: Boolean, default: false }
+  },
+  { timestamps: true }
 )
 
 userSchema.pre('save', async function (next) {

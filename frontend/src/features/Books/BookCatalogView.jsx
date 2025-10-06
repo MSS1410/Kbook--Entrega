@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { FiGrid, FiList } from 'react-icons/fi'
 import useCart from '../../hooks/useCart'
 import api from '../../api'
+import useScrollToTopOn from '../../hooks/useScrollToTopOn'
 
 /* ===== Layout y header ===== */
 const Wrap = styled.div`
@@ -425,7 +426,7 @@ export default function BookCatalogView({
 
   // Estado: formato elegido por libro { [bookId]: 'TapaBlanda' | 'TapaDura' | 'Ebook' }
   const [choice, setChoice] = useState({})
-
+  useScrollToTopOn(page)
   useEffect(() => {
     localStorage.setItem('booksView', view)
   }, [view])

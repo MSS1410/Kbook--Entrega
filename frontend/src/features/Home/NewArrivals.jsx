@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import api from '../../api'
-import HomeCarrusel from '../../components/HomeCarrusels'
+import HomeCarrusel from '../../components/carrouseles/HomeCarrusels'
 
 const Card = styled.div`
   position: relative;

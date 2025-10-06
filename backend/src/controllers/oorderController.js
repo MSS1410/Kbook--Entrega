@@ -1,5 +1,6 @@
 import Order from '../models/Order.js'
 import Cart from '../models/Cart.js'
+import Book from '../models/Book.js'
 
 /**
  * Crea una orden a partir del carrito del usuario autenticado.
@@ -52,6 +53,8 @@ export const createOrder = async (req, res, next) => {
 
 /**
  * Confirma el pago de una orden del usuario → pasa a 'paid'
+ *  * + Incrementa soldCount de los libros incluidos (una sola vez)
+
  */
 export const markOrderPaid = async (req, res, next) => {
   try {
@@ -62,20 +65,46 @@ export const markOrderPaid = async (req, res, next) => {
 
     if (!order) return res.status(404).json({ message: 'Orden no encontrada' })
 
+    // Ya estaba pagada → idempotente
     if (order.status === 'paid') {
-      return res.json(order) // idempotente
+      await order.populate({ path: 'items.book', select: 'title coverImage' })
+      return res.json(order)
     }
 
+    // Solo permitimos pasar de 'pending' a 'paid'
     if (order.status !== 'pending') {
-      return res
-        .status(400)
-        .json({
-          message: `No se puede pagar una orden con estado "${order.status}"`
-        })
+      return res.status(400).json({
+        message: `No se puede pagar una orden con estado "${order.status}"`
+      })
     }
+
+    // Guardamos items antes para construir las operaciones
+    const items = Array.isArray(order.items) ? order.items : []
 
     order.status = 'paid'
     await order.save()
+
+    // Incremento de soldCount por cada item (cantidad incluida)
+    if (items.length) {
+      const ops = items
+        .filter((it) => it?.book)
+        .map((it) => ({
+          updateOne: {
+            filter: { _id: it.book },
+            update: {
+              $inc: { soldCount: Math.max(1, Number(it.quantity || 1)) }
+            }
+          }
+        }))
+      if (ops.length) {
+        await Book.bulkWrite(ops).catch(() => {
+          // No rompemos la respuesta si falla el contador;
+          // opcional: loggear para revisión
+        })
+      }
+    }
+
+    await order.populate({ path: 'items.book', select: 'title coverImage' })
     res.json(order)
   } catch (err) {
     next(err)

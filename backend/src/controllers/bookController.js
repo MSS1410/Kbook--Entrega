@@ -3,27 +3,71 @@ import Author from '../models/Author.js'
 import mongoose from 'mongoose'
 const { Types } = mongoose
 // Obtiene todos los libros (formats incluidos)
+// Obtiene todos los libros (formats incluidos)
 export const getAllBooks = async (req, res, next) => {
   try {
-    const { page = 1, limit = 10, sort, category, search } = req.query
+    const {
+      page = 1,
+      limit = 10,
+      sort,
+      category,
+      search,
+      author, // <— id de autor (ObjectId)
+      authorName // <— nombre de autor (string)
+    } = req.query
 
     const filter = {}
+
+    // Filtro por categoría exacta (case-insensitive)
     if (category) filter.category = new RegExp(`^${category.trim()}$`, 'i')
+
+    // Filtro por autor (id) si llega
+    if (author) {
+      filter.author = author
+    }
+
+    // Filtro por nombre de autor si llega
+    if (authorName && !filter.author) {
+      const regexAuthor = new RegExp(authorName, 'i')
+      const Author = (await import('../models/Author.js')).default
+      const authors = await Author.find({ name: regexAuthor }).select('_id')
+      filter.author = { $in: authors.map((a) => a._id) }
+    }
+
+    // Búsqueda general (título o nombre de autor) si llega 'search'
     if (search) {
       const regex = new RegExp(search, 'i')
+      const Author = (await import('../models/Author.js')).default
       const authors = await Author.find({ name: regex }).select('_id')
-      filter.$or = [
-        { title: regex },
-        { author: { $in: authors.map((a) => a._id) } }
-      ]
+
+      // Si ya había filter.author por id o por nombre, lo combinamos
+      if (filter.author) {
+        filter.$and = [
+          { author: filter.author },
+          {
+            $or: [
+              { title: regex },
+              { author: { $in: authors.map((a) => a._id) } }
+            ]
+          }
+        ]
+        delete filter.author
+      } else {
+        filter.$or = [
+          { title: regex },
+          { author: { $in: authors.map((a) => a._id) } }
+        ]
+      }
     }
 
     const total = await Book.countDocuments(filter)
     const skip = (Number(page) - 1) * Number(limit)
+
     let query = Book.find(filter)
       .populate('author', 'name')
       .skip(skip)
       .limit(Number(limit))
+
     if (sort) query = query.sort(sort)
 
     const books = await query
