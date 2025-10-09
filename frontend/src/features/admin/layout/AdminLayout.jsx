@@ -2,8 +2,8 @@
 import React from 'react'
 import styled from 'styled-components'
 import { Outlet } from 'react-router-dom'
-import AdminHeader from '../components/AdminHeader.jsx'
-import AdminFooter from '../components/AdminFooter.jsx'
+import AdminHeader from '../components/layout/AdminHeader.jsx'
+import AdminFooter from '../components/layout/AdminFooter.jsx'
 import ScrollToTop from '../../../components/scrollToTop.jsx'
 
 const HEADER_H = 64

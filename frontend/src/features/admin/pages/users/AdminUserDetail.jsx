@@ -1,4 +1,3 @@
-// frontend/src/features/admin/pages/AdminUserDetail.jsx
 import React, { useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { useParams, useNavigate } from 'react-router-dom'
@@ -7,13 +6,15 @@ import {
   listAllUsersAdmin,
   toggleUserBlockAdmin,
   updateUserRoleAdmin,
-  listOrders,
-  listReviews,
   adminSendMessageToUser,
   deleteUserAdmin,
-  deleteReview // 👈 IMPORTANTE
+  deleteReview
 } from '../../api/adminApi.js'
-import { Lock, Unlock, Save, Trash2 } from 'lucide-react' // 👈 usamos Trash2
+import { Lock, Unlock, Save, Trash2 } from 'lucide-react'
+import useUserAggregates from '../../hooks/useUserAggregates.js'
+import ReviewsTable from '../../components/users/usersDet/ReviewsTable.jsx'
+import { absUrl } from '../../../../utils/absUrl.js'
+import Avatar from '../../components/Avatar.jsx'
 
 const Wrap = styled.div`
   display: grid;
@@ -38,7 +39,9 @@ const Block = styled(Card)`
   display: grid;
   gap: 10px;
 `
-const Avatar = styled.div`
+
+// Contenedor cuadrado para el avatar grande
+const AvatarBox = styled.div`
   position: relative;
   width: 100%;
   background: #eee;
@@ -47,15 +50,12 @@ const Avatar = styled.div`
     display: block;
     padding-bottom: 100%;
   }
-  img {
+  > div {
     position: absolute;
     inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
   }
 `
+
 const Field = styled.div`
   display: grid;
   gap: 6px;
@@ -89,6 +89,15 @@ const Table = styled.table`
   }
 `
 
+const getAvatarUrl = (u) =>
+  absUrl(
+    (u?.avatar &&
+      typeof u.avatar === 'object' &&
+      (u.avatar.url || u.avatar.path)) ||
+      (typeof u?.avatar === 'string' ? u.avatar : '') ||
+      ''
+  )
+
 export default function AdminUserDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -96,69 +105,30 @@ export default function AdminUserDetail() {
   const [user, setUser] = useState(null)
   const [role, setRole] = useState('user')
   const [deleting, setDeleting] = useState(false)
-
-  const [orders, setOrders] = useState([])
-  const [ordersTotal, setOrdersTotal] = useState(0)
-
-  const [reviews, setReviews] = useState([])
-  const [reviewsTotal, setReviewsTotal] = useState(0)
-
   const [blocking, setBlocking] = useState(false)
   const [savingRole, setSavingRole] = useState(false)
-
   const [message, setMessage] = useState({ subject: '', body: '' })
-
   const [deletingReviewIds, setDeletingReviewIds] = useState(new Set())
 
-  const sameId = (a, b) => String(a || '').trim() === String(b || '').trim()
+  const {
+    loading,
+    orders,
+    ordersTotal,
+    setOrders,
+    reviews,
+    reviewsTotal,
+    setReviews,
+    setReviewsTotal
+  } = useUserAggregates(id)
 
   useEffect(() => {
     let alive = true
     ;(async () => {
       const all = await listAllUsersAdmin()
-      const u = all.find((x) => sameId(x._id, id))
+      const u = all.find((x) => String(x._id) === String(id))
       if (!alive) return
       setUser(u || null)
       setRole(u?.role || 'user')
-
-      try {
-        const resOrders = await listOrders({ page: 1, limit: 500, userId: id })
-        const arr = Array.isArray(resOrders?.orders) ? resOrders.orders : []
-        const filtered = arr.filter((o) => {
-          const uu = o.user
-          const uid = typeof uu === 'object' ? uu?._id || uu?.id : uu
-          return sameId(uid, id)
-        })
-        if (!alive) return
-        setOrders(filtered)
-        setOrdersTotal(filtered.length)
-      } catch {
-        if (!alive) return
-        setOrders([])
-        setOrdersTotal(0)
-      }
-
-      try {
-        const resReviews = await listReviews({
-          page: 1,
-          limit: 500,
-          userId: id,
-          order: 'desc'
-        })
-        const arr = Array.isArray(resReviews?.reviews) ? resReviews.reviews : []
-        const filtered = arr.filter((r) => {
-          const uu = r.user
-          const uid = typeof uu === 'object' ? uu?._id || uu?.id : uu
-          return sameId(uid, id)
-        })
-        if (!alive) return
-        setReviews(filtered)
-        setReviewsTotal(filtered.length)
-      } catch {
-        if (!alive) return
-        setReviews([])
-        setReviewsTotal(0)
-      }
     })()
     return () => {
       alive = false
@@ -197,8 +167,7 @@ export default function AdminUserDetail() {
       navigate('/admin/users')
     } catch (e) {
       const msg =
-        e?.response?.data?.message ||
-        'No se pudo eliminar el usuario (posible restricción: no puedes borrarte a ti mismo o al último admin).'
+        e?.response?.data?.message || 'No se pudo eliminar el usuario.'
       alert(msg)
     } finally {
       setDeleting(false)
@@ -216,9 +185,9 @@ export default function AdminUserDetail() {
     }
   }
 
-  if (!user) {
-    return <div style={{ padding: 16 }}>Cargando…</div>
-  }
+  if (!user || loading) return <div style={{ padding: 16 }}>Cargando…</div>
+
+  const avatarSrc = getAvatarUrl(user)
 
   return (
     <Wrap>
@@ -247,9 +216,9 @@ export default function AdminUserDetail() {
 
       <Top>
         <Card>
-          <Avatar>
-            {user.avatar ? <img src={user.avatar} alt={user.name} /> : null}
-          </Avatar>
+          <AvatarBox>
+            <Avatar fill square src={avatarSrc} name={user.name} />
+          </AvatarBox>
         </Card>
 
         <Block>
@@ -358,77 +327,31 @@ export default function AdminUserDetail() {
         )}
       </Block>
 
-      {/* ===== RESEÑAS ===== */}
       <Block>
         <strong>Reseñas ({reviewsTotal})</strong>
         {reviews.length ? (
-          <TableWrap>
-            <Table>
-              <thead>
-                <tr>
-                  <th>Fecha</th>
-                  <th>Libro</th>
-                  <th>Puntuación</th>
-                  <th>Comentario</th>
-                  <th style={{ width: 64, textAlign: 'right' }}>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {reviews.map((r) => {
-                  const isDeleting = deletingReviewIds.has(r._id)
-                  return (
-                    <tr key={r._id}>
-                      <td>
-                        {r.createdAt
-                          ? new Date(r.createdAt).toLocaleString()
-                          : '—'}
-                      </td>
-                      <td>
-                        {typeof r.book === 'object'
-                          ? r.book?.title || 'Libro'
-                          : 'Libro'}
-                      </td>
-                      <td>{r.rating ?? '—'}</td>
-                      <td>{r.comment || '—'}</td>
-                      <td style={{ textAlign: 'right' }}>
-                        {/* 👇 Botón de borrar sin contorno rojo (ghost) */}
-                        <Button
-                          $variant='ghost'
-                          disabled={isDeleting}
-                          onClick={async () => {
-                            if (
-                              !confirm('¿Eliminar esta reseña definitivamente?')
-                            )
-                              return
-                            setDeletingReviewIds((s) => new Set(s).add(r._id))
-                            try {
-                              await deleteReview(r._id)
-                              setReviews((arr) =>
-                                arr.filter((x) => x._id !== r._id)
-                              )
-                              setReviewsTotal((n) => Math.max(0, n - 1))
-                            } catch (e) {
-                              console.error(e)
-                              alert('No se pudo eliminar la reseña.')
-                            } finally {
-                              setDeletingReviewIds((s) => {
-                                const next = new Set(s)
-                                next.delete(r._id)
-                                return next
-                              })
-                            }
-                          }}
-                          title='Eliminar reseña'
-                        >
-                          <Trash2 size={16} />
-                        </Button>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </Table>
-          </TableWrap>
+          <ReviewsTable
+            reviews={reviews}
+            deletingIds={deletingReviewIds}
+            onDelete={async (r) => {
+              if (!confirm('¿Eliminar esta reseña definitivamente?')) return
+              setDeletingReviewIds((s) => new Set(s).add(r._id))
+              try {
+                await deleteReview(r._id)
+                setReviews((arr) => arr.filter((x) => x._id !== r._id))
+                setReviewsTotal((n) => Math.max(0, n - 1))
+              } catch (e) {
+                console.error(e)
+                alert('No se pudo eliminar la reseña.')
+              } finally {
+                setDeletingReviewIds((s) => {
+                  const next = new Set(s)
+                  next.delete(r._id)
+                  return next
+                })
+              }
+            }}
+          />
         ) : (
           <div style={{ color: '#64748b' }}>
             Este usuario no ha hecho reseñas.
@@ -436,7 +359,6 @@ export default function AdminUserDetail() {
         )}
       </Block>
 
-      {/* ===== Mensaje interno ===== */}
       <Block>
         <strong>Mensaje interno al usuario</strong>
         <div style={{ display: 'grid', gap: 8 }}>

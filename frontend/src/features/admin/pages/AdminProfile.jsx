@@ -1,4 +1,3 @@
-// frontend/src/features/admin/pages/AdminProfile.jsx
 import React, { useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import Button from '../components/Button.jsx'
@@ -6,7 +5,12 @@ import useAuth from '../../../hooks/useAuth.jsx'
 import { updateUserAdmin } from '../api/adminApi.js'
 import api from '../../../api/index.js'
 import { uploadUserAvatar } from '../../../api/adminUpload.js'
-import { Eye, EyeOff, Upload, Pencil, Save, X } from 'lucide-react'
+import { Pencil, Save, X } from 'lucide-react'
+
+// Secciones
+import ProfileAvatarSection from '../components/profile/ProfileAvatarSection.jsx'
+import ProfileDetailsSection from '../components/profile/ProfileDetailsSection.jsx'
+import ProfileActivitySection from '../components/profile/ProfileActivitySection.jsx'
 
 /* ======================= UI ======================= */
 const Wrap = styled.div`
@@ -21,114 +25,12 @@ const Top = styled.div`
     grid-template-columns: 360px minmax(0, 1fr);
   }
 `
-const Card = styled.div`
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: ${({ theme }) => theme.radii.lg};
-  background: ${({ theme }) => theme.colors.cardBg};
-  overflow: hidden;
-`
-const Block = styled(Card)`
-  padding: 16px;
-  display: grid;
-  gap: 12px;
-`
-const SectionTitle = styled.h3`
-  margin: 0 0 6px 0;
-  font-size: 18px;
-`
-const Field = styled.label`
-  display: grid;
-  gap: 6px;
-`
-const Label = styled.span`
-  font-weight: 700;
-  color: ${({ theme }) => theme.colors.primary};
-`
-const Row = styled.div`
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  align-items: center;
-`
-const Input = (props) => (
-  <input
-    {...props}
-    style={{
-      width: '100%',
-      padding: '10px 12px',
-      border: '1px solid var(--border,#E2E8F0)',
-      borderRadius: 10
-    }}
-  />
-)
-const Textarea = (props) => (
-  <textarea
-    {...props}
-    style={{
-      width: '100%',
-      padding: '10px 12px',
-      border: '1px solid var(--border,#E2E8F0)',
-      borderRadius: 10
-    }}
-  />
-)
-
-/* Avatar bonito */
-const AvatarShell = styled.div`
-  display: grid;
-  place-items: center;
-  padding: 12px;
-  border-radius: 16px;
-  background: linear-gradient(180deg, #fafafa, #f3f5f9);
-  border: 1px dashed ${({ theme }) => theme.colors.border};
-`
-const AvatarBox = styled.div`
-  width: 168px;
-  height: 168px;
-  border-radius: 9999px;
-  background: #e5e7eb;
-  overflow: hidden;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08), inset 0 0 0 6px #fff;
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-`
-const FileButton = styled.label`
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  border: 1px dashed ${({ theme }) => theme.colors.border};
-  background: ${({ theme }) => theme.colors.mutedSurface};
-  color: ${({ theme }) => theme.colors.text};
-  padding: 10px 12px;
-  border-radius: 10px;
-  user-select: none;
-  &:hover {
-    filter: brightness(0.98);
-  }
-  input {
-    display: none;
-  }
-`
-const Muted = styled.small`
-  color: #64748b;
-`
-const Bottom = styled.div`
-  display: grid;
-  gap: 16px;
-  grid-template-columns: minmax(0, 1fr);
-`
 
 /* ======================= Page ======================= */
 export default function AdminProfile() {
   const { user } = useAuth() || {}
   const [adminId, setAdminId] = useState(null)
   const [loading, setLoading] = useState(true)
-
   const [editing, setEditing] = useState(false)
 
   // datos actuales
@@ -171,7 +73,6 @@ export default function AdminProfile() {
   }
 
   useEffect(() => {
-    let alive = true
     const fill = (u) => {
       setAdminId(u?.id || null)
       setCurrent({
@@ -208,9 +109,6 @@ export default function AdminProfile() {
           setLoading(false)
         }
       })()
-    }
-    return () => {
-      alive = false
     }
   }, [user?._id])
 
@@ -292,7 +190,7 @@ export default function AdminProfile() {
         }))
       }
 
-      /// 3) Cambiar contraseña si procede
+      // 3) Cambiar contraseña si procede
       if (wantsPwChange) {
         setPwSaving(true)
         try {
@@ -333,6 +231,7 @@ export default function AdminProfile() {
 
   return (
     <Wrap>
+      {/* Header */}
       <div
         style={{
           display: 'flex',
@@ -352,7 +251,6 @@ export default function AdminProfile() {
           </Button>
         ) : (
           <div style={{ display: 'flex', gap: 8 }}>
-            {/* 👉 Guardar siempre habilitado en edición (salvo mientras guarda) */}
             <Button onClick={saveProfile} disabled={saving || pwSaving}>
               <Save size={16} /> {saving ? 'Guardando…' : 'Guardar'}
             </Button>
@@ -363,157 +261,32 @@ export default function AdminProfile() {
         )}
       </div>
 
+      {/* Contenido */}
       <Top>
-        {/* Avatar */}
-        <Block>
-          <SectionTitle>Foto de perfil</SectionTitle>
-          <AvatarShell>
-            <AvatarBox>
-              {newAvatarPreview || current.avatar ? (
-                <img
-                  src={newAvatarPreview || current.avatar}
-                  alt={current.name || 'Avatar'}
-                />
-              ) : null}
-            </AvatarBox>
-          </AvatarShell>
-          <div>
-            <FileButton
-              title='Seleccionar imagen'
-              style={{
-                opacity: editing ? 1 : 0.6,
-                pointerEvents: editing ? 'auto' : 'none'
-              }}
-            >
-              <Upload size={16} /> Subir imagen desde tu equipo
-              <input type='file' accept='image/*' onChange={onPickAvatar} />
-            </FileButton>
-            <div style={{ marginTop: 6 }}>
-              <Muted>JPG/PNG. Se guardará al pulsar “Guardar”.</Muted>
-            </div>
-          </div>
-        </Block>
+        <ProfileAvatarSection
+          editing={editing}
+          name={current.name}
+          avatarUrl={current.avatar}
+          previewUrl={newAvatarPreview}
+          onPickAvatar={onPickAvatar}
+        />
 
-        {/* Datos */}
-        <Block>
-          <SectionTitle>Datos del administrador</SectionTitle>
-
-          <Field>
-            <Label>Nombre</Label>
-            <Input
-              disabled={!editing}
-              placeholder={current.name || '—'}
-              value={editing ? form.name : ''}
-              onChange={onChangeForm('name')}
-            />
-          </Field>
-
-          <Field>
-            <Label>Email</Label>
-            <Input
-              type='email'
-              disabled={!editing}
-              placeholder={current.email || '—'}
-              value={editing ? form.email : ''}
-              onChange={onChangeForm('email')}
-            />
-          </Field>
-
-          <div
-            style={{
-              display: 'grid',
-              gap: 10,
-              opacity: editing ? 1 : 0.6,
-              pointerEvents: editing ? 'auto' : 'none'
-            }}
-          >
-            <Field>
-              <Label>Contraseña actual</Label>
-              <div style={{ position: 'relative' }}>
-                <Input
-                  type={showCurrent ? 'text' : 'password'}
-                  placeholder='••••••••'
-                  value={pw.current}
-                  onChange={onChangePw('current')}
-                />
-                <button
-                  type='button'
-                  onClick={() => setShowCurrent((v) => !v)}
-                  title={showCurrent ? 'Ocultar' : 'Mostrar'}
-                  style={{
-                    position: 'absolute',
-                    right: 10,
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    border: 0,
-                    background: 'transparent',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {showCurrent ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-            </Field>
-
-            <Field>
-              <Label>Nueva contraseña</Label>
-              <div style={{ position: 'relative' }}>
-                <Input
-                  type={showNext ? 'text' : 'password'}
-                  placeholder='••••••••'
-                  value={pw.next}
-                  onChange={onChangePw('next')}
-                />
-                <button
-                  type='button'
-                  onClick={() => setShowNext((v) => !v)}
-                  title={showNext ? 'Ocultar' : 'Mostrar'}
-                  style={{
-                    position: 'absolute',
-                    right: 10,
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    border: 0,
-                    background: 'transparent',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {showNext ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-            </Field>
-
-            {pwMsg ? <Muted>{pwMsg}</Muted> : null}
-          </div>
-
-          <Field>
-            <Label>Descripción</Label>
-            <Textarea
-              rows={4}
-              disabled={!editing}
-              placeholder={current.description || 'Sobre mí…'}
-              value={editing ? form.description : ''}
-              onChange={onChangeForm('description')}
-            />
-          </Field>
-        </Block>
+        <ProfileDetailsSection
+          editing={editing}
+          current={current}
+          form={form}
+          onChangeForm={onChangeForm}
+          pw={pw}
+          onChangePw={onChangePw}
+          showCurrent={showCurrent}
+          showNext={showNext}
+          setShowCurrent={setShowCurrent}
+          setShowNext={setShowNext}
+          pwMsg={pwMsg}
+        />
       </Top>
 
-      <Bottom>
-        <Block>
-          <SectionTitle>Actividad reciente</SectionTitle>
-          <div style={{ color: '#64748b', fontSize: 14 }}>
-            Última conexión:{' '}
-            {current.lastLogin
-              ? new Date(current.lastLogin).toLocaleString()
-              : '—'}
-          </div>
-          <div style={{ color: '#9CA3AF', fontSize: 13, marginTop: 6 }}>
-            Historial de acciones (solo muestreo). Más adelante podemos
-            habilitar un <em>audit log</em>.
-          </div>
-        </Block>
-      </Bottom>
+      <ProfileActivitySection lastLogin={current.lastLogin} />
     </Wrap>
   )
 }

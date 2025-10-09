@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import Avatar from '../Avatar.jsx'
+import { avatarSrc } from '../../../../constants/media.js'
 
 const Card = styled.div`
   width: 256px;
@@ -35,7 +36,7 @@ export default function UserCard({ u }) {
     <Card>
       <Body>
         <Avatar
-          src={u?.avatar?.url || u?.avatar}
+          src={avatarSrc(u?.avatar?.url || u?.avatar)}
           name={u?.name || u?.fullName || u?.email}
         />
         <div style={{ minWidth: 0 }}>

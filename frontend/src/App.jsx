@@ -13,30 +13,31 @@ import Layout from './components/layout/Layout.jsx'
 import LoginPage from './features/auth/LoginPage'
 import RegisterPage from './features/auth/RegisterPage'
 
-import HomePage from './features/Home/HomePage'
-import ProfilePage from './features/pages/profileSite/ProfilePage.jsx'
-import BestSellerPage from './features/pages/bestSeller/BestSellerPage.jsx'
-import NewArrivalsPage from './features/pages/newArrivals/newArrivalsPage.jsx'
-import AuthorsPage from './features/pages/authors/AuthorsPage.jsx'
-import AuthorDetailPage from './features/pages/authors/AuthorDetailPage.jsx'
+import HomePage from './features/user/Home/HomePage.jsx'
+import ProfilePage from './features/user/Sites/profileSite/ProfilePage.jsx'
+import BestSellerPage from './features/user/booksBy/bestSeller/BestSellerPage.jsx'
+import NewArrivalsPage from './features/user/booksBy/newArrivals/newArrivalsPage.jsx'
 
-import ReviewsPage from './features/pages/reviews/ReviewsPage.jsx'
-import BookReviewsPage from './features/pages/reviews/BookReviewsPage.jsx'
+import AuthorsPage from './features/user/Sites/author/AuthorsPage.jsx'
+import AuthorDetailPage from './features/user/Sites/author/AuthorDetailPage.jsx'
 
-import CategoryPage from './features/pages/cats/CategoryPage.jsx'
-import BooksPage from './features/Books/BooksPage'
-import BookSingularPage from './features/Books/BookSingularPage'
-import MyBooksPage from './features/pages/books/MisLibrosPage.jsx'
-import CartPage from './features/cart/CartPage'
-import CheckoutPage from './features/pages/saleProcess/CheckOutPage.jsx'
-import OrderConfirm from './features/pages/saleProcess/OrderConfirm.jsx'
-import ContactPage from './features/pages/contact/Contact.jsx'
+import ReviewsPage from './features/user/Sites/reviews/ReviewsPage/ReviewsPage.jsx'
+import BookReviewsPage from './features/user/Sites/reviews/BookReviewsPage.jsx'
+
+import CategoryPage from './features/user/booksBy/cats/CategoryPage.jsx'
+import BooksPage from './features/user/Sites/Books/PageBooks/BooksPage.jsx'
+import BookSingularPage from './features/user/Sites/Books/SingularBook/BookSingularPage.jsx'
+import MyBooksPage from './features/user/Sites/profileSite/MisLibrosPage.jsx'
+import CartPage from './features/user/cart/CartPage'
+import CheckoutPage from './features/user/Sites/saleProcess/checkoutPage/CheckOutPage.jsx'
+import OrderConfirm from './features/user/Sites/saleProcess/OrderConfirm/OrderConfirm.jsx'
+import ContactPage from './features/user/Sites/contact/Contact.jsx'
 import useAuth, { AuthProvider } from './hooks/useAuth'
 import AdminRoutes from './routes/AdminRoutes.jsx'
 import AdminRoute from './routes/AdminRoute.jsx'
 
 // 🚀 Bandeja de entrada de usuario
-import InboxUser from './features/pages/message/InboxUser.jsx'
+import InboxUser from './features/user/Sites/message/InboxUser.jsx'
 
 function ProtectedRoute({ children }) {
   const { token } = useAuth()

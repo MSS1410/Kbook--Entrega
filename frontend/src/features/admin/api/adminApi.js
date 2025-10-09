@@ -1,43 +1,55 @@
 // frontend/src/admin/api/adminApi.js
 import api from '../../../api/index'
 
-/* ============== HELPERS ============== */
-const pickArray = (data, keys) => {
-  for (const k of keys) if (Array.isArray(data?.[k])) return data[k]
+/* ============== HELPERS GENERALES ============== */
+
+const DEFAULT_ARRAY_KEYS = [
+  'items',
+  'orders',
+  'users',
+  'reviews',
+  'books',
+  'authors'
+]
+
+const pickArray = (data, keys = DEFAULT_ARRAY_KEYS) => {
+  if (!data) return []
+  for (const k of keys) {
+    const v = data?.[k]
+    if (Array.isArray(v)) return v
+  }
+  // si el propio data es array:
   if (Array.isArray(data)) return data
   return []
 }
 
+const sumBy = (arr, f) => arr.reduce((acc, x) => acc + (f(x) || 0), 0)
+
+const get = (url, params) => api.get(url, { params }).then((r) => r.data)
+
 /* ============== DASHBOARD ============== */
 export async function fetchAdminHome() {
-  // Para tarjetas recientes
-  const usersReq = api
-    .get('/api/admin/users', { params: { sort: '-createdAt', limit: 10 } })
-    .then((r) => r.data?.users || r.data || [])
+  // Tarjetas recientes
+  const usersReq = get('/api/admin/users', { order: 'desc', limit: 10 })
+    .then((d) => pickArray(d, ['users', ...DEFAULT_ARRAY_KEYS]))
     .catch(() => [])
 
-  const ordersRecentReq = api
-    .get('/api/admin/orders', { params: { sort: '-createdAt', limit: 10 } })
-    .then((r) => r.data?.orders || r.data || [])
+  const ordersRecentReq = get('/api/admin/orders', { order: 'desc', limit: 10 })
+    .then((d) => pickArray(d, ['orders', ...DEFAULT_ARRAY_KEYS]))
     .catch(() => [])
 
-  const reviewsReq = api
-    .get('/api/admin/reviews', { params: { sort: '-createdAt', limit: 10 } })
-    .then((r) => r.data?.reviews || r.data || [])
+  const reviewsReq = get('/api/admin/reviews', { order: 'desc', limit: 10 })
+    .then((d) => pickArray(d, ['reviews', ...DEFAULT_ARRAY_KEYS]))
     .catch(() => [])
 
-  const dashboardReq = api
-    .get('/api/admin/dashboard')
-    .then((r) => r.data)
-    .catch(() => ({}))
+  const dashboardReq = get('/api/admin/dashboard').catch(() => ({}))
 
-  // ⬇️ inbox solo NO LEÍDOS
-  const inboxReq = api
-    .get('/api/admin/inbox', { params: { unread: 1, limit: 20 } })
-    .then((r) => r.data || { items: [], unreadCount: 0 })
+  // Inbox (solo no leídos)
+  const inboxReq = get('/api/admin/inbox', { unread: 1, limit: 20 })
+    .then((d) => d || { items: [], unreadCount: 0 })
     .catch(() => ({ items: [], unreadCount: 0 }))
 
-  // ⬇️ pedidos de los últimos 30 días (para la gráfica)
+  // Pedidos últimos 30 días (para la gráfica)
   const orders30Req = fetchOrdersForLastDays(30, 500).catch(() => [])
 
   const [dashboard, users, ordersRecent, reviews, inbox, orders30] =
@@ -50,14 +62,14 @@ export async function fetchAdminHome() {
       orders30Req
     ])
 
-  // Totales robustos (vienen del dashboard)
-  const totalUsers = dashboard?.totales?.usuarios ?? 0
-  const totalOrders = dashboard?.totales?.pedidos ?? 0
+  // Compatibilidad: 'totals' o 'totales'
+  const totals = dashboard?.totals || dashboard?.totales || {}
+  const totalUsers = totals?.usuarios ?? 0
+  const totalOrders = totals?.pedidos ?? 0
   const totalSales =
-    dashboard?.salesAll?.totalAmount ??
-    ordersRecent.reduce((acc, o) => acc + (o.totalPrice || 0), 0)
+    dashboard?.salesAll?.totalAmount ?? sumBy(ordersRecent, (o) => o.totalPrice)
 
-  // Serie 30d: YYYY-MM-DD -> amount
+  // Serie 30 días
   const dayKey = (d) => {
     const x = new Date(d)
     x.setHours(0, 0, 0, 0)
@@ -69,16 +81,14 @@ export async function fetchAdminHome() {
   const now = new Date()
   now.setHours(0, 0, 0, 0)
   const start = new Date(now)
-  start.setDate(now.getDate() - 29) // 30 días incluyendo hoy
+  start.setDate(now.getDate() - 29)
 
-  // Suma importes por día
   const byDay = new Map()
   for (const o of orders30) {
     const k = dayKey(o.createdAt)
     byDay.set(k, (byDay.get(k) || 0) + (o.totalPrice || 0))
   }
 
-  // Relleno de días vacíos para que la gráfica sea continua
   const series = []
   for (let d = new Date(start); d <= now; d.setDate(d.getDate() + 1)) {
     const k = dayKey(d)
@@ -92,9 +102,9 @@ export async function fetchAdminHome() {
     inbox: inbox.items || [],
     unreadCount: inbox.unreadCount || 0,
     metrics: {
-      series, // ← gráfica 30 días
-      totalAmount: totalSales, // ventas totales
-      totalOrders: totalOrders,
+      series,
+      totalAmount: totalSales,
+      totalOrders,
       usersTotal: totalUsers
     }
   }
@@ -106,10 +116,10 @@ export const listBooksAll = async () => {
   let page = 1,
     out = []
   while (true) {
-    const { data } = await api
-      .get('/api/books', { params: { page, limit: pageSize } })
-      .catch(async () => ({ data: (await api.get('/api/books')).data }))
-    const arr = pickArray(data, ['books', 'items'])
+    const data = await get('/api/books', { page, limit: pageSize }).catch(
+      async () => await get('/api/books')
+    )
+    const arr = pickArray(data, ['books', ...DEFAULT_ARRAY_KEYS])
     out = out.concat(arr)
     const total = data?.total || data?.count
     const pages =
@@ -126,8 +136,7 @@ export const listBooksAll = async () => {
   return out
 }
 
-export const getBook = (id) =>
-  api.get(`/api/books/${id}`).then((r) => r.data?.book || r.data)
+export const getBook = (id) => get(`/api/books/${id}`).then((d) => d?.book || d)
 
 export const createBook = (payload) =>
   api.post('/api/admin/books', payload).then((r) => r.data)
@@ -152,10 +161,10 @@ export const listAuthorsAll = async () => {
   let page = 1,
     out = []
   while (true) {
-    const { data } = await api
-      .get('/api/authors', { params: { page, limit: pageSize } })
-      .catch(async () => ({ data: (await api.get('/api/authors')).data }))
-    const arr = pickArray(data, ['authors', 'items'])
+    const data = await get('/api/authors', { page, limit: pageSize }).catch(
+      async () => await get('/api/authors')
+    )
+    const arr = pickArray(data, ['authors', ...DEFAULT_ARRAY_KEYS])
     out = out.concat(arr)
     const total = data?.total || data?.count
     const pages =
@@ -171,9 +180,10 @@ export const listAuthorsAll = async () => {
   }
   return out
 }
-export const listAuthorsPublic = listAuthorsAll // alias
+export const listAuthorsPublic = listAuthorsAll
+
 export const getAuthor = (id) =>
-  api.get(`/api/authors/${id}`).then((r) => r.data?.author || r.data)
+  get(`/api/authors/${id}`).then((d) => d?.author || d)
 
 export const createAuthor = (payload) =>
   api.post('/api/admin/authors', payload).then((r) => r.data)
@@ -193,8 +203,24 @@ export const toggleAuthorFeatured = (id, value) =>
   api.patch(`/api/admin/authors/${id}/featured`, { value }).then((r) => r.data)
 
 /* ============== PEDIDOS (admin) ============== */
-export const listOrders = (params = {}) =>
-  api.get('/api/admin/orders', { params }).then((r) => r.data)
+// 💡 Normalizado: siempre devolvemos { orders, total, page, limit }
+export const listOrders = async (params = {}) => {
+  const d = await get('/api/admin/orders', params)
+  const orders = Array.isArray(d?.orders)
+    ? d.orders
+    : Array.isArray(d?.items)
+    ? d.items
+    : Array.isArray(d)
+    ? d
+    : []
+  const total =
+    typeof d?.total === 'number'
+      ? d.total
+      : typeof d?.count === 'number'
+      ? d.count
+      : orders.length
+  return { orders, total, page: d?.page, limit: d?.limit }
+}
 
 export async function fetchOrdersForLastDays(days = 30, pageSize = 200) {
   const threshold = Date.now() - days * 24 * 60 * 60 * 1000
@@ -203,23 +229,41 @@ export async function fetchOrdersForLastDays(days = 30, pageSize = 200) {
   const MAX_PAGES = 10
   while (page <= MAX_PAGES) {
     const res = await listOrders({ page, limit: pageSize })
-    const batch = Array.isArray(res?.orders)
-      ? res.orders
-      : Array.isArray(res)
-      ? res
-      : []
+    const batch = pickArray(res, ['orders', ...DEFAULT_ARRAY_KEYS])
     if (!batch.length) break
     out = out.concat(batch)
     const oldest = batch[batch.length - 1]
-    if (new Date(oldest.createdAt).getTime() < threshold) break
+    if (oldest && new Date(oldest.createdAt).getTime() < threshold) break
     page += 1
   }
   return out.filter((o) => new Date(o.createdAt).getTime() >= threshold)
 }
 
 /* ============== RESEÑAS (admin) ============== */
-export const listReviews = (params = {}) =>
-  api.get('/api/admin/reviews', { params }).then((r) => r.data)
+// 💡 Normalizado: siempre devolvemos { reviews, total, page, limit }
+//    y aceptamos bookId/book y userId/user como filtros (compat)
+export const listReviews = async (params = {}) => {
+  const q = {
+    ...params,
+    bookId: params.bookId ?? params.book,
+    userId: params.userId ?? params.user
+  }
+  const d = await get('/api/admin/reviews', q)
+  const reviews = Array.isArray(d?.reviews)
+    ? d.reviews
+    : Array.isArray(d?.items)
+    ? d.items
+    : Array.isArray(d)
+    ? d
+    : []
+  const total =
+    typeof d?.total === 'number'
+      ? d.total
+      : typeof d?.count === 'number'
+      ? d.count
+      : reviews.length
+  return { reviews, total, page: d?.page, limit: d?.limit }
+}
 
 export const deleteReview = (id) =>
   api.delete(`/api/admin/reviews/${id}`).then((r) => r.data)
@@ -236,7 +280,7 @@ export async function computeReviewStats(maxPages = 10, pageSize = 200) {
 
   while (page <= maxPages) {
     const res = await listReviews({ page, limit: pageSize })
-    const batch = Array.isArray(res?.reviews) ? res.reviews : []
+    const batch = pickArray(res, ['reviews', ...DEFAULT_ARRAY_KEYS])
     if (!batch.length) break
 
     for (const r of batch) {
@@ -297,10 +341,12 @@ export const listAllUsersAdmin = async () => {
   let page = 1,
     out = []
   while (true) {
-    const { data } = await api.get('/api/admin/users', {
-      params: { page, limit: pageSize, sort: '-createdAt' }
+    const data = await get('/api/admin/users', {
+      page,
+      limit: pageSize,
+      sort: '-createdAt'
     })
-    const arr = data?.users || []
+    const arr = pickArray(data, ['users', ...DEFAULT_ARRAY_KEYS])
     out = out.concat(arr)
     const total = data?.total
     const pages = total
@@ -320,8 +366,7 @@ export const listAllUsersAdmin = async () => {
   return out
 }
 
-export const listUsersAdmin = (params = {}) =>
-  api.get('/api/admin/users', { params }).then((r) => r.data)
+export const listUsersAdmin = (params = {}) => get('/api/admin/users', params)
 
 export const toggleUserBlockAdmin = (id, value) =>
   api.patch(`/api/admin/users/${id}/block`, { value }).then((r) => r.data)
@@ -336,29 +381,24 @@ export const deleteUserAdmin = (id) =>
   api.delete(`/api/admin/users/${id}`).then((r) => r.data)
 
 /* ============== MENSAJERÍA (admin) ============== */
-// Inbox paginado (solo recibidos)
-export const listAdminInbox = (params = {}) =>
-  api.get('/api/admin/inbox', { params }).then((r) => r.data)
+export const listAdminInbox = (params = {}) => get('/api/admin/inbox', params)
 
-// Enviar mensaje a un usuario
 export const adminSendMessageToUser = (userId, { subject, body }) =>
   api
     .post(`/api/admin/users/${userId}/messages`, { subject, body })
     .then((r) => r.data)
 
 export const adminListMessagesToUser = (userId, params = {}) =>
-  api.get(`/api/admin/users/${userId}/messages`, { params }).then((r) => r.data)
+  get(`/api/admin/users/${userId}/messages`, params)
 
-// === Nuevos helpers de hilo & estado ===
 export const getAdminThreadWithUser = async (userId) => {
   try {
-    const r = await api.get(`/api/admin/users/${userId}/thread`)
-    return r.data
+    const d = await get(`/api/admin/users/${userId}/thread`)
+    return d
   } catch (err) {
     if (err?.response?.status === 404) {
-      // ↩️ Fallback: usar threads P2P ya montado
-      const { data } = await api.get(`/api/messages/threads/${userId}`)
-      return data // { messages: [...] } con el mismo shape que espera la UI
+      const d = await get(`/api/messages/threads/${userId}`)
+      return d // { messages: [...] }
     }
     throw err
   }
@@ -374,8 +414,6 @@ export const markAllFromUserRead = (userId) =>
     .patch(`/api/admin/users/${userId}/messages/read`)
     .then((r) => r.data)
     .catch((err) => {
-      // Si ese endpoint aún no está montado o no llegó a recargarse el server,
-      // NO bloquees la UI.
       if (err?.response?.status === 404) return null
       throw err
     })
