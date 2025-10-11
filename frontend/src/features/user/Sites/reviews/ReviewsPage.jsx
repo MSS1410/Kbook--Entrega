@@ -1,16 +1,16 @@
-// ReviewsPage.jsx
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
-import api from '../../../../../api/index.js'
-import { AVATAR_PLACEHOLDER } from '../../../../../constants/media.js'
+import api from '../../../../api/index.js'
+import { AVATAR_PLACEHOLDER } from '../../../../constants/media.js'
 
-// Presentacionales
-import ReviewsSearchBox from './reviewsComponents/ReviewsSearchBox'
-import ReviewCard from './reviewsComponents/ReviewCard'
-import ReviewsPager from './reviewsComponents/ReviewsPager'
+// TRAER COMPONENTES
+import ReviewsSearchBox from './reviewsComponents/ReviewsSearchBox.jsx'
+import ReviewCard from './reviewsComponents/ReviewCard.jsx'
+import ReviewsPager from './reviewsComponents/ReviewsPager.jsx'
 
-/* ===== Estilos ===== */
+/* stylish  */
+// contenedor principal
 const Page = styled.div`
   max-width: 1100px;
   margin: 2rem auto;
@@ -19,15 +19,18 @@ const Page = styled.div`
   gap: 16px;
   overflow-x: hidden;
 `
+// titulo y caja d busqueda derecha,
 const Header = styled.header`
   display: grid;
   grid-template-columns: 1fr 360px;
   gap: 12px;
   align-items: end;
+  // movil 1 columna
   @media (max-width: 860px) {
     grid-template-columns: 1fr;
   }
 `
+
 const Title = styled.h1`
   margin: 0;
   font-size: ${({ theme }) => theme.fontSizes.xl};
@@ -49,28 +52,31 @@ const getUrl = (u) => {
   if (!u) return ''
   if (/^https?:\/\//i.test(u) || u.startsWith('data:')) return u
   const base = (api.defaults.baseURL || '').replace(/\/+$/, '')
+  // normaliza rutas relativas contra baseUrl, imagenes guardadas como path relativo
   return `${base}${u.startsWith('/') ? '' : '/'}${u}`
 }
 
 export default function ReviewsPage() {
-  const loc = useLocation()
-  const navigate = useNavigate()
-  const params = new URLSearchParams(loc.search)
-  const bookIdFromUrl = params.get('book') || ''
-  const pageFromUrl = Math.max(1, parseInt(params.get('page') || '1', 10))
+  const loc = useLocation() // lee query actual
+  const navigate = useNavigate() // sincronizar Url
+  const params = new URLSearchParams(loc.search) //parsing ?book=&page=_
+  const bookIdFromUrl = params.get('book') || '' //filtro x libro
 
-  const [page, setPage] = useState(pageFromUrl)
-  const [limit] = useState(40)
-  const [total, setTotal] = useState(0)
-  const [items, setItems] = useState([])
-  const [loading, setLoading] = useState(false)
+  const pageFromUrl = Math.max(1, parseInt(params.get('page') || '1', 10)) //pg inicial
+
+  const [page, setPage] = useState(pageFromUrl) // pg actual
+  const [limit] = useState(40) // tamaño pagina fijo
+  const [total, setTotal] = useState(0) // total de reseñas
+  const [items, setItems] = useState([]) // reseñas visibles
+  const [loading, setLoading] = useState(false) // carga
   const [error, setError] = useState(null)
 
   // buscador
-  const [q, setQ] = useState('')
-  const [qDebounced, setQDebounced] = useState('')
-  const [results, setResults] = useState([])
+  const [q, setQ] = useState('') // texto input
+  const [qDebounced, setQDebounced] = useState('') // debounced typing
+  const [results, setResults] = useState([]) // libros resultado
   const [selectedBook, setSelectedBook] = useState(
+    // libro seleccionado
     bookIdFromUrl ? { _id: bookIdFromUrl } : null
   )
   const resultsRef = useRef(null)
@@ -82,13 +88,13 @@ export default function ReviewsPage() {
 
   // debounce query
   useEffect(() => {
-    const t = setTimeout(() => setQDebounced(q.trim()), 300)
+    const t = setTimeout(() => setQDebounced(q.trim()), 300) // retraso tecleo
     return () => clearTimeout(t)
   }, [q])
 
   // buscar libros por título
   useEffect(() => {
-    let cancelled = false
+    let cancelled = false // evito setState tras desmontar
     ;(async () => {
       if (!qDebounced) {
         setResults([])
@@ -96,9 +102,10 @@ export default function ReviewsPage() {
       }
       try {
         const { data } = await api.get('/api/search', {
+          // enp search
           params: { q: qDebounced, limit: 8 }
         })
-        const arr = Array.isArray(data?.books) ? data.books : []
+        const arr = Array.isArray(data?.books) ? data.books : [] // normalizo
         if (!cancelled) setResults(arr)
       } catch {
         if (!cancelled) setResults([])
@@ -109,7 +116,7 @@ export default function ReviewsPage() {
     }
   }, [qDebounced])
 
-  // cargar reseñas (global o por libro)
+  // cargar reseñas , global y por ejemplar
   useEffect(() => {
     ;(async () => {
       try {
@@ -117,18 +124,21 @@ export default function ReviewsPage() {
         setError(null)
 
         if (selectedBook?._id) {
+          // modo "x libro"
+
           const { data } = await api.get(
             `/api/reviews/book/${selectedBook._id}`,
-            { params: { page, limit, sort: '-createdAt' } }
+            { params: { page, limit, sort: '-createdAt' } } // + recientes
           )
           const arr = Array.isArray(data)
             ? data
-            : data?.items || data?.reviews || []
+            : data?.items || data?.reviews || [] // aseguramos  compatibles
           setItems(arr)
           setTotal(
             Array.isArray(data) ? arr.length : data?.total || data?.count || 0
           )
         } else {
+          // sino, todas las reseñas
           const { data } = await api.get('/api/reviews', {
             params: { page, limit, sort: '-createdAt' }
           })
@@ -148,34 +158,36 @@ export default function ReviewsPage() {
         setLoading(false)
       }
     })()
-  }, [selectedBook?._id, page, limit])
+  }, [selectedBook?._id, page, limit]) // refetch al cambiar filtros/ pagina
 
   // sync params en URL
   useEffect(() => {
     const p = new URLSearchParams()
-    if (selectedBook?._id) p.set('book', selectedBook._id)
-    p.set('page', String(page))
-    navigate({ search: p.toString() }, { replace: true })
+    if (selectedBook?._id) p.set('book', selectedBook._id) // aguanto filtro en URL
+    p.set('page', String(page)) // y la pagina
+    navigate({ search: p.toString() }, { replace: true }) // sin romper historial
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedBook?._id, page])
 
-  // cerrar dropdown al click fuera (la ref vive aquí)
+  // cerrar dropdown al click fuera
   useEffect(() => {
     const onDocClick = (e) => {
       if (!resultsRef.current) return
-      if (!resultsRef.current.contains(e.target)) setResults([])
+      if (!resultsRef.current.contains(e.target)) setResults([]) // oculto sugerencias
     }
     document.addEventListener('click', onDocClick)
     return () => document.removeEventListener('click', onDocClick)
   }, [])
 
   const handlePick = (b) => {
+    // al elegir libro de sugerencias
     setSelectedBook(b)
     setQ(b.title || '')
     setPage(1)
     setResults([])
   }
   const handleClear = () => {
+    // limpia filtro
     setSelectedBook(null)
     setQ('')
     setResults([])
@@ -187,11 +199,12 @@ export default function ReviewsPage() {
       <Header>
         <div>
           <Title>
+            {/* titulo reactivo */}
             {selectedBook?._id ? 'Reseñas del libro' : 'Todas las reseñas'}
           </Title>
         </div>
 
-        <ReviewsSearchBox
+        <ReviewsSearchBox // input y resultados
           containerRef={resultsRef}
           q={q}
           onChangeQ={setQ}
@@ -204,6 +217,7 @@ export default function ReviewsPage() {
       <Subtle>
         Página {page}
         {total ? ` · ${total} reseñas en total` : ''}
+        {/*   paginacion */}
       </Subtle>
 
       {selectedBook?._id && (
@@ -224,8 +238,8 @@ export default function ReviewsPage() {
               <ReviewCard
                 key={r._id}
                 r={r}
-                getUrl={getUrl}
-                placeholder={AVATAR_PLACEHOLDER}
+                getUrl={getUrl} // normalizo urls rlt
+                placeholder={AVATAR_PLACEHOLDER} // aseguro fallback
               />
             ))}
           </Grid>
@@ -234,7 +248,7 @@ export default function ReviewsPage() {
             <ReviewsPager
               page={page}
               totalPages={totalPages}
-              onPrev={() => setPage((p) => Math.max(1, p - 1))}
+              onPrev={() => setPage((p) => Math.max(1, p - 1))} // handlers de paginacion
               onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
               onGoto={(n) => setPage(n)}
             />

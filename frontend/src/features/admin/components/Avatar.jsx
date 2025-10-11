@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import styled from 'styled-components'
 import { AVATAR_PLACEHOLDER } from '../../../constants/media'
 
+// flexible contenedor: circular default, cuadrado si $square
 const Wrapper = styled.div`
   width: ${({ $fill, $size }) => ($fill ? '100%' : `${$size}px`)};
   height: ${({ $fill, $size }) => ($fill ? '100%' : `${$size}px`)};
@@ -23,12 +24,13 @@ const Wrapper = styled.div`
 `
 
 /**
- * Props:
- * - src, name
- * - size (número, por defecto 48)
- * - fill (true => se ajusta al 100% del contenedor)
- * - square (true => esquinas redondeadas en vez de círculo)
- * - radius (override del radio cuando square=true)
+ Props esperadas:
+src: url de imagen
+name: string 
+size: px number, default 48
+ fill: si true, entonces 100% de padre
+square: si true, usa bordes redondeados con  radius que declaramos abajo
+radius: % esquina redonda
  */
 export default function Avatar({
   src,
@@ -38,16 +40,18 @@ export default function Avatar({
   square = false,
   radius
 }) {
-  const [broken, setBroken] = useState(false)
+  const [broken, setBroken] = useState(false) // track fallo de carga
+  // solo img si hay src y no rompio
   const showImg = !!src && !broken
+
   return (
     <Wrapper $fill={fill} $size={size} $square={square} $radius={radius}>
       {showImg ? (
-        // eslint-disable-next-line jsx-a11y/alt-text
         <img
           src={src}
           alt={name}
           onError={(e) => {
+            // fallback a placeholdero, no fallara
             if (e.currentTarget.src !== AVATAR_PLACEHOLDER) {
               e.currentTarget.src = AVATAR_PLACEHOLDER
             } else {
@@ -56,6 +60,7 @@ export default function Avatar({
           }}
         />
       ) : (
+        // Maximo fallo, inicial del nombre
         name?.[0]?.toUpperCase() || 'U'
       )}
     </Wrapper>

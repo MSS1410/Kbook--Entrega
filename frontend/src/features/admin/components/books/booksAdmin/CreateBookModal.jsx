@@ -32,23 +32,24 @@ const PreviewBox = styled.div`
 `
 
 export default function CreateBookModal({
-  open,
-  onClose,
-  creating,
-  setCreating,
-  coverFile,
-  setCoverFile,
+  open, // visibilidad del modal
+  onClose, // calback para cerrar
+  creating, // estado local del formulario
+  setCreating, // setter actualiza los campos
+  coverFile, // portada seleccionada
+  setCoverFile, // setter del file
   coverPreview,
   setCoverPreview,
-  savingCreate,
+  savingCreate, // flag guardado en curso
   onSave,
-  authors,
-  AuthorComboComp, // componente JSX ya preparado
-  categoriesEnum
+  authors, // autores dispo
+  AuthorComboComp, // ccomponente comboBox ya en autor
+  categoriesEnum // selec categoria permitida
 }) {
   useEffect(
     () => () => {
       if (coverPreview) URL.revokeObjectURL(coverPreview)
+      // libra memoria del objectUrl cuando el modal se desmonta
     },
     [coverPreview]
   )
@@ -90,6 +91,7 @@ export default function CreateBookModal({
           overflowY: 'auto'
         }}
       >
+        {/* obligamos al admin a tener el autor reglado para que al añadir un libro no me quede colgado sin autor. */}
         {!authors.length && (
           <Note>
             <AlertTriangle size={18} /> No hay autores. Primero añádelo en{' '}
@@ -120,10 +122,11 @@ export default function CreateBookModal({
           />
         </label>
 
-        {/* Autor con buscador */}
+        {/* author con buscador para correcta eleccion */}
         {AuthorComboComp}
 
         <label>
+          {/* sect category */}
           Categoría *
           <select
             value={creating.category}
@@ -138,6 +141,7 @@ export default function CreateBookModal({
               borderRadius: 10
             }}
           >
+            {/* selector de categoria */}
             <option value=''>Selecciona categoría…</option>
             {categoriesEnum.map((c) => (
               <option key={c} value={c}>
@@ -148,6 +152,7 @@ export default function CreateBookModal({
         </label>
 
         <label>
+          {/* sect descri libro sinopsis */}
           Sinopsis *
           <textarea
             rows={4}
@@ -172,6 +177,7 @@ export default function CreateBookModal({
             gap: 8
           }}
         >
+          {/* marca de precio segun la tapa del libro */}
           <label>
             Precio blanda (€) *
             <input
@@ -227,7 +233,7 @@ export default function CreateBookModal({
             />
           </label>
         </div>
-
+        {/* seccion para portada cover Book */}
         <div>
           <div style={{ fontWeight: 700, marginBottom: 6 }}>
             O sube un archivo de portada
@@ -244,6 +250,7 @@ export default function CreateBookModal({
           />
           {(coverPreview || creating.coverImage) && (
             <>
+              {/* previsualizar portada en modal OK */}
               <div style={{ fontSize: 12, color: '#64748b', marginTop: 8 }}>
                 Vista previa
               </div>

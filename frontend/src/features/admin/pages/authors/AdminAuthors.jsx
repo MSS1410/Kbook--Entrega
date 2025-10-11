@@ -24,28 +24,35 @@ const HeadRow = styled.div`
 `
 const GridWrap = styled.div`
   display: grid;
-  gap: 16px;
+  gap: 12px;
   align-items: stretch;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  @media (min-width: 900px) {
+  @media (min-width: 480px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  @media (min-width: 1024px) {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 `
 const ListWrap = styled.div`
   display: grid;
   gap: 12px;
+  @media (max-width: 1023px) {
+    display: none;
+  }
 `
 
 export default function AdminAuthors() {
-  const [authors, setAuthors] = useState([])
-  const [q, setQ] = useState('')
+  const [authors, setAuthors] = useState([]) // state fuente, lista de autores
+
+  const [q, setQ] = useState('') // control nbusqueda
   const [view, setView] = useState('grid') // grid | list
   const [loading, setLoading] = useState(true)
-  const [sortAZ, setSortAZ] = useState(true)
+  const [sortAZ, setSortAZ] = useState(true) //orden
 
-  const pageSize = 12
-  const [page, setPage] = useState(1)
-  useScrollToTopOn(page, q)
+  const pageSize = 12 //  tamaño pagina fijo UI
+  const [page, setPage] = useState(1) // pag actual
+  useScrollToTopOn(page, q) // sroll up
 
   // modal crear
   const [openCreate, setOpenCreate] = useState(false)
@@ -54,25 +61,26 @@ export default function AdminAuthors() {
     biography: '',
     featured: false
   })
-  const [creatingPhotoFile, setCreatingPhotoFile] = useState(null)
-  const [creatingPreviewUrl, setCreatingPreviewUrl] = useState('')
-  const [savingCreate, setSavingCreate] = useState(false)
+  // modelo controlado de formulario
+  const [creatingPhotoFile, setCreatingPhotoFile] = useState(null) // selected archive img
+  const [creatingPreviewUrl, setCreatingPreviewUrl] = useState('') // url preview
+  const [savingCreate, setSavingCreate] = useState(false) // spinner save
 
   useEffect(() => {
     ;(async () => {
       setLoading(true)
       try {
-        const allAuthors = await listAuthorsAll()
+        const allAuthors = await listAuthorsAll() // fetch authors, pag interno
         setAuthors(Array.isArray(allAuthors) ? allAuthors : [])
       } finally {
-        setLoading(false)
+        setLoading(false) // apago loader
       }
     })()
-  }, [])
+  }, []) // carga inicial
 
   useEffect(
     () => () => {
-      if (creatingPreviewUrl) URL.revokeObjectURL(creatingPreviewUrl)
+      if (creatingPreviewUrl) URL.revokeObjectURL(creatingPreviewUrl) // evitar leaks del objectUrl
     },
     [creatingPreviewUrl]
   )
@@ -81,17 +89,17 @@ export default function AdminAuthors() {
     let arr = [...authors]
     if (q.trim()) {
       const s = q.trim().toLowerCase()
-      arr = arr.filter((a) => (a.name || '').toLowerCase().includes(s))
+      arr = arr.filter((a) => (a.name || '').toLowerCase().includes(s)) // busqueda por nombre case-insensitive
     }
     arr.sort((a, b) => {
       const na = (a.name || '').toLowerCase(),
         nb = (b.name || '').toLowerCase()
-      return sortAZ ? na.localeCompare(nb) : nb.localeCompare(na)
+      return sortAZ ? na.localeCompare(nb) : nb.localeCompare(na) // orden AZ / ZA
     })
     return arr
-  }, [authors, q, sortAZ])
+  }, [authors, q, sortAZ]) //recalculo solo si cambian deps
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize)) // numero de paginas minimo
   useEffect(() => {
     if (page > totalPages) setPage(1)
   }, [totalPages])
@@ -104,14 +112,14 @@ export default function AdminAuthors() {
   const onDelete = async (id) => {
     if (!confirm('¿Eliminar este autor? Esta acción no se puede deshacer.'))
       return
-    await deleteAuthor(id)
-    const all = await listAuthorsAll()
-    setAuthors(all)
+    await deleteAuthor(id) // borra en backend
+    const all = await listAuthorsAll() // refetch consistencia
+    setAuthors(all) // actualizamos fuente local
   }
 
   const openCreateModal = () => {
-    setCreating({ name: '', biography: '', featured: false })
-    setCreatingPhotoFile(null)
+    setCreating({ name: '', biography: '', featured: false }) // clean
+    setCreatingPhotoFile(null) // clean img
     if (creatingPreviewUrl) {
       URL.revokeObjectURL(creatingPreviewUrl)
       setCreatingPreviewUrl('')
@@ -127,17 +135,18 @@ export default function AdminAuthors() {
     setSavingCreate(true)
     try {
       const created = await createAuthor({
+        // crea author
         name: creating.name.trim(),
         biography: creating.biography?.trim() || '',
         featured: !!creating.featured
       })
       if (created?._id && creatingPhotoFile) {
-        await uploadAuthorPhoto(created._id, creatingPhotoFile)
+        await uploadAuthorPhoto(created._id, creatingPhotoFile) // si hay foto, la sube enpoint media
       }
       const all = await listAuthorsAll()
       setAuthors(all)
-      setOpenCreate(false)
-      setCreating({ name: '', biography: '', featured: false })
+      setOpenCreate(false) // cierra modal
+      setCreating({ name: '', biography: '', featured: false }) // reset form
       if (creatingPreviewUrl) {
         URL.revokeObjectURL(creatingPreviewUrl)
         setCreatingPreviewUrl('')
@@ -157,18 +166,19 @@ export default function AdminAuthors() {
   return (
     <>
       <HeadRow>
+        {/* titulo */}
         <h2 style={{ fontSize: 22 }}>Autores</h2>
         <AuthorsToolbar
           q={q}
           setQ={(v) => {
-            setQ(v)
-            setPage(1)
+            setQ(v) // actualiza filtro
+            setPage(1) // reset d pagina tras filtrar
           }}
           sortAZ={sortAZ}
           setSortAZ={setSortAZ}
           view={view}
           setView={setView}
-          onAdd={openCreateModal}
+          onAdd={openCreateModal} // boton añadir autor
         />
       </HeadRow>
 
@@ -176,11 +186,12 @@ export default function AdminAuthors() {
         <div style={{ padding: 16 }}>Cargando…</div>
       ) : pageItems.length === 0 ? (
         <div style={{ padding: 16, color: '#64748b' }}>Sin resultados.</div>
-      ) : view === 'grid' ? (
+      ) : view === 'grid' ? ( // vista grid
         <>
           <GridWrap>
             {pageItems.map((a) => (
               <AuthorCard key={a._id} a={a} onDelete={onDelete} />
+              // tarjeta de acciones
             ))}
           </GridWrap>
           <Pagination
@@ -193,6 +204,7 @@ export default function AdminAuthors() {
       ) : (
         <>
           <ListWrap>
+            {/* rama de vista lista */}
             {pageItems.map((a) => (
               <AuthorRow key={a._id} a={a} onDelete={onDelete} />
             ))}
@@ -206,7 +218,7 @@ export default function AdminAuthors() {
         </>
       )}
 
-      <CreateAuthorModal
+      <CreateAuthorModal // modal controlado para crear autor
         open={openCreate}
         onClose={() => setOpenCreate(false)}
         creating={creating}

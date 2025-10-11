@@ -6,10 +6,14 @@ import Order from '../models/Order.js'
 const countWords = (text = '') =>
   String(text).trim().split(/\s+/).filter(Boolean).length
 
-// Obtener reseñas de un libro (solo ese libro), con user(name,avatar) y book(title,coverImage)
+// obtener reseñas de un libro ,solo de ese libro , necesito teneer  user(name,avatar) y book(title,coverImage)
 export const getReviewsByBook = async (req, res, next) => {
   try {
+    //hasPaging, detecta si cliente tiene paginacion con page o limit, si no necesita, reseñas simples, si necesita, paginacion.
+
     const hasPaging = 'page' in req.query || 'limit' in req.query
+
+    //normalizo page y limit 1-50
     const page = Math.max(1, parseInt(req.query.page || '1', 10))
     const limit = Math.min(
       50,
@@ -17,21 +21,26 @@ export const getReviewsByBook = async (req, res, next) => {
     )
     const skip = (page - 1) * limit
 
+    // base query para que encuentre las reviews del libro, las ordene por creacion, las rellene con los datos del usuario + datos del libro
     const baseQuery = Review.find({ book: req.params.bookId })
       .sort(req.query.sort || '-createdAt')
       .populate('user', 'name avatar')
       .populate({ path: 'book', select: 'title coverImage' })
-
+    // consulta de base reusable, reseñas de libro -> /books/:bookId/reviews
+    //orden por defecto -createdAt
+    //populate user trae nombre y avatar, book title cover
     if (!hasPaging) {
       const reviews = await baseQuery.exec()
       return res.json(reviews)
     }
+    // sin paginacion
 
     const [items, total] = await Promise.all([
       baseQuery.skip(skip).limit(limit).exec(),
       Review.countDocuments({ book: req.params.bookId })
     ])
-
+    // items, pagina pedida sobre baseQuery, total, cuenta de reseñas para poder paginar o no.
+    // promise all, reduce tiempo de res
     res.json({ items, total, page, limit })
   } catch (err) {
     next(err)

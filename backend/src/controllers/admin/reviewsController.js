@@ -6,17 +6,17 @@ export const adminListReviews = async (req, res, next) => {
     const page = Number(req.query.page || 1)
     const limit = Number(req.query.limit || 20)
     const skip = (page - 1) * limit
+    //paginacion basik
 
-    // Soporta ?order=asc|desc o ?sort=asc|desc
+    // aceptare tanto orden como sort para fecha de crracion
     const sortParam = String(
       req.query.order || req.query.sort || 'desc'
     ).toLowerCase()
     const sortDir = sortParam === 'asc' ? 1 : -1
 
-    // Filtros opcionales
     const userIdParam = req.query.userId || req.query.user
     const bookIdParam = req.query.bookId || req.query.book
-
+    // filtro de usuario o libro
     const filter = {}
     if (userIdParam) filter.user = userIdParam
     if (bookIdParam) filter.book = bookIdParam

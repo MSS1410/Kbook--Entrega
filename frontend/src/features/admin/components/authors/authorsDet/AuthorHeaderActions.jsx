@@ -4,17 +4,18 @@ import { Pencil, Save, X, Trash2, Star } from 'lucide-react'
 
 export default function AuthorHeaderActions({
   editing,
-  saving,
+  saving, //estao UI
   featured,
   onToggleFeatured,
   onEdit,
   onSave,
   onCancel,
-  onDelete
+  onDelete // DE Featureed a delete, callbacks levantados en el padre
 }) {
   return (
     <div style={{ display: 'flex', gap: 8 }}>
       <Button $variant='ghost' onClick={onToggleFeatured}>
+        {/* toggle, texto */}
         <Star size={16} /> {featured ? 'Quitar destacado' : 'Marcar destacado'}
       </Button>
       {editing ? (

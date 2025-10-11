@@ -4,15 +4,18 @@ import styled from 'styled-components'
 
 const StepsBar = styled.div`
   display: flex;
-  gap: ${({ theme }) => theme.spacing.md};
+  gap: ${({ theme }) => theme.spacing.md}; /* gap entre steps top */
   margin-bottom: ${({ theme }) => theme.spacing.lg};
 `
 const Step = styled.div`
-  flex: 1;
+  flex: 1; // cada paso ocupa mismo ancho
   padding: ${({ theme }) => theme.spacing.sm};
   border-radius: ${({ theme }) => theme.radii.sm};
+
   background: ${({ active, completed, theme }) =>
+    // color segun situacion
     completed ? '#d4edda' : active ? theme.colors.mutedSurface : '#f0f0f0'};
+
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -24,6 +27,7 @@ const Step = styled.div`
 `
 
 export default function StepBar({ step }) {
+  // steps 1 2 3
   return (
     <StepsBar>
       <Step active={step === 1} completed={step > 1}>

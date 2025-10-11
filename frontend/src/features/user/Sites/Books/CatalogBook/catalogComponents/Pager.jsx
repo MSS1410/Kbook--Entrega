@@ -30,8 +30,9 @@ const PageEllipsis = styled.span`
   place-items: center;
   color: #888;
 `
-
+// paginador generico con prev/next
 export default function Pager({
+  // props
   page,
   pages = [],
   totalPages,
@@ -40,12 +41,17 @@ export default function Pager({
   onGoto
 }) {
   return (
+    // accesible aria label y aria current
+    // sin state, recibo handlers onPrev,OnNext,OnGoto, para cambiar pagina
     <PagerWrap aria-label='Paginación'>
       <PageBtn
         onClick={onPrev}
         disabled={page === 1}
         aria-label='Página anterior'
       >
+        {/* aria label, nombre accesible a un elemento para lectores de pantalla
+        desrcibe que hace cuando el texto visible no es suficiente
+        no cambia estado, solo nombra, en este caso no nos explica nada, solo dice: pagina ant */}
         ‹
       </PageBtn>
 
@@ -59,6 +65,11 @@ export default function Pager({
             aria-current={p === page ? 'page' : undefined}
             onClick={() => onGoto(p)}
           >
+            {/* aria current: marca de estado para indicar el elemento actual dentro de un conjunto
+            valores utiles: "page" pagina actual, "step", "location""date""time""true/false" */}
+            {/* no pone nombre, marca cual esta activo / seleccionado */}
+
+            {/* current : este es el actual dentro de un grupo/ label: como se llama donde ataca */}
             {p}
           </PageBtn>
         )

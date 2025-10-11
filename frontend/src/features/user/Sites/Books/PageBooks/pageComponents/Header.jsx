@@ -41,8 +41,11 @@ const ToggleBtn = styled.button`
   }
 `
 
+// barra superior de bookspage, titulo toggle vista
+
 export default function Header({ title, view, onSetView }) {
   return (
+    // permite cambio de vista
     <HeaderRow>
       <H1>{title}</H1>
       <Tools>
@@ -54,6 +57,7 @@ export default function Header({ title, view, onSetView }) {
             onClick={() => onSetView('list')}
             title='Vista lista'
           >
+            {/* accesible aria-label, para el grupo, aria-pressed */}
             <FiList /> Lista
           </ToggleBtn>
           <ToggleBtn

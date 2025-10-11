@@ -1,4 +1,3 @@
-// src/components/layout/Header.jsx
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react'
 import styled from 'styled-components'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
@@ -18,7 +17,7 @@ import {
 import useAuth from '../../hooks/useAuth'
 import api from '../../api'
 
-/* ============ Top Bar ============ */
+/*  Top Bar  */
 const HeaderTop = styled.div`
   display: flex;
   align-items: center;
@@ -91,7 +90,7 @@ const IconButton = styled.button`
   }
 `
 
-/* ============ Bottom/Nav (desktop) ============ */
+/*  Bottom/Nav  */
 const HeaderBottom = styled.div`
   background: ${({ theme }) => theme.colors.headerBg};
   padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
@@ -201,7 +200,7 @@ const SubLink = styled(Link)`
   }
 `
 
-/* 🔒 Header fijo (robusto) */
+/*  Header fijo  */
 const HeaderShell = styled.header`
   position: fixed;
   top: 0;
@@ -215,7 +214,7 @@ const HeaderShell = styled.header`
   isolation: isolate;
 `
 
-/* ============ Mobile row (search + burger) ============ */
+/*  Mobile row (search + burger)  */
 const MobileBar = styled.div`
   display: none;
   @media (max-width: 1000px) {
@@ -263,7 +262,7 @@ const Burger = styled.button`
   }
 `
 
-/* Overlay móvil */
+/* overlay phone */
 const Overlay = styled.div`
   display: ${({ open }) => (open ? 'flex' : 'none')};
   position: fixed;
@@ -383,24 +382,26 @@ const categories = [
 ]
 
 export default function Header() {
-  const [query, setQuery] = useState('')
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [catOpen, setCatOpen] = useState(false)
-  const [catMobileOpen, setCatMobileOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
+  const [query, setQuery] = useState('') // texto de busqueda
+  const [menuOpen, setMenuOpen] = useState(false) // overlay movil open
+  const [catOpen, setCatOpen] = useState(false) // menu categorias para desktop - open
+  const [catMobileOpen, setCatMobileOpen] = useState(false) // subpanel categorias
+  const [scrolled, setScrolled] = useState(false) //   scroll
+
   const [suggestions, setSuggestions] = useState([])
+
   const [showSug, setShowSug] = useState(false)
   const [loadingSug, setLoadingSug] = useState(false)
 
   const debounceRef = useRef(null)
-  const shellRef = useRef(null)
+  const shellRef = useRef(null) // arreglar altura header
 
   const navigate = useNavigate()
   const location = useLocation()
   const { token, logout } = useAuth()
   const isAuth = ['/login', '/register'].includes(location.pathname)
 
-  // Cerrar dropdown al hacer click fuera
+  // Cerrar menu  desktop con click fuera
   const navRef = useRef()
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -412,6 +413,7 @@ export default function Header() {
   }, [])
 
   useEffect(() => {
+    // salida esc
     const onKey = (e) => {
       if (e.key === 'Escape') {
         setMenuOpen(false)
@@ -424,7 +426,7 @@ export default function Header() {
   }, [])
 
   useEffect(() => {
-    setShowSug(false)
+    setShowSug(false) // cambio de ruta, oculto suggerencias
   }, [location.pathname])
 
   useEffect(() => {
@@ -434,18 +436,19 @@ export default function Header() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // 🔧 Publica la altura del header como variable CSS para el Main
+  // calcula y publica altura de header como variable css para empujar y poner a sitio el main
   const publishOffset = () => {
     const h = shellRef.current?.offsetHeight || 0
     document.documentElement.style.setProperty('--header-offset', `${h}px`)
   }
   useLayoutEffect(() => {
     publishOffset()
+    // al montar
     const ro =
       'ResizeObserver' in window
         ? new ResizeObserver(() => publishOffset())
         : null
-    if (ro && shellRef.current) ro.observe(shellRef.current)
+    if (ro && shellRef.current) ro.observe(shellRef.current) // escucha los cambio de tamaño del header
     const onResize = () => publishOffset()
     window.addEventListener('resize', onResize)
     return () => {
@@ -455,10 +458,12 @@ export default function Header() {
   }, [])
 
   const handleSearch = (e) => {
+    // submit de busuqeda
     e.preventDefault()
     const q = query.trim()
     if (!q) return
     navigate(`/books?search=${encodeURIComponent(q)}`)
+    // navego a listado filtrado
     setQuery('')
     setShowSug(false)
     setMenuOpen(false)
@@ -466,9 +471,11 @@ export default function Header() {
   }
 
   const onQueryChange = (val) => {
+    // escritura con busqueda
     setQuery(val)
     if (debounceRef.current) clearTimeout(debounceRef.current)
     if (val.trim().length < 2) {
+      // a partir de 2 letras
       setSuggestions([])
       setShowSug(false)
       return
@@ -480,10 +487,10 @@ export default function Header() {
           params: { q: val.trim(), limit: 6 }
         })
         const arr = Array.isArray(data?.books) ? data.books : []
-        setSuggestions(arr)
+        setSuggestions(arr) // OK RESULTS
         setShowSug(true)
       } catch {
-        setSuggestions([])
+        setSuggestions([]) // NON OK RESULTS
         setShowSug(false)
       } finally {
         setLoadingSug(false)
@@ -493,16 +500,16 @@ export default function Header() {
 
   return (
     <>
-      {/* Header fijo */}
+      {/* header fijo */}
       <HeaderShell ref={shellRef} $scrolled={scrolled}>
         <HeaderTop>
           <Logo to='/'>KBook Store</Logo>
-
+          {/* sin buscador en login reg */}
           {!isAuth && (
             <SearchForm onSubmit={handleSearch}>
               <SearchInput
                 value={query}
-                onChange={(e) => onQueryChange(e.target.value)}
+                onChange={(e) => onQueryChange(e.target.value)} // on debounce
                 placeholder='Buscar libros, autores, ISBN'
               />
               <SearchButton type='submit' aria-label='Buscar'>
@@ -510,6 +517,7 @@ export default function Header() {
               </SearchButton>
 
               {showSug && (
+                // cajoncito de sugg
                 <SuggestBox>
                   {loadingSug && <div style={{ padding: 8 }}>Buscando…</div>}
                   {!loadingSug && suggestions.length === 0 && (
@@ -520,6 +528,7 @@ export default function Header() {
                       key={b._id}
                       to={`/books/${b._id}`}
                       onClick={() => setShowSug(false)}
+                      // close al elegir
                     >
                       {b.coverImage ? (
                         <SugCover src={b.coverImage} alt={b.title} />
@@ -551,6 +560,7 @@ export default function Header() {
           <Icons>
             {!isAuth &&
               (token ? (
+                // user auth OK
                 <>
                   <IconButton
                     as={Link}
@@ -569,6 +579,7 @@ export default function Header() {
                   </IconButton>
                   <IconButton
                     onClick={() => {
+                      // LOG OUT y home
                       logout()
                       navigate('/')
                     }}
@@ -579,6 +590,7 @@ export default function Header() {
                   </IconButton>
                 </>
               ) : (
+                //  envio al login
                 <IconButton as={Link} to='/login' aria-label='Iniciar sesión'>
                   <FiUser />
                 </IconButton>
@@ -588,6 +600,7 @@ export default function Header() {
               <IconButton
                 type='button'
                 aria-label='Abrir Carrito'
+                // abre Drawerr, layout escucha
                 onClick={() => window.dispatchEvent(new Event('cart:open'))}
                 title='Carrito'
               >
@@ -616,6 +629,7 @@ export default function Header() {
                           key={cat}
                           to={`/categories/${encodeURIComponent(cat)}`}
                           onClick={() => setCatOpen(false)}
+                          // cierra al navegar
                         >
                           {cat}
                         </SubLink>
@@ -630,9 +644,10 @@ export default function Header() {
               <NavLink to='/contact'>Contáctenos</NavLink>
             </Nav>
 
-            {/* Mobile row: search + burger */}
+            {/*Phone ROW, burger */}
             <MobileBar>
               <MobileSearchForm onSubmit={handleSearch}>
+                {/* adapto para funcionalidad en mobil */}
                 <MobileSearchInput
                   value={query}
                   onChange={(e) => onQueryChange(e.target.value)}
@@ -645,6 +660,7 @@ export default function Header() {
                 {showSug && (
                   <SuggestBox>
                     {loadingSug && <div style={{ padding: 8 }}>Buscando…</div>}
+
                     {!loadingSug && suggestions.length === 0 && (
                       <div style={{ padding: 8 }}>Sin resultados</div>
                     )}
@@ -654,6 +670,7 @@ export default function Header() {
                         to={`/books/${b._id}`}
                         onClick={() => {
                           setShowSug(false)
+
                           setMenuOpen(false)
                         }}
                       >
@@ -664,7 +681,9 @@ export default function Header() {
                             style={{
                               width: 36,
                               height: 48,
+
                               background: '#eee',
+
                               borderRadius: 6
                             }}
                           />
@@ -691,7 +710,7 @@ export default function Header() {
         )}
       </HeaderShell>
 
-      {/* Overlay móvil fuera del header */}
+      {/* phone overlay fuera del header */}
       {!isAuth && (
         <Overlay open={menuOpen}>
           <OverlayTopBar>
@@ -710,6 +729,7 @@ export default function Header() {
           </OverlayTopBar>
 
           {!catMobileOpen ? (
+            // menu principal para phone
             <OverlayNav>
               <OverlayLink to='/bestsellers' onClick={() => setMenuOpen(false)}>
                 Más Vendidos
@@ -754,6 +774,7 @@ export default function Header() {
               )}
             </OverlayNav>
           ) : (
+            // /////////////////// subpanel para categorias
             <CatPanel>
               <BackRow onClick={() => setCatMobileOpen(false)}>
                 <FiChevronLeft /> Categorías

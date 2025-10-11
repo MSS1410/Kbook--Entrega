@@ -24,24 +24,28 @@ const Fallback = styled.div`
 
 export default function BestsellerSection() {
   const [items, setItems] = useState([])
-
+  // estado items
   useEffect(() => {
+    // carga libros mas vendidos, 12
     ;(async () => {
       try {
         const { data } = await api.get('/api/books', {
           params: { sort: '-soldCount', limit: 24 }
         })
+        // normalizo list, priorizo data.books, luego si data es array
         const list = Array.isArray(data?.books)
           ? data.books
           : Array.isArray(data)
           ? data
           : []
         const mapped = list.map((b) => {
+          // mapeo items con id, link books:id
           const cover = b.coverImage || b.cover || b.coverImageUrl || ''
           return {
             id: b._id,
             link: `/books/${b._id}`,
             component: (
+              // tarjeta con la portada
               <Card>
                 {cover ? (
                   <Cover
@@ -52,6 +56,7 @@ export default function BestsellerSection() {
                     }
                   />
                 ) : (
+                  // sin items no cargo la seccion
                   <Fallback />
                 )}
               </Card>

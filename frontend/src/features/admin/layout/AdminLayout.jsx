@@ -1,4 +1,3 @@
-// frontend/src/features/admin/layout/AdminLayout.jsx
 import React from 'react'
 import styled from 'styled-components'
 import { Outlet } from 'react-router-dom'
@@ -29,12 +28,19 @@ const Main = styled.main`
   flex: 1;
 `
 
+/**
+ ---_----- Layout de Admin: ----_-----
+-Header fijo fuera de flujo, tratamos espacio para evitar solapes
+- ScrollToTop: obliga a siempre arrancar desde arriba
+- Main: renderiza children o <Outlet/>  para cuando se use para anidadas routes
+- Footer 
+ */
 export default function AdminLayout({ children }) {
   return (
     <Page>
       <AdminHeader />
       <HeaderSpacer />
-      <ScrollToTop /> {/* 👈 siempre arriba al cambiar de ruta */}
+      <ScrollToTop /> {/* siempre arriba al cambiar de ruta */}
       <Main>{children ?? <Outlet />}</Main>
       <AdminFooter />
     </Page>

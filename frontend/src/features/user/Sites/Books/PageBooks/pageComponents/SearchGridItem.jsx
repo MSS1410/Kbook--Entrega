@@ -94,7 +94,8 @@ const Add = styled.button`
 `
 
 const getAuthorName = (a) => (typeof a === 'string' ? a : a?.name || '')
-
+// tarjeta de result en rejilla,
+//Portada grande, titulo, autor, precio CTA Add cart
 export default function SearchGridItem({ book, minPrice, onAdd }) {
   const cover = book.coverImage || book.cover || book.coverImageUrl || ''
   const authorName = getAuthorName(book.author)
@@ -103,13 +104,16 @@ export default function SearchGridItem({ book, minPrice, onAdd }) {
     <Card>
       <Thumb>{cover ? <img src={cover} alt={book.title} /> : null}</Thumb>
       <Body>
+        {/* titulo libro */}
         <Title to={`/books/${book._id}`}>{book.title}</Title>
         <Author>{authorName}</Author>
         <Footer>
+          {/* precio */}
           <GridPrice>
             {minPrice != null ? `${minPrice.toFixed(2)} €` : ''}
           </GridPrice>
           <Btns>
+            {/* buttons actions */}
             <Add onClick={onAdd} aria-label='Añadir al carrito'>
               Añadir al carrito
             </Add>

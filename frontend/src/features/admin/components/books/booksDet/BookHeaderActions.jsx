@@ -3,11 +3,11 @@ import Button from '../../Button'
 import { Pencil, Save, X, Trash2 } from 'lucide-react'
 
 export default function BookHeaderActions({
-  editing,
-  saving,
-  onEdit,
-  onSave,
-  onCancel,
+  editing, // alterna entre edit y read
+  saving, // disabled save si esta saving
+  onEdit, // activa modo edicion
+  onSave, // persiste los cambios
+  onCancel, // revierte cambios locales
   onDelete
 }) {
   return (

@@ -32,6 +32,7 @@ const Avatar = styled.div`
     display: block;
   }
 `
+// cudro foto a 1:1
 const CardBody = styled.div`
   display: flex;
   flex-direction: column;
@@ -63,6 +64,7 @@ export default function AuthorCard({ a, onDelete }) {
   return (
     <Card>
       <Avatar>{a.photo ? <img src={a.photo} alt={a.name} /> : null}</Avatar>
+      {/* placeholder gris pero nunca deberia mostrarse :) */}
       <CardBody>
         <Name title={a.name}>{a.name}</Name>
         <Actions>

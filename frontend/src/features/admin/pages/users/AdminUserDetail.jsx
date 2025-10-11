@@ -1,21 +1,23 @@
+// frontend/src/admin/pages//AdminUserDetail.jsx
 import React, { useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { useParams, useNavigate } from 'react-router-dom'
 import Button from '../../components/Button.jsx'
 import {
-  listAllUsersAdmin,
-  toggleUserBlockAdmin,
+  listAllUsersAdmin, //  API: obtiene  listado que me permite localizar al usuario por id
+  toggleUserBlockAdmin, // API: bloquea/desbloquea al usuario
   updateUserRoleAdmin,
-  adminSendMessageToUser,
+  adminSendMessageToUser, // API: envio de  mensaje interno
   deleteUserAdmin,
   deleteReview
 } from '../../api/adminApi.js'
 import { Lock, Unlock, Save, Trash2 } from 'lucide-react'
-import useUserAggregates from '../../hooks/useUserAggregates.js'
+import useUserAggregates from '../../hooks/useUserAggregates.js' // ← Hook: agrega pedidos y reviews del usuario
 import ReviewsTable from '../../components/users/usersDet/ReviewsTable.jsx'
 import { absUrl } from '../../../../utils/absUrl.js'
 import Avatar from '../../components/Avatar.jsx'
 
+// // / // UI // / // 7 /
 const Wrap = styled.div`
   display: grid;
   gap: 16px;
@@ -40,7 +42,7 @@ const Block = styled(Card)`
   gap: 10px;
 `
 
-// Contenedor cuadrado para el avatar grande
+// Contenedor 1:1 para avatar grande
 const AvatarBox = styled.div`
   position: relative;
   width: 100%;
@@ -49,11 +51,11 @@ const AvatarBox = styled.div`
     content: '';
     display: block;
     padding-bottom: 100%;
-  }
+  } /* truco cuadrado */
   > div {
     position: absolute;
     inset: 0;
-  }
+  } /* Avatar ocupa todo */
 `
 
 const Field = styled.div`
@@ -64,6 +66,7 @@ const Label = styled.span`
   color: ${({ theme }) => theme.colors.primary};
   font-weight: 700;
 `
+
 const TableWrap = styled.div`
   max-height: 420px;
   overflow: auto;
@@ -89,6 +92,7 @@ const Table = styled.table`
   }
 `
 
+// Helper : resuelve avatar si viene como objeto o string
 const getAvatarUrl = (u) =>
   absUrl(
     (u?.avatar &&
@@ -99,28 +103,31 @@ const getAvatarUrl = (u) =>
   )
 
 export default function AdminUserDetail() {
-  const { id } = useParams()
+  const { id } = useParams() //  id del usuario desde la URL
   const navigate = useNavigate()
 
+  // estado base del usuario seleccionado
   const [user, setUser] = useState(null)
   const [role, setRole] = useState('user')
-  const [deleting, setDeleting] = useState(false)
+  const [deleting, setDeleting] = useState(false) // spiners de acto
   const [blocking, setBlocking] = useState(false)
-  const [savingRole, setSavingRole] = useState(false)
-  const [message, setMessage] = useState({ subject: '', body: '' })
+  const [savingRole, setSavingRole] = useState(false) //../
+  const [message, setMessage] = useState({ subject: '', body: '' }) // form mensaje interno
   const [deletingReviewIds, setDeletingReviewIds] = useState(new Set())
 
+  // Hook que trae agregados: pedidos, reviews y totales del usuario
   const {
     loading,
-    orders,
-    ordersTotal,
-    setOrders,
+    orders, //  pedidos user
+    ordersTotal, // ← conteo pedidos
+    setOrders, // ← setters expuestos por el hook // no lo uso aqui // lo dejo ready
     reviews,
-    reviewsTotal,
+    reviewsTotal, // conteo revs
     setReviews,
     setReviewsTotal
   } = useUserAggregates(id)
 
+  // carga usuario desde  listado general
   useEffect(() => {
     let alive = true
     ;(async () => {
@@ -135,11 +142,13 @@ export default function AdminUserDetail() {
     }
   }, [id])
 
+  // MEMO: total gastado sumando totales de pedidos
   const totalSpent = useMemo(
     () => orders.reduce((acc, o) => acc + (o.totalPrice || 0), 0),
     [orders]
   )
 
+  // ACCION: blok/disblok  y actualiza estado local
   const toggleBlock = async () => {
     if (!user) return
     setBlocking(true)
@@ -152,6 +161,7 @@ export default function AdminUserDetail() {
     }
   }
 
+  // acttion: elimina cuenta y navega a listado
   const onDelete = async () => {
     if (!user) return
     if (
@@ -174,6 +184,7 @@ export default function AdminUserDetail() {
     }
   }
 
+  // accion: guarda cambio de rol
   const saveRole = async () => {
     if (!user) return
     setSavingRole(true)
@@ -189,8 +200,10 @@ export default function AdminUserDetail() {
 
   const avatarSrc = getAvatarUrl(user)
 
+  // // / //  Render // / // //
   return (
     <Wrap>
+      {/* Header con acctiones*/}
       <div
         style={{
           display: 'flex',
@@ -214,6 +227,7 @@ export default function AdminUserDetail() {
         </div>
       </div>
 
+      {/* header con : avatar + datos principales + rol ajustable y fechas*/}
       <Top>
         <Card>
           <AvatarBox>
@@ -242,6 +256,7 @@ export default function AdminUserDetail() {
               gap: 8
             }}
           >
+            {/* cambio de rol habilitado  in-place */}
             <Field>
               <Label>Rol</Label>
               <div style={{ display: 'flex', gap: 8 }}>
@@ -263,6 +278,7 @@ export default function AdminUserDetail() {
               </div>
             </Field>
 
+            {/* temporal meta data*/}
             <Field>
               <Label>Registrado</Label>
               <div>
@@ -271,7 +287,6 @@ export default function AdminUserDetail() {
                   : '—'}
               </div>
             </Field>
-
             <Field>
               <Label>Última conexión</Label>
               <div>
@@ -284,6 +299,7 @@ export default function AdminUserDetail() {
         </Block>
       </Top>
 
+      {/* pedidos del usuario */}
       <Block>
         <strong>
           Compras ({ordersTotal}) — Total gastado:{' '}
@@ -292,6 +308,7 @@ export default function AdminUserDetail() {
             currency: 'EUR'
           })}
         </strong>
+
         {orders.length ? (
           <TableWrap>
             <Table>
@@ -327,6 +344,7 @@ export default function AdminUserDetail() {
         )}
       </Block>
 
+      {/* reseñas  usuario + borrado individual */}
       <Block>
         <strong>Reseñas ({reviewsTotal})</strong>
         {reviews.length ? (
@@ -359,6 +377,7 @@ export default function AdminUserDetail() {
         )}
       </Block>
 
+      {/* mensajeria interna con  usuario */}
       <Block>
         <strong>Mensaje interno al usuario</strong>
         <div style={{ display: 'grid', gap: 8 }}>

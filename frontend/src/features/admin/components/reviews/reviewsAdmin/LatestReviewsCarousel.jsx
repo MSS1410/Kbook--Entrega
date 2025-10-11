@@ -1,10 +1,10 @@
-// frontend/src/admin/pages/reviews/LatestReviewsCarousel.jsx
 import React from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import Button from '../../Button.jsx'
 import { AVATAR_PLACEHOLDER } from '../../../../../constants/media.js'
 import { absUrl } from '../../../../../utils/absUrl.js'
+
 const Section = styled.section`
   display: grid;
   gap: 12px;
@@ -22,7 +22,7 @@ const Head = styled.div`
 const HScroll = styled.div`
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: 280px;
+  grid-auto-columns: 280px; /* ← cada tarjeta ocupa 280px */
   gap: 12px;
   overflow-x: auto;
   padding-bottom: 6px;
@@ -40,7 +40,7 @@ const MiniCard = styled.div`
   border-radius: 12px;
   overflow: hidden;
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto 1fr auto; /* ← header / body / footer */
 `
 const Row = styled.div`
   display: flex;
@@ -85,7 +85,7 @@ const Footer = styled.div`
   color: #475569;
 `
 
-const fmtDate = (iso) => new Date(iso).toLocaleDateString()
+const fmtDate = (iso) => new Date(iso).toLocaleDateString() // ← fecha corta
 
 export default function LatestReviewsCarousel({ items, loading }) {
   return (
@@ -112,7 +112,7 @@ export default function LatestReviewsCarousel({ items, loading }) {
             <MiniCard key={it.id} title={it.bookTitle}>
               <Row>
                 <Avatar
-                  src={absUrl(it.coverImage || '') || AVATAR_PLACEHOLDER}
+                  src={absUrl(it.userAvatar || '') || AVATAR_PLACEHOLDER} // ← avatar usuario
                   alt={it.userName}
                 />
                 <div style={{ minWidth: 0 }}>

@@ -1,6 +1,9 @@
-// Helpers de validación comunes (tarjeta, CVC, CP, etc.)
+// Helpers de vallidate  tarjeta, CVC, CP, etccc...
+
+// deja solo digitos
 export const onlyDigits = (s = '') => s.replace(/\D+/g, '')
 
+// Algoritmo de Luhn para numeros de tarjeta
 export const luhnCheck = (num = '') => {
   const s = onlyDigits(num)
   if (!s) return false
@@ -18,23 +21,24 @@ export const luhnCheck = (num = '') => {
   return sum % 10 === 0
 }
 
-// === Helpers de inputs (debajo de formatCardNumber) ===
+// Evita e, +, -, . en inputs numericos // tarjeta fecha etc
 export const blockNonNumericKeys = (e) => {
-  // Evita 'e', '+', '-', '.' en inputs numéricos
   if (['e', 'E', '+', '-', '.'].includes(e.key)) e.preventDefault()
 }
 
-// MM/AA → solo dígitos + auto “/” tras 2
+// Formatea MM/AA con auto slash
 export const formatExpiry = (raw) => {
   const s = onlyDigits(raw).slice(0, 4)
   if (s.length <= 2) return s
   return `${s.slice(0, 2)}/${s.slice(2)}`
 }
 
-// CVC → 3 dígitos (4 si AMEX)
+// CVC con 2 opciones:
+// 3 si visa // 4 si AMEX)
 export const formatCVC = (raw, brand) =>
   onlyDigits(raw).slice(0, brand === 'AMEX' ? 4 : 3)
 
+// deteccion muy basica por BIN
 export const detectBrand = (num = '') => {
   const s = onlyDigits(num)
   if (/^4\d{12,18}$/.test(s)) return 'VISA'
@@ -44,6 +48,7 @@ export const detectBrand = (num = '') => {
   return 'CARD'
 }
 
+//validamos a fecha no pasada
 export const isValidExpiry = (v = '') => {
   const m = v.match(/^(\d{2})[\/\-](\d{2}|\d{4})$/)
   if (!m) return false
@@ -61,6 +66,7 @@ export const isValidCVC = (cvc = '', brand = 'CARD') => {
   return brand === 'AMEX' ? /^\d{4}$/.test(s) : /^\d{3}$/.test(s)
 }
 
+// codigo postal simple por paises en lista
 export const isValidPostal = (code = '', country = '') => {
   const c = (country || '').toUpperCase()
   if (c === 'ES') return /^\d{5}$/.test(code)

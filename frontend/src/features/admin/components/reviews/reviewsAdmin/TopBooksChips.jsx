@@ -1,9 +1,9 @@
-// frontend/src/admin/pages/reviews/TopBooksChips.jsx
 import React from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { absUrl } from '../../../../../utils/absUrl'
 import { AVATAR_PLACEHOLDER } from '../../../../../constants/media'
+
 const Section = styled.section`
   display: grid;
   gap: 12px;
@@ -20,7 +20,7 @@ const Head = styled.div`
 `
 const ChipsRow = styled.div`
   display: grid;
-  grid-auto-flow: column;
+  grid-auto-flow: column; /* ← chips en horizontal */
   grid-auto-columns: max-content;
   gap: 10px;
   overflow-x: auto;
@@ -95,6 +95,7 @@ export default function TopBooksChips({ topBooks, loading }) {
               >
                 {b.title}
               </span>
+              {/* numero de reseñas */}
               <Badge>· {b.count}</Badge>
             </Chip>
           ))}

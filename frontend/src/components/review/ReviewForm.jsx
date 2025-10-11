@@ -69,12 +69,14 @@ const Close = styled.button`
 `
 
 export default function ReviewForm({ book, onClose, prefill = {} }) {
-  const { user } = useAuth()
+  const { user } = useAuth() // no lo uso aqui, es util bloquear user anonimo
+
   const [comment, setComment] = useState(prefill.comment || '')
   const [rating, setRating] = useState(prefill.rating || 5)
   const [error, setError] = useState(null)
   const maxWords = 250
 
+  // me preparo para poder avisar sobre el maxWords
   const wordCount = comment.trim() ? comment.trim().split(/\s+/).length : 0
   const isTooLong = wordCount > maxWords
 
@@ -88,6 +90,7 @@ export default function ReviewForm({ book, onClose, prefill = {} }) {
       return
     }
     try {
+      // crea reseña
       await api.post('/api/reviews', {
         book: book._id,
         rating,
@@ -95,6 +98,7 @@ export default function ReviewForm({ book, onClose, prefill = {} }) {
       })
       alert('Gracias por tu reseña')
       onClose()
+      // cierra modal
     } catch (e) {
       console.error(e)
       alert('Error enviando reseña')

@@ -10,6 +10,7 @@ const Card = styled.div`
 const Body = styled.div`
   padding: 16px;
 `
+// pedido izq, estado derecha
 const Row = styled.div`
   display: flex;
   align-items: center;
@@ -32,11 +33,13 @@ const Total = styled.div`
   font-weight: 700;
 `
 
+// fecha local corta
 const fmtDate = (iso) => new Date(iso).toLocaleDateString()
 const currency = (n) =>
   typeof n === 'number'
     ? n.toLocaleString(undefined, { style: 'currency', currency: 'EUR' })
     : n
+// robustez si no llega numero
 
 export default function OrderCard({ o }) {
   return (
@@ -46,13 +49,16 @@ export default function OrderCard({ o }) {
           <div style={{ fontWeight: 600, fontSize: 14 }}>
             Pedido #{o?.code || o?._id?.slice(-6)}
           </div>
+          {/* estado simple */}
           <Badge>{o?.status || 'pending'}</Badge>
         </Row>
         <Muted>
           {o?.user?.name || o?.user?.email || 'Cliente'} ·{' '}
           {fmtDate(o?.createdAt)}
         </Muted>
+        {/* total formato EUR */}
         <Total>{currency(o?.total || o?.amount)}</Total>
+        {/* cantidad de items */}
         <Muted>{o?.items?.length || 0} artículos</Muted>
       </Body>
     </Card>

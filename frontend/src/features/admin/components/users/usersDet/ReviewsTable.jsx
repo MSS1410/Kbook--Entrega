@@ -1,4 +1,3 @@
-// ReviewsTable.jsx
 import React from 'react'
 import styled from 'styled-components'
 import Button from '../../Button'
@@ -44,6 +43,7 @@ export default function ReviewsTable({ reviews, deletingIds, onDelete }) {
         </thead>
         <tbody>
           {reviews.map((r) => {
+            // estado por fila
             const isDeleting = deletingIds.has(r._id)
             return (
               <tr key={r._id}>

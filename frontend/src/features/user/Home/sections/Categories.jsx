@@ -39,6 +39,7 @@ const Label = styled.span`
 
 export default function CategoriesSect() {
   const categories = [
+    // array local static con name e img de cada cat
     { name: 'Ciencia Ficción', img: 'src/assets/images/cienciaFiccion.webp' },
     { name: 'Ciencia', img: 'src/assets/images/ciencia.jpg' },
     { name: 'Infantiles', img: 'src/assets/images/infantil.jpg' },
@@ -47,6 +48,7 @@ export default function CategoriesSect() {
     { name: 'Psicologia', img: 'src/assets/images/psicologia.jpg' },
     { name: 'Natura', img: 'src/assets/images/Natura.jpg' }
   ]
+  // mapeo de items con id nombre, component = tarjeta con img y nombre floating + Link a cada page de categorias
   const items = categories.map((cat) => ({
     id: cat.name,
     component: (

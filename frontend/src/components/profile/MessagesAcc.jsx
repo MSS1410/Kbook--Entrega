@@ -44,35 +44,43 @@ const DateSmall = styled.small`
   display: block;
   color: ${({ theme }) => theme.colors.mutedText};
 `
-
+// Muestra 3 primeros mensajes recibidos recientes
 export default function MessagesAccordion({ open: controlledOpen, onToggle }) {
-  // Soporte controlado / no controlado
-  const [internalOpen, setInternalOpen] = useState(false)
-  const open = controlledOpen ?? internalOpen
+  const [internalOpen, setInternalOpen] = useState(false) // estaco control vs no control
+
+  // si el padre no pasa open, se usa internalOpenv= no controlado
+  //togglw llama a onToggle del padre si existe, sino invierte internalOpen
+
+  const open = controlledOpen ?? internalOpen // control open close
   const toggle = onToggle ?? (() => setInternalOpen((o) => !o))
 
+  // estados de datos
   const [loading, setLoading] = useState(false)
   const [items, setItems] = useState([])
   const [error, setError] = useState(null)
   const { user } = useAuth()
 
+  // guard para evitar doble fetch
   const userId = String(user?._id || user?.id || '')
   const fetchingRef = useRef(false)
 
   useEffect(() => {
     if (!open) return
     if (fetchingRef.current) return
-    fetchingRef.current = true
-    let cancelled = false
+    fetchingRef.current = true // evita disparar el fetch si ya esta en curso
+    let cancelled = false // evita setting del estado si el comp se desmonta o cierra a medio fetch
 
+    // solo ejecuta al abrirse o si cambia userId
     const run = async () => {
+      // resset datos y modo carga
       setError(null)
       setLoading(true)
 
       try {
+        // buffer local
         const received = []
 
-        // 1) Threads P2P
+        //primer intento threads 2 bandas
         let threads = []
         try {
           const { data } = await api.get('/api/messages/threads')
@@ -80,13 +88,14 @@ export default function MessagesAccordion({ open: controlledOpen, onToggle }) {
         } catch {
           threads = []
         }
+        // si hay threads, toma hasta 6 y pide los mensajes de cada uno
 
         if (threads.length > 0) {
           const top = threads.slice(0, 6)
           const results = await Promise.allSettled(
             top.map((t) => api.get(`/api/messages/threads/${t.id}`))
           )
-
+          // de cada thread, hilo, leido, toma mensajes y solo conserva los q NO vienen del Propio usuario
           for (const r of results) {
             if (r.status !== 'fulfilled') continue
             const msgs = Array.isArray(r.value?.data?.messages)
@@ -106,7 +115,7 @@ export default function MessagesAccordion({ open: controlledOpen, onToggle }) {
           }
         }
 
-        // 2) Fallback admin→user si aún no hay
+        // fallback admin -> user, si no hubo nada en threads
         if (received.length === 0) {
           try {
             const { data } = await api.get('/api/users/messages', {
@@ -126,13 +135,14 @@ export default function MessagesAccordion({ open: controlledOpen, onToggle }) {
           } catch {}
         }
 
-        // 3) dedup + orden desc + top 3
+        // lo tenemos, abrimos por orden los ultimos 3 recibidos si hay
         const map = new Map()
         for (const r of received) map.set(String(r._id), r)
         const top3 = [...map.values()]
           .sort(
             (a, b) => +new Date(b.createdAt || 0) - +new Date(a.createdAt || 0)
           )
+          // desc por fecha
           .slice(0, 3)
 
         if (!cancelled) setItems(top3)
@@ -141,6 +151,7 @@ export default function MessagesAccordion({ open: controlledOpen, onToggle }) {
       } finally {
         if (!cancelled) setLoading(false)
         fetchingRef.current = false
+        // soltamos candado para permitir futuros fetch si se vuelve a abrir
       }
     }
 

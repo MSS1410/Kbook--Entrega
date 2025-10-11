@@ -63,6 +63,7 @@ export default function BooksGrid({ authorName, books }) {
   return (
     <Block>
       <strong>Libros de {authorName}</strong>
+      {/* head contexto */}
       {books.length ? (
         <GridBooks>
           {books.map((b) => (
@@ -78,6 +79,7 @@ export default function BooksGrid({ authorName, books }) {
                   to={`/admin/books/${b._id}`}
                   style={{ justifySelf: 'start' }}
                 >
+                  {/* acceso al detalle del libro */}
                   Ver libro
                 </Button>
               </BookBody>

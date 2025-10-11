@@ -1,4 +1,3 @@
-// components/ChatPanel.jsx
 import React from 'react'
 import styled from 'styled-components'
 import { AVATAR_PLACEHOLDER } from '../../../../../constants/media'
@@ -84,7 +83,7 @@ const SendBtn = styled.button`
   border-radius: 10px;
   cursor: pointer;
 `
-
+// props: active(hilo) / messages, loadingMsgs, compose, onCompose, onSend
 export default function ChatPanel({
   active,
   messages,
@@ -97,6 +96,7 @@ export default function ChatPanel({
     <div>
       <Wrap>
         <Header>
+          {/* muestro avatar y nombre de la otra parte / select chat */}
           {active ? (
             <>
               <Avatar
@@ -116,6 +116,8 @@ export default function ChatPanel({
         </Header>
 
         <List>
+          {/* mensajes, emisor tu vs usuario recibidor */}
+          {/* bubles estilo y flecha */}
           {loadingMsgs && <p>Cargando conversación…</p>}
           {!loadingMsgs &&
             active &&
@@ -124,9 +126,9 @@ export default function ChatPanel({
               const me =
                 String(fromId || '') ===
                 String(active?.user?.currentUserId || '___no')
-              // Nota: el padre identifica "me" al crear el mensaje y porque el receptor es admin;
-              // aquí asumimos que los mensajes ya vienen con su "from" correcto.
-              // Para evitar confusiones, simplemente mostramos "Tú" si el padre ya agregó así.
+              //  el padre identifica "me" al crear el mensaje y porque el receptor es admin;
+              // aqui asumo que los mensajes ya vienen con su "from" correcto.
+              // Para
               const showMe = /^(tú|tu)$/i.test(m.from?.name || '') || me
               return (
                 <RowMsg key={m._id} $me={showMe}>
@@ -147,7 +149,7 @@ export default function ChatPanel({
               )
             })}
         </List>
-
+        {/* text area y boton enviar, disabled si no hay hilo activo */}
         <Composer onSubmit={onSend}>
           <Textarea
             placeholder={

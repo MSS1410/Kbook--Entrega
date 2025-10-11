@@ -1,4 +1,3 @@
-// frontend/src/features/admin/components/home/EconomySection.jsx
 import React from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
@@ -22,6 +21,11 @@ const Panel = styled.div`
   background: ${({ theme }) => theme.colors.cardBg};
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: ${({ theme }) => theme.radii.lg};
+  min-width: 0;
+  overflow: hidden;
+  @media (max-width: 480px) {
+    padding: 12px;
+  }
 `
 
 const Divider = styled.hr`
@@ -49,8 +53,10 @@ const GhostBtn = styled(Link)`
 const TwoCol = styled.div`
   display: grid;
   gap: 24px;
+  align-items: stretch;
+  min-width: 0;
   @media (min-width: 992px) {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); // ← 2 columnas en desktop
   }
 `
 
@@ -58,6 +64,8 @@ const Card = styled.div`
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: ${({ theme }) => theme.radii.lg};
   background: ${({ theme }) => theme.colors.cardBg};
+  overflow: hidden;
+  min-width: 0;
 `
 
 const CardHeader = styled.div`
@@ -66,8 +74,20 @@ const CardHeader = styled.div`
   font-size: 1rem;
 `
 const CardBody = styled.div`
-  height: 288px;
+  height: 288px; // ← alto fijo para el gráfico
   padding: 0 8px 8px 8px;
+  @media (max-width: 480px) {
+    height: 220px;
+  }
+  @media (min-width: 481px) and (max-width: 767px) {
+    height: 240px;
+  }
+  @media (min-width: 768px) and (max-width: 1199px) {
+    height: 280px;
+  }
+  @media (min-width: 1200px) {
+    height: 320px;
+  }
 `
 
 const currency = (n) =>
@@ -76,12 +96,14 @@ const currency = (n) =>
     : n
 
 export default function EconomySection({ orders = [], series = [] }) {
+  // orders ::: ultimos pedidos para carro
+  // series ::: [{ date: '01', amount : 1234 }, ...] para el chart (30 DIAS)
   return (
     <Panel>
       <Section
         title='Economía Kbook'
         subtitle='Últimos pedidos y ventas'
-        action={<GhostBtn to='/admin/orders'>Ver todos</GhostBtn>}
+        action={<GhostBtn to='/admin/orders'>Ver todos</GhostBtn>} // a todos los pedidos
       />
       <Divider />
       <TwoCol>
@@ -106,6 +128,7 @@ export default function EconomySection({ orders = [], series = [] }) {
           <CardBody>
             {Array.isArray(series) && series.length ? (
               <ResponsiveContainer width='100%' height='100%'>
+                {/* adaptable al contenedor */}
                 <AreaChart
                   data={series}
                   margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
@@ -125,7 +148,8 @@ export default function EconomySection({ orders = [], series = [] }) {
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray='3 3' opacity={0.2} />
-                  <XAxis dataKey='date' tick={{ fontSize: 12 }} />
+                  <XAxis dataKey='date' tick={{ fontSize: 12 }} />{' '}
+                  {/* eje x horizontal :: dia/fecha */}
                   <YAxis
                     tick={{ fontSize: 12 }}
                     tickFormatter={(v) =>
@@ -133,6 +157,7 @@ export default function EconomySection({ orders = [], series = [] }) {
                     }
                   />
                   <Tooltip
+                    // formatea a EUR
                     formatter={(v) => currency(v)}
                     labelFormatter={(l) => `Día ${l}`}
                   />

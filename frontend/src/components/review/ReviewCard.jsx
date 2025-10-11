@@ -2,6 +2,8 @@ import React from 'react'
 import styled from 'styled-components'
 import { format } from 'date-fns'
 
+import { AVATAR_PLACEHOLDER } from '../../constants/media'
+
 const Card = styled.div`
   width: ${({ width }) => width};
   padding: ${({ theme }) => theme.spacing.md};
@@ -106,17 +108,13 @@ const DateText = styled.span`
 `
 
 export default function ReviewCard({ review, width }) {
-  const avatarUrl =
-    review.user?.avatar ||
-    review.avatar ||
-    'https://via.placeholder.com/48?text=User'
+  const avatarUrl = review.user?.avatar || review.avatar || AVATAR_PLACEHOLDER
 
-  const coverUrl =
-    review.book?.coverImage ||
-    'https://via.placeholder.com/80x110?text=No+Cover'
+  const coverUrl = review.book?.coverImage || ''
 
   const bookTitle = review.book?.title || 'Título desconocido'
   const stars =
+    // CAlculo string
     '★'.repeat(review.rating || 0) + '☆'.repeat(5 - (review.rating || 0))
 
   return (

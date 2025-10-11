@@ -4,8 +4,8 @@
 import Author from '../models/Author.js'
 import mongoose from 'mongoose'
 
-// Obtiene todos los autores
-// Obtiene todos los autores (ahora con opciones de búsqueda, filtro y libros)
+// Obtiene todos los autores con busqueda filtro y libros
+
 export const getAllAuthors = async (req, res, next) => {
   try {
     const page = Math.max(1, parseInt(req.query.page || '1', 10))
@@ -20,12 +20,15 @@ export const getAllAuthors = async (req, res, next) => {
 
     const match = {}
     if (q) match.name = { $regex: q, $options: 'i' }
-
+    // regex operador de mongo, "i" comodines, insensitive, etc
+    // uso de pipeline, podria usar .find(). Que gano con pipeline?
+    // puedo contar agrupar, ordenar por multiples condiciones. Me ayuda por ejemplo para traer los libros por autor.
     const pipeline = [
       { $match: match },
       {
         $lookup: {
-          from: 'books', // colección de libros
+          // hago joint lookup puedo con pipeline
+          from: 'books', // traigo coleccion de libros
           localField: '_id',
           foreignField: 'author',
           as: 'books'
@@ -34,7 +37,7 @@ export const getAllAuthors = async (req, res, next) => {
       {
         $addFields: {
           booksCount: { $size: '$books' },
-          // Deja sólo lo que necesitamos de los libros y ordénalos por título
+          // cojo lo que me interesa de libors y ordeno por titulo
           books: {
             $map: {
               input: {
@@ -64,7 +67,7 @@ export const getAllAuthors = async (req, res, next) => {
     const authors = agg[0]?.data || []
     const total = agg[0]?.total?.[0]?.count || 0
 
-    // Mantenemos una respuesta clara para front
+    // respuesta clear para front
     res.json({ authors, total, page, limit })
   } catch (err) {
     next(err)

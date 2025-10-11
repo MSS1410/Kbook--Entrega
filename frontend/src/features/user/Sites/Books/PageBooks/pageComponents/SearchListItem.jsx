@@ -125,6 +125,7 @@ const excerpt = (s, n = 180) => {
   return (space > 0 ? cut.slice(0, space) : cut) + '…'
 }
 
+// resultado de la busuqeda en modo lista
 export default function SearchListItem({ book, minPrice, onAdd }) {
   const cover = book.coverImage || book.cover || book.coverImageUrl || ''
   const authorName = getAuthorName(book.author)

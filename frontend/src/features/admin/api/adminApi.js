@@ -1,7 +1,14 @@
-// frontend/src/admin/api/adminApi.js
 import api from '../../../api/index'
+// proposito  capa de acceso a datos para administrador
 
-/* ============== HELPERS GENERALES ============== */
+// centralizar toda la comunicacion http de panel admin
+// desacopla UI - API : LAS PAGINAS NO SABEN Detalles de enpoinds, queryparams, ni formatos cambiantes, solo entiende de funciones
+
+// normalizo respuestas hetereo. enpoints devuelven items otros devuelven ordres... SIEMPRE mismo shape a la UI.
+
+// reuse and reduce
+
+/*  HELPERS GENERALES  */
 
 const DEFAULT_ARRAY_KEYS = [
   'items',
@@ -27,9 +34,9 @@ const sumBy = (arr, f) => arr.reduce((acc, x) => acc + (f(x) || 0), 0)
 
 const get = (url, params) => api.get(url, { params }).then((r) => r.data)
 
-/* ============== DASHBOARD ============== */
+/*  DASHBOARD  */
 export async function fetchAdminHome() {
-  // Tarjetas recientes
+  // tarjetas recientes
   const usersReq = get('/api/admin/users', { order: 'desc', limit: 10 })
     .then((d) => pickArray(d, ['users', ...DEFAULT_ARRAY_KEYS]))
     .catch(() => [])
@@ -44,12 +51,12 @@ export async function fetchAdminHome() {
 
   const dashboardReq = get('/api/admin/dashboard').catch(() => ({}))
 
-  // Inbox (solo no leídos)
+  // Inbox (solo no leidos)
   const inboxReq = get('/api/admin/inbox', { unread: 1, limit: 20 })
     .then((d) => d || { items: [], unreadCount: 0 })
     .catch(() => ({ items: [], unreadCount: 0 }))
 
-  // Pedidos últimos 30 días (para la gráfica)
+  // pedidos para grafica de last 30 days
   const orders30Req = fetchOrdersForLastDays(30, 500).catch(() => [])
 
   const [dashboard, users, ordersRecent, reviews, inbox, orders30] =
@@ -62,14 +69,14 @@ export async function fetchAdminHome() {
       orders30Req
     ])
 
-  // Compatibilidad: 'totals' o 'totales'
+  // compatibilidad: s/es
   const totals = dashboard?.totals || dashboard?.totales || {}
   const totalUsers = totals?.usuarios ?? 0
   const totalOrders = totals?.pedidos ?? 0
   const totalSales =
     dashboard?.salesAll?.totalAmount ?? sumBy(ordersRecent, (o) => o.totalPrice)
 
-  // Serie 30 días
+  // serie 30 dias
   const dayKey = (d) => {
     const x = new Date(d)
     x.setHours(0, 0, 0, 0)
@@ -110,7 +117,7 @@ export async function fetchAdminHome() {
   }
 }
 
-/* ============== LIBROS ============== */
+/*  LIBROS  */
 export const listBooksAll = async () => {
   const pageSize = 100
   let page = 1,
@@ -155,7 +162,7 @@ export const updateBookCover = (id, url) =>
 export const toggleBookFeatured = (id, value) =>
   api.patch(`/api/admin/books/${id}/featured`, { value }).then((r) => r.data)
 
-/* ============== AUTORES ============== */
+/*  AUTORES  */
 export const listAuthorsAll = async () => {
   const pageSize = 100
   let page = 1,
@@ -202,8 +209,8 @@ export const updateAuthorPhoto = (id, url) =>
 export const toggleAuthorFeatured = (id, value) =>
   api.patch(`/api/admin/authors/${id}/featured`, { value }).then((r) => r.data)
 
-/* ============== PEDIDOS (admin) ============== */
-// 💡 Normalizado: siempre devolvemos { orders, total, page, limit }
+/*  PORDERS PARA ADMIN  */
+//  Normalizado siempre devuelvo { orders, total, page, limit }
 export const listOrders = async (params = {}) => {
   const d = await get('/api/admin/orders', params)
   const orders = Array.isArray(d?.orders)
@@ -239,9 +246,9 @@ export async function fetchOrdersForLastDays(days = 30, pageSize = 200) {
   return out.filter((o) => new Date(o.createdAt).getTime() >= threshold)
 }
 
-/* ============== RESEÑAS (admin) ============== */
-// 💡 Normalizado: siempre devolvemos { reviews, total, page, limit }
-//    y aceptamos bookId/book y userId/user como filtros (compat)
+/*  REVIEWS ADMIN */
+//  Normalizado siempre retorn[ reviews, total, page, limit ]
+//    y acepto bookId/book y userId/user como filtros
 export const listReviews = async (params = {}) => {
   const q = {
     ...params,
@@ -335,7 +342,7 @@ export async function computeReviewStats(maxPages = 10, pageSize = 200) {
   return { topUsers, topBooks }
 }
 
-/* ============== USERS (admin) ============== */
+/*USERS ADMIN */
 export const listAllUsersAdmin = async () => {
   const pageSize = 100
   let page = 1,
@@ -380,7 +387,7 @@ export const updateUserAdmin = (id, payload) =>
 export const deleteUserAdmin = (id) =>
   api.delete(`/api/admin/users/${id}`).then((r) => r.data)
 
-/* ============== MENSAJERÍA (admin) ============== */
+/* ADMIN MSGS */
 export const listAdminInbox = (params = {}) => get('/api/admin/inbox', params)
 
 export const adminSendMessageToUser = (userId, { subject, body }) =>

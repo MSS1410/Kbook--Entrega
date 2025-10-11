@@ -20,9 +20,14 @@ const Box = styled.div`
 
 export default function Modal({ open, onClose, children }) {
   if (!open) return null
+  {
+    /* facil, no render sino abierto */
+  }
   return (
     <Overlay onClick={onClose}>
+      {/* OutClick -> cierre modal */}
       <Box onClick={(e) => e.stopPropagation()}>{children}</Box>
+      {/*stop..- evita cierre accidental  */}
     </Overlay>
   )
 }

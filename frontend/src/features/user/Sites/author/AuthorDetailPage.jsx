@@ -1,4 +1,3 @@
-// frontend/src/features/pages/authors/AuthorDetailPage.jsx
 import React, { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import styled from 'styled-components'
@@ -57,13 +56,17 @@ const BackRow = styled.div`
   }
 `
 
+// pagina de detall del autor, carga autor por id de la url, y muestra foto, bio y sus libros
 export default function AuthorDetailPage() {
   const { id } = useParams()
+  // routing, id de la ruta
   const [author, setAuthor] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  // estados
 
   useEffect(() => {
+    // fetch con cancel suave, evita  setState si la vista se desmonta antes de que termine la peti
     let cancelled = false
     ;(async () => {
       try {
@@ -104,6 +107,7 @@ export default function AuthorDetailPage() {
   const books = Array.isArray(author.books) ? author.books : []
 
   return (
+    // render del autor
     <Page>
       <Header>
         <Avatar
@@ -133,6 +137,7 @@ export default function AuthorDetailPage() {
       <div style={{ marginTop: 24 }}>
         {books.length > 0 ? (
           <HomeCarrusel
+            // carrusel de libros que trae el autor
             title={`Libros de ${author.name}`}
             items={books.map((b) => ({
               id: b._id,

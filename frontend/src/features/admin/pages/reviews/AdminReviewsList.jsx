@@ -1,4 +1,3 @@
-// frontend/src/admin/pages/reviews/AdminReviewsList.jsx
 import React, { useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { useSearchParams } from 'react-router-dom'
@@ -11,21 +10,22 @@ const Wrap = styled.div`
   display: grid;
   gap: 16px;
 `
-const PER_PAGE = 40
+const PER_PAGE = 40 // tamaño de pagina
 
 export default function AdminReviewsList() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const [page, setPage] = useState(Number(searchParams.get('page') || 1))
+  const [page, setPage] = useState(Number(searchParams.get('page') || 1)) // estado controlado por URL
   const [order, setOrder] = useState(
-    (searchParams.get('order') || 'desc').toLowerCase()
+    (searchParams.get('order') || 'desc').toLowerCase() //  asc//desc
   )
 
-  const [reviews, setReviews] = useState([])
-  const [total, setTotal] = useState(0)
+  const [reviews, setReviews] = useState([]) // reseñas pg act
+  const [total, setTotal] = useState(0) //  total reviews para pager
   const [loading, setLoading] = useState(true)
   const [deletingIds, setDeletingIds] = useState(() => new Set())
 
   useEffect(() => {
+    // sincro estado con query
     const sp = new URLSearchParams()
     sp.set('page', String(page))
     sp.set('order', order)
@@ -33,12 +33,14 @@ export default function AdminReviewsList() {
   }, [page, order, setSearchParams])
 
   const totalPages = useMemo(
+    //pag totales?
     () => Math.max(1, Math.ceil(total / PER_PAGE)),
     [total]
   )
 
   useEffect(() => {
     ;(async () => {
+      // fetch paged listado
       setLoading(true)
       try {
         const res = await listReviews({ page, limit: PER_PAGE, order })
@@ -64,6 +66,7 @@ export default function AdminReviewsList() {
   }, [page, order])
 
   const onDelete = async (r) => {
+    // handler eliminar reseña
     const bookTitle =
       (typeof r.book === 'object' ? r.book?.title : '') || 'este libro'
     const userName =
@@ -75,12 +78,13 @@ export default function AdminReviewsList() {
     )
       return
 
-    setDeletingIds((s) => new Set(s).add(r._id))
+    setDeletingIds((s) => new Set(s).add(r._id)) // ← marca "eliminado"
     try {
       await deleteReview(r._id)
-      setReviews((list) => list.filter((x) => x._id !== r._id))
+      setReviews((list) => list.filter((x) => x._id !== r._id)) // quita en local
       setTotal((t) => Math.max(0, t - 1))
       setTimeout(() => {
+        // empty page -> back
         setReviews((list) => {
           if (list.length === 0 && page > 1) setPage(page - 1)
           return list
@@ -106,7 +110,7 @@ export default function AdminReviewsList() {
         onChangeOrder={(v) => {
           setOrder(v)
           setPage(1)
-        }}
+        }} // al cambiar orden, vuelvo pag 1
       />
 
       {loading ? (

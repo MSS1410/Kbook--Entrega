@@ -28,15 +28,22 @@ const Value = styled.div`
 `
 
 export default function Kpi({ label, value, icon }) {
+  // componente minimal y reusable para metricas del dashboard
   return (
     <Card>
       <Body>
+        {/* slot para cualquier icona */}
         <IconWrap>{icon}</IconWrap>
         <div>
+          {/* qué mide */}
           <Label>{label}</Label>
+          {/* cuánto vale ahora */}
           <Value>{value}</Value>
         </div>
       </Body>
     </Card>
   )
 }
+
+// KPI key performance indicator.
+//indicador de renidimiento que asume metrica importante, ventas totales usuarios nuevos etc.

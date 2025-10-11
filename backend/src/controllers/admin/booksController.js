@@ -56,7 +56,7 @@ export const adminDeleteBook = async (req, res, next) => {
   }
 }
 
-// ⚠️ Esta acción está duplicada por rutas nuevas de upload. Se mantiene por compatibilidad.
+// lo tengo duplicado para evitar que se me rompan usuarios antiguos previos , funcionalidad cubierta por adminCoverController
 export const adminUpdateBookCover = async (req, res, next) => {
   try {
     const { id } = req.params

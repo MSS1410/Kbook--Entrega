@@ -16,7 +16,6 @@ const Row = styled.div`
   padding: 8px;
   overflow: hidden;
 `
-
 const Thumb = styled.div`
   width: 72px;
   height: 72px;
@@ -24,19 +23,16 @@ const Thumb = styled.div`
   overflow: hidden;
   background: #eee;
   border: 1px solid ${({ theme }) => theme.colors.border};
-
   > div {
     width: 100%;
     height: 100%;
-  }
+  } /* Avatar ocupa todo el thumb */
 `
-
 const RowContent = styled.div`
   min-width: 0;
   display: grid;
   gap: 6px;
 `
-
 const RowName = styled.div`
   font-weight: 600;
   font-size: 16px;
@@ -44,7 +40,6 @@ const RowName = styled.div`
   text-overflow: ellipsis;
   white-space: nowrap;
 `
-
 const Badge = styled.span`
   display: inline-block;
   padding: 2px 8px;
@@ -53,12 +48,10 @@ const Badge = styled.span`
   background: ${({ theme }) => theme.colors.mutedSurface};
   color: ${({ theme }) => theme.colors.accent};
 `
-
 const RowMeta = styled.div`
   color: ${({ theme }) => theme.colors.mutedText};
   font-size: 13px;
 `
-
 const RowActions = styled.div`
   display: flex;
   gap: 8px;
@@ -72,7 +65,6 @@ export default function UserListRow({ u, onToggleBlock }) {
   return (
     <Row>
       <Thumb>
-        {/* fill + square para ocupar todo el “thumb” */}
         <Avatar
           fill
           square

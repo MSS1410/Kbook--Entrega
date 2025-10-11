@@ -61,29 +61,33 @@ const NavButton = styled.button`
 `
 
 export default function ReviewsCarrusel({
+  // props:
   reviews = [],
   title = 'Reseñas destacadas',
   viewAllLink = '/reviews'
 }) {
   const [width] = useWindowSize()
+  // hook useWindowSize, conocer el ancho y decidir si por vista 1, o 2.
   const perView = width < 576 ? 1 : 2
   const [idx, setIdx] = useState(0)
+  // idx=pag actual
 
-  // Log incoming reviews
+  // useefect para log
   useEffect(() => {
-    console.log('📦 ReviewsCarrusel received reviews:', reviews)
+    // console.log(' ReviewsCarrusel received reviews:', reviews)
     if (Array.isArray(reviews)) {
       console.log(
-        `📊 Count: ${reviews.length}, current index: ${idx}, perView: ${perView}`
+        `Count: ${reviews.length}, current index: ${idx}, perView: ${perView}`
       )
       console.log(
-        '🆔 Review IDs:',
+        ' Review IDs:',
         reviews.map((r) => r._id || '[no-id]')
       )
     }
   }, [reviews, perView, idx])
 
   const handleNav = (dir) => {
+    // calculo para saber cuantas puedo mostrar por view
     const max = Math.max(0, reviews.length - perView)
     const prev = idx
     const next = Math.min(Math.max(0, idx + dir), max)

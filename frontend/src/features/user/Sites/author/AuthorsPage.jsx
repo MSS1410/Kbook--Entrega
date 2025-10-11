@@ -1,4 +1,3 @@
-// frontend/src/features/pages/AuthorsPage.jsx
 import React, { useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 
@@ -122,7 +121,7 @@ const Btn = styled.button`
     background: ${({ active }) => (active ? '#111' : '#f6f6fa')};
   }
 `
-
+// el listado general de autores con busqueda y paginacion. Indice de autores del sitio
 export default function AuthorsPage() {
   const [authors, setAuthors] = useState([])
   const [page, setPage] = useState(1)
@@ -131,11 +130,14 @@ export default function AuthorsPage() {
 
   const [query, setQuery] = useState('')
   const [qDebounced, setQDebounced] = useState('')
+  // estados
+  // authors: apgina actual de resultados // total = total global del backend
+  //query y debunced: no disparar peticiones por cada tecla
 
-  // 👇 DESPLAZA ARRIBA cuando cambian page o el buscador (reinicia resultados)
+  //  DESPLAZA ARRIBA cuando cambian page o el buscador
   useScrollToTopOn(page, qDebounced)
 
-  // debounce 300ms
+  // debounce 300ms en busqueda
   useEffect(() => {
     const t = setTimeout(() => setQDebounced(query.trim()), 300)
     return () => clearTimeout(t)
@@ -159,6 +161,7 @@ export default function AuthorsPage() {
         const list = Array.isArray(data?.authors) ? data.authors : []
         setAuthors(list)
         setTotal(typeof data?.total === 'number' ? data.total : list.length)
+        // pide pagina actual y "q", normalizamos forma de data.authors y data.total.
       } catch (e) {
         console.error(e)
         setAuthors([])
@@ -170,8 +173,10 @@ export default function AuthorsPage() {
   return (
     <Wrap>
       <HeaderRow>
+        {/* render del view */}
         <H1>Autores</H1>
         <SearchBox
+          // header search
           type='search'
           placeholder='Buscar autor por nombre…'
           value={query}
@@ -181,11 +186,13 @@ export default function AuthorsPage() {
       </HeaderRow>
 
       <Sub>
+        {/* subtitulo informativo */}
         {total} autores · Mostrando {(page - 1) * limit + 1}–
         {(page - 1) * limit + authors.length}
       </Sub>
 
       {authors.map((a) => {
+        // mapeo de cada author tras busqueda.
         const photo = a.photo || 'https://via.placeholder.com/120'
         const bio = a.biography?.trim()
           ? a.biography
@@ -202,6 +209,7 @@ export default function AuthorsPage() {
             </div>
 
             <Shelf>
+              {/* estante encargado de mostrar los libros del autor */}
               <ShelfHeader>Libros de {a.name}</ShelfHeader>
               <Strip>
                 {books.length === 0 ? (

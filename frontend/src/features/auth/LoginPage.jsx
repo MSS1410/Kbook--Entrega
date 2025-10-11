@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import useAuth from '../../hooks/useAuth'
 
-/* ===== Estilos ===== */
+/*  Estilos  */
 const Container = styled.div`
   display: flex;
   justify-content: center;
@@ -105,14 +105,14 @@ const Hint = styled.p`
   margin-top: -4px;
 `
 
-/* ===== Utiles locales ===== */
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
+/*  local util   */
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/ // validacion basik
+// pantalla combinada login/ registro. layout de 2 columnas Reutilizable.
 export default function LoginPage({ initialMode = 'login' }) {
-  const [mode, setMode] = useState(initialMode) // 'login' | 'register'
+  const [mode, setMode] = useState(initialMode) // login | register, para dinamic form
   const isLogin = mode === 'login'
   const navigate = useNavigate()
-  const { login, register } = useAuth()
+  const { login, register } = useAuth() // funciones contexto
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -126,6 +126,7 @@ export default function LoginPage({ initialMode = 'login' }) {
   const [confirm, setConfirm] = useState('')
 
   const canSubmit = useMemo(() => {
+    // segun el modo se habilita boton que pertoque
     if (loading) return false
     if (isLogin) {
       return emailRegex.test(email) && password.length >= 6
@@ -142,14 +143,17 @@ export default function LoginPage({ initialMode = 'login' }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!canSubmit) return
+
     setError(null)
     setLoading(true)
     try {
       if (isLogin) {
         const user = await login({ email: email.trim(), password })
+        // login
         if (user?.role === 'admin' || user?.isAdmin) navigate('/admin')
         else navigate('/')
       } else {
+        // registro
         await register({ name: name.trim(), email: email.trim(), password })
         // Mostrar aviso en ProfilePage
         try {
@@ -176,7 +180,7 @@ export default function LoginPage({ initialMode = 'login' }) {
     <Container>
       <Card>
         <TwoCol>
-          {/* IZQ: formulario dinámico */}
+          {/* IZQ: form dinamico */}
           <Left>
             <Title>{isLogin ? 'Iniciar sesión' : 'Crear cuenta'}</Title>
             <Sub>
@@ -268,7 +272,7 @@ export default function LoginPage({ initialMode = 'login' }) {
             </Form>
           </Left>
 
-          {/* DER: CTA que alterna el modo */}
+          {/* DER: seccion permite alternar accion */}
           <Right>
             <h3 style={{ margin: 0 }}>
               {isLogin ? '¿Aún no tienes cuenta?' : '¿Ya tienes cuenta?'}

@@ -1,4 +1,3 @@
-// frontend/src/features/Books/SingularBook/components/PurchaseActions.jsx
 import React from 'react'
 import styled from 'styled-components'
 
@@ -23,7 +22,7 @@ const Btn = styled.button`
     flex: 1 1 100%;
   }
 `
-
+// botones compra
 export default function PurchaseActions({
   selected,
   adding,

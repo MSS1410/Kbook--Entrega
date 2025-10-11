@@ -7,12 +7,16 @@ const Card = styled.div`
   background: ${({ theme }) => theme.colors.cardBg};
   min-width: 0;
 `
+// contenedro base
+
 const Block = styled(Card)`
   padding: 16px;
   display: grid;
   gap: 10px;
   min-width: 0;
 `
+
+// patron de campo y etiquta
 const Field = styled.label`
   display: grid;
   gap: 6px;
@@ -27,29 +31,32 @@ const money = (n) =>
     ? n.toLocaleString(undefined, { style: 'currency', currency: 'EUR' })
     : '—'
 
+// extrae precio segun formato
 const priceFrom = (formats, t) => {
   const f = Array.isArray(formats) ? formats.find((x) => x?.type === t) : null
   return typeof f?.price === 'number' ? f.price : null
 }
 
 export default function BookFormFields({
-  book,
-  model,
-  setModel,
-  editing,
-  authors
+  book, // libro fuente
+  model, // estado editable colando desde book
+  setModel, // setter del modelo
+  editing, // flag de edivion o lectura
+  authors // lista de authors by select
 }) {
+  // muestra precios en modo lectura
   const priceLabel = (b, t) => money(priceFrom(b?.formats, t))
   const authorName =
     typeof book.author === 'object'
       ? book.author?.name || '—'
       : authors.find((a) => String(a._id) === String(book.author))?.name ||
         book.author ||
-        '—'
+        '—' // resuelve el nombre cuando book.author es id String
 
   return (
     <Block>
       <Field>
+        {/* titulo libro */}
         <FieldLabel>Título</FieldLabel>
         {editing ? (
           <input
@@ -68,6 +75,7 @@ export default function BookFormFields({
       </Field>
 
       <Field>
+        {/* section autor */}
         <FieldLabel>Autor</FieldLabel>
         {editing ? (
           <select
@@ -93,7 +101,7 @@ export default function BookFormFields({
           <div>{authorName}</div>
         )}
       </Field>
-
+      {/* cateogria elegible */}
       <Field>
         <FieldLabel>Categoría</FieldLabel>
         {editing ? (
@@ -135,6 +143,7 @@ export default function BookFormFields({
           gap: 8
         }}
       >
+        {/* precios by format */}
         <Field>
           <FieldLabel>Precio blanda</FieldLabel>
           {editing ? (
@@ -201,7 +210,7 @@ export default function BookFormFields({
           )}
         </Field>
       </div>
-
+      {/* sect synopsis */}
       <Field>
         <FieldLabel>Sinopsis</FieldLabel>
         {editing ? (

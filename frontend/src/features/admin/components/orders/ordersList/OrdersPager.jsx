@@ -1,4 +1,3 @@
-// frontend/src/admin/pages/orders/OrdersPager.jsx
 import React from 'react'
 import styled from 'styled-components'
 import Button from '../../Button.jsx'
@@ -12,6 +11,7 @@ const Pager = styled.div`
 `
 
 export default function OrdersPager({ page, totalPages, onPrev, onNext }) {
+  // EZ control pag
   return (
     <Pager>
       <Button onClick={onPrev} disabled={page <= 1}>

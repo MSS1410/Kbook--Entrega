@@ -1,4 +1,3 @@
-// frontend/src/features/Books/SingularBook/components/FormatsPicker.jsx
 import React from 'react'
 import styled from 'styled-components'
 
@@ -32,7 +31,7 @@ const Price = styled.p`
   margin: 0;
   font-weight: 700;
 `
-
+// grid fluido, card.active dibuja focus en el seleccionado. mostramos formastos
 export default function FormatsPicker({ formats = [], selected, onSelect }) {
   return (
     <Grid>

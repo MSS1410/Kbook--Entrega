@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { Upload } from 'lucide-react'
 import { absUrl } from '../../../../utils/absUrl'
 
-// placeholder 1x1 transparente (seguro)
+// placeholder 1x1 transparente
 import { AVATAR_PLACEHOLDER } from '../../../../constants/media'
 
 const Card = styled.div`
@@ -28,11 +28,11 @@ const AvatarBox = styled.div`
   border-radius: 9999px;
   background: #e5e7eb;
   overflow: hidden;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08), inset 0 0 0 6px #fff;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08), inset 0 0 0 6px #fff; /* ← estilo suave */
   img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: cover; /* ← recorte centrado */
     display: block;
   }
 `
@@ -51,7 +51,7 @@ const FileButton = styled.label`
     filter: brightness(0.98);
   }
   input {
-    display: none;
+    display: none; /* ← input escondido, clic en label */
   }
 `
 const Muted = styled.small`
@@ -61,10 +61,11 @@ const Muted = styled.small`
 export default function ProfileAvatarSection({
   editing,
   name,
-  avatarUrl,
-  previewUrl,
-  onPickAvatar
+  avatarUrl, // URL del backend
+  previewUrl, // URL local URL.createObjectURL
+  onPickAvatar // handler para input file
 }) {
+  // prioridad -- preview local
   const src =
     previewUrl || (avatarUrl ? absUrl(avatarUrl) : '') || AVATAR_PLACEHOLDER
 
@@ -73,7 +74,7 @@ export default function ProfileAvatarSection({
       <SectionTitle>Foto de perfil</SectionTitle>
       <AvatarShell>
         <AvatarBox>
-          <img src={src} alt={name || 'Avatar'} />
+          <img src={src} alt={name || 'Avatar'} />{' '}
         </AvatarBox>
       </AvatarShell>
 
@@ -82,11 +83,12 @@ export default function ProfileAvatarSection({
           title='Seleccionar imagen'
           style={{
             opacity: editing ? 1 : 0.6,
-            pointerEvents: editing ? 'auto' : 'none'
+            pointerEvents: editing ? 'auto' : 'none' // no edit interaction block
           }}
         >
           <Upload size={16} /> Subir imagen desde tu equipo
-          <input type='file' accept='image/*' onChange={onPickAvatar} />
+          {/* dispara preview con setNewAvatar */}
+          <input type='file' accept='image/*' onChange={onPickAvatar} />{' '}
         </FileButton>
         <div style={{ marginTop: 6 }}>
           <Muted>JPG/PNG/WebP. Se guardará al pulsar “Guardar”.</Muted>

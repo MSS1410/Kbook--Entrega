@@ -67,7 +67,7 @@ const ErrorText = styled.div`
 const Muted = styled.small`
   color: #64748b;
 `
-
+// edita nombre, email, descripcion, y pwd
 export default function PersonalSection() {
   const { user, setUser } = useAuth()
   const [form, setForm] = useState({
@@ -77,24 +77,29 @@ export default function PersonalSection() {
     pwCurrent: '',
     pwNext: ''
   })
+  //estados
   const [edit, setEdit] = useState(false)
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState({})
   const [pwMsg, setPwMsg] = useState('')
 
   const validate = () => {
+    // revisa nombre/email, length descri, combis de pwd
     const e = {}
     if (!form.name.trim()) e.name = 'El nombre es obligatorio.'
     if (form.description.length > 500) e.description = 'Máx. 500 caracteres.'
     if (!form.email.trim()) {
       e.email = 'El email es obligatorio.'
     } else {
+      // revision email
       const basicEmail = /.+@.+\..+/
       if (!basicEmail.test(form.email.trim())) e.email = 'Email no válido.'
     }
+    // revision comparacion pwrd
     if ((form.pwCurrent && !form.pwNext) || (!form.pwCurrent && form.pwNext)) {
       e.password = 'Completa ambas contraseñas para actualizar.'
     }
+    // requisito
     if (form.pwNext && form.pwNext.length < 6) {
       e.password = 'La nueva contraseña debe tener al menos 6 caracteres.'
     }
@@ -107,7 +112,7 @@ export default function PersonalSection() {
     if (!validate()) return
     setSaving(true)
 
-    // 1) Actualizar nombre/email/descripcion
+    // 1 PUT nombre/email/descripcion
     try {
       const res = await api.put(
         '/api/users/profile',
@@ -119,17 +124,17 @@ export default function PersonalSection() {
         { headers: { 'Content-Type': 'application/json' } }
       )
       const updated = res.data?.user || res.data
+      // actualiza context con setuSER, RESETEA ESTADOS y msg
       if (updated) setUser(updated)
     } catch (err) {
       const msg =
-        err?.response?.data?.message ||
-        'Error guardando datos personales (perfil).'
+        err?.response?.data?.message || 'Error guardando datos personales.'
       alert(msg)
       setSaving(false)
       return
     }
 
-    // 2) Cambiar contraseña (opcional)
+    // 2 PATCH PWD
     if (form.pwCurrent || form.pwNext) {
       try {
         await api.patch(
@@ -157,7 +162,7 @@ export default function PersonalSection() {
     <Card>
       <SectionTitle>Información personal</SectionTitle>
 
-      {/* Uploader único (incluye preview, cambiar y quitar foto) */}
+      {/* Uploader unico  preview, cambiar y quitar foto */}
       <AvatarUploader />
 
       <Field>
@@ -169,7 +174,7 @@ export default function PersonalSection() {
         />
         {errors.name && <ErrorText>{errors.name}</ErrorText>}
       </Field>
-
+      {/* email */}
       <Field>
         <Label>Email</Label>
         <Input
@@ -180,7 +185,7 @@ export default function PersonalSection() {
         />
         {errors.email && <ErrorText>{errors.email}</ErrorText>}
       </Field>
-
+      {/* descrip */}
       <Field>
         <Label>Descripción</Label>
         <Textarea
@@ -194,7 +199,7 @@ export default function PersonalSection() {
         {errors.description && <ErrorText>{errors.description}</ErrorText>}
       </Field>
 
-      {/* Password (opcional) */}
+      {/* Password  */}
       <div
         style={{
           opacity: edit ? 1 : 0.6,
@@ -230,6 +235,7 @@ export default function PersonalSection() {
 
       <Row>
         {!edit ? (
+          // habilita edicion
           <Button type='button' onClick={() => setEdit(true)}>
             Editar
           </Button>
@@ -238,6 +244,12 @@ export default function PersonalSection() {
             <Button type='button' onClick={save} disabled={saving}>
               {saving ? 'Guardando…' : 'Guardar'}
             </Button>
+            {/* saved and act */}
+            {/* gh but, boton cancel, 
+            - restaura form con valores act del usuario
+            - limpia errores setErrors{} y el mensaje pwd
+            Cierra del modo edicicion setEdit[false]
+            -  */}
             <GhostButton
               type='button'
               onClick={() => {

@@ -1,4 +1,3 @@
-// components/ReviewCard.jsx
 import React from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
@@ -14,7 +13,7 @@ const Card = styled.article`
 `
 const Row = styled.div`
   display: grid;
-  grid-template-columns: 40px 1fr;
+  grid-template-columns: 40px 1fr; // avatar + datos
   gap: 10px;
   align-items: center;
 `
@@ -65,11 +64,11 @@ export default function ReviewCard({ r, getUrl, placeholder }) {
     <Card>
       <Row>
         <Avatar
-          src={getUrl(r.user?.avatar) || placeholder}
+          src={getUrl(r.user?.avatar) || placeholder} // normalizo url o placholder
           alt={r.user?.name || 'Usuario'}
           onError={(e) => {
             if (e.currentTarget.src !== placeholder) {
-              e.currentTarget.src = placeholder
+              e.currentTarget.src = placeholder // doble fall
             }
           }}
         />

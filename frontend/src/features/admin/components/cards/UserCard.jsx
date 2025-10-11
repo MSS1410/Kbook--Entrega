@@ -15,12 +15,14 @@ const Body = styled.div`
   gap: 12px;
   align-items: center;
 `
+// avatar y datos
 const Name = styled.div`
   font-weight: 600;
   white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
+  text-overflow: ellipsis; // evita saltos
+  overflow: hidden; // corta nombres
 `
+
 const Small = styled.div`
   font-size: 12px;
   color: #64748b;
@@ -36,12 +38,13 @@ export default function UserCard({ u }) {
     <Card>
       <Body>
         <Avatar
-          src={avatarSrc(u?.avatar?.url || u?.avatar)}
-          name={u?.name || u?.fullName || u?.email}
+          src={avatarSrc(u?.avatar?.url || u?.avatar)} // soporta {url } o string
+          name={u?.name || u?.fullName || u?.email} // genera inicial si no hay imgen
         />
         <div style={{ minWidth: 0 }}>
           <Name>{u?.name || u?.fullName || 'Usuario'}</Name>
           <Small>{u?.email}</Small>
+          {/* fecha de alta IMP  */}
           <Small>Alta: {fmtDate(u?.createdAt)}</Small>
         </div>
       </Body>

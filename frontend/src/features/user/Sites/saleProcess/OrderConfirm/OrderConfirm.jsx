@@ -12,7 +12,7 @@ import {
   isValidCVC
 } from '../../../../../utils/validators'
 
-// Presentacionales
+// Components
 import ShippingSection from './orderComponents/ShippingSection'
 import PaymentSection from './orderComponents/PaymentSection'
 import ReviewAndTotals from './orderComponents/ReviewAndTotals'
@@ -34,26 +34,28 @@ const Title = styled.h1`
   margin: 0;
 `
 
-// Helpers locales
-const digitsOnly = (v) => (v || '').replace(/\D+/g, '')
+// Helpers
+const digitsOnly = (v) => (v || '').replace(/\D+/g, '') // Deja solo dígitos.
+
 const formatCardNumber = (raw) =>
   digitsOnly(raw)
     .slice(0, 19)
     .replace(/(\d{4})(?=\d)/g, '$1 ')
     .trim()
-const maskLast4 = (last4 = '') =>
-  last4 ? `•••• •••• •••• ${String(last4).slice(-4)}` : '—'
+const maskLast4 = (
+  last4 = '' // Muestra “•••• •••• •••• 1234”
+) => (last4 ? `•••• •••• •••• ${String(last4).slice(-4)}` : '—')
 
 export default function OrderConfirmPage() {
-  const { user, setUser } = useAuth()
-  const { state } = useLocation()
+  const { user, setUser } = useAuth() // perfil del usuario
+  const { state } = useLocation() // recoge datos pasados por checkout
 
-  const order = state?.order || null
+  const order = state?.order || null // pedido creado o pagado recien
   const shippingOption = state?.shippingOption || null
 
-  // Prefill robusto desde /profile si faltan campos
+  // rellenado  desde /profile si faltan campos
   useEffect(() => {
-    const needsProfile =
+    const needsProfile = // indica si recargar profile
       !user ||
       !user.shipping ||
       !user.payment ||
@@ -62,8 +64,8 @@ export default function OrderConfirmPage() {
     if (needsProfile) {
       ;(async () => {
         try {
-          const { data } = await api.get('/api/users/profile')
-          if (data?.user) setUser(data.user)
+          const { data } = await api.get('/api/users/profile') // carga de perfil actualizado
+          if (data?.user) setUser(data.user) // rellena contexto d usuario
         } catch (_) {}
       })()
     }
@@ -87,11 +89,12 @@ export default function OrderConfirmPage() {
     )
   }
 
-  // ===== Estado local edición puntual (no persiste en backend) =====
-  const profileShip = user?.shipping || {}
-  const orderShip = order?.shippingAddress || {}
-  const [useAltShipping, setUseAltShipping] = useState(false)
+  //  Estado local por si quiere re editr campos, no backend
+  const profileShip = user?.shipping || {} // envio segun perfil
+  const orderShip = order?.shippingAddress || {} // envio segun pedido generada
+  const [useAltShipping, setUseAltShipping] = useState(false) // otra direccion, local
   const [shipForm, setShipForm] = useState({
+    // form de envio a mostrar si actualiza direccion
     fullName: user?.name || '',
     address: profileShip.address || orderShip.address || '',
     city: profileShip.city || orderShip.city || '',
@@ -101,8 +104,10 @@ export default function OrderConfirmPage() {
   const [shipErrors, setShipErrors] = useState({})
 
   useEffect(() => {
-    if (useAltShipping) return
+    //
+    if (useAltShipping) return // si usa otra direccin, no rehidrato
     setShipForm((prev) => ({
+      // sin editado, reflejar pedido y orden actuales
       ...prev,
       fullName: user?.name || prev.fullName || '',
       address: profileShip.address || orderShip.address || '',
@@ -110,10 +115,10 @@ export default function OrderConfirmPage() {
       postalCode: profileShip.postalCode || orderShip.postalCode || '',
       country: profileShip.country || orderShip.country || ''
     }))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, order, useAltShipping])
 
   const validateShipping = () => {
+    // validacion del form por edicion
     if (!useAltShipping) return true
     const e = {}
     if (!shipForm.fullName.trim()) e.fullName = 'Nombre obligatorio.'
@@ -125,18 +130,19 @@ export default function OrderConfirmPage() {
     return Object.keys(e).length === 0
   }
 
-  const [useAltPayment, setUseAltPayment] = useState(false)
+  const [useAltPayment, setUseAltPayment] = useState(false) // usar otro metodo de pago
   const [payForm, setPayForm] = useState({
+    // form editable
     holderName: user?.payment?.cardHolderName || user?.name || '',
     cardNumber: '',
     expiry: '',
     cvc: ''
   })
   useEffect(() => {
-    if (useAltPayment) return
+    if (useAltPayment) return // sin edicion
     setPayForm((f) => ({
       ...f,
-      holderName: user?.payment?.cardHolderName || user?.name || ''
+      holderName: user?.payment?.cardHolderName || user?.name || '' // mantenemos sincro con perfil
     }))
   }, [user, useAltPayment])
 
@@ -147,6 +153,7 @@ export default function OrderConfirmPage() {
   const [payErrors, setPayErrors] = useState({})
 
   const validatePayment = () => {
+    // validacion required solo si he editado
     if (!useAltPayment) return true
     const e = {}
     if (!payForm.holderName.trim()) e.holderName = 'Titular obligatorio.'
@@ -163,36 +170,38 @@ export default function OrderConfirmPage() {
   }
 
   // Datos de entrega / totales
-  const items = Array.isArray(order.items) ? order.items : []
-  const shippingKey = (shippingOption && shippingOption.key) || 'standard'
-  const shippingLabel =
+  const items = Array.isArray(order.items) ? order.items : [] // ejemplares comprados
+  const shippingKey = (shippingOption && shippingOption.key) || 'standard' // key de envio
+  const shippingLabel = // etiqueta info
     shippingOption?.label ||
     (shippingKey === 'fast'
       ? 'Entrega rápida (2 días laborables)'
       : 'Entrega estándar (5-6 días laborables)')
-  const baseDate = new Date()
-  const estimatedWindow =
+  const baseDate = new Date() //  ahora para calculo de entrega
+  const estimatedWindow = // fecha, segun elección
     shippingKey === 'fast'
       ? format(addBusinessDays(baseDate, 2), 'dd MMM yyyy')
       : `${format(addBusinessDays(baseDate, 5), 'dd MMM yyyy')} - ${format(
           addBusinessDays(baseDate, 6),
           'dd MMM yyyy'
         )}`
+
   const deliveryPhrase =
+    // segun elección plural o singular.
     (items.length > 1 ? 'Sus ejemplares llegarán ' : 'Su ejemplar llegará ') +
     estimatedWindow
 
   const subtotal = items.reduce((s, it) => s + it.price * it.quantity, 0)
-  const shippingCost = Number(shippingOption?.extra || 0)
-  const total = subtotal + shippingCost
+  const shippingCost = Number(shippingOption?.extra || 0) // coste add sobre el envio
+  const total = subtotal + shippingCost // final suma
 
-  const confirmLocalChoices = () => {
-    const okShip = validateShipping()
-    const okPay = validatePayment()
-    if (okShip && okPay) {
-      alert('Datos verificados. (Nota: esto no modifica tu perfil ni la orden)')
-    }
-  }
+  // const confirmLocalChoices = () => {
+  //   const okShip = validateShipping()
+  //   const okPay = validatePayment()
+  //   if (okShip && okPay) {
+  //     alert('Datos verificados. (Nota: esto no modifica tu perfil ni la orden)')
+  //   }
+  // }
 
   return (
     <Container>
@@ -200,11 +209,11 @@ export default function OrderConfirmPage() {
         ¡Gracias por su compra, {shipForm.fullName || user?.name || 'lector/a'}!
       </Title>
 
-      {/* Envío y Pago (editables localmente) */}
+      {/* Envio y pago con edidcion */}
       <ShippingSection
-        useAltShipping={useAltShipping}
-        onToggle={setUseAltShipping}
-        form={shipForm}
+        useAltShipping={useAltShipping} // checkbox usar otra
+        onToggle={setUseAltShipping} // seter checkbox
+        form={shipForm} //edicion o valores q tenemos
         errors={shipErrors}
         onChange={(key, val) => setShipForm((f) => ({ ...f, [key]: val }))}
       />

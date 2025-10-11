@@ -3,18 +3,19 @@ import styled from 'styled-components'
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import { Link } from 'react-router-dom'
 
+/*  estilos base  */
 const Wrap = styled.section`
   position: relative;
   border: 1px solid ${({ theme }) => theme.colors?.primary || '#8b5cf6'};
   border-radius: ${({ theme }) => theme.radii.md};
   padding: ${({ theme }) => theme.spacing.md};
   background: ${({ theme }) => theme.colors.surface};
-  overflow: hidden;
+  overflow: hidden; /* oculta el scroll horizontal nativo */
 `
 
 const TitleBar = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; /* título a izq / “ver todos” a dcha */
   align-items: baseline;
   margin-bottom: ${({ theme }) => theme.spacing.sm};
 `
@@ -37,16 +38,17 @@ const Outer = styled.div`
   position: relative;
 `
 const Track = styled.div`
-  display: flex;
+  display: flex; /* items en fila */
   gap: ${(p) => p.$gap}px;
   align-items: stretch;
-  scroll-behavior: smooth;
+  scroll-behavior: smooth; /* suaviza desplazamiento de scrollBy */
 `
 
+/* TARJETa esta linkeada con un Link para cada item del carro */
 const Card = styled(Link)`
-  flex: 0 0 auto;
-  width: ${(p) => p.$w}px;
-  height: ${(p) => p.$h}px;
+  flex: 0 0 auto; /* no se encoge, tamaño fijo */
+  width: ${(p) => p.$w}px; /* ancho configurable */
+  height: ${(p) => p.$h}px; /* alto configurable */
   border-radius: 10px;
   overflow: hidden;
   background: #fff;
@@ -68,6 +70,7 @@ const Card = styled(Link)`
   }
 `
 
+/* Flechas laterales // ocultas en phone*/
 const Arrow = styled.button`
   position: absolute;
   top: 50%;
@@ -84,16 +87,20 @@ const Arrow = styled.button`
   }
 `
 
+/*  componente  */
 export default function AuthorBooksCarousel({
   title,
-  items,
+  items, // [{ id, link, component }] — component suele ser img
   viewAllLink,
   itemWidth = 128,
   itemHeight = 192,
   itemGap = 8
 }) {
+  // referencia al contenedor con overflow
   const outerRef = useRef(null)
+  // para medir hasta donde scroll width
   const trackRef = useRef(null)
+  // render de flechas
   const [showArrows, setShowArrows] = useState(false)
 
   useEffect(() => {
@@ -101,21 +108,23 @@ export default function AuthorBooksCarousel({
       const outer = outerRef.current
       const track = trackRef.current
       if (!outer || !track) return
-      // Flechas solo si hay más de 1 y hay overflow
+      // Mostrar flechas solo si hay +1 item , overflow horizontal
       setShowArrows(items.length > 1 && track.scrollWidth > outer.clientWidth)
     }
     calc()
-    window.addEventListener('resize', calc)
+    window.addEventListener('resize', calc) // recalc en resize
     return () => window.removeEventListener('resize', calc)
-  }, [items])
+  }, [items]) // producira el calculo cuando cambia la lista
 
+  // Desplaza el carrusel un paso al ancho visible
   const scrollBy = (dir) => {
     const outer = outerRef.current
     if (!outer) return
-    const step = outer.clientWidth * 0.85
+    const step = outer.clientWidth * 0.85 //mas o menos 85% del carrusel
     outer.scrollBy({ left: dir * step, behavior: 'smooth' })
   }
 
+  // “ver todos con mas de un item
   const showViewAll = Boolean(viewAllLink) && items.length > 1
 
   return (
@@ -140,6 +149,7 @@ export default function AuthorBooksCarousel({
         <Track ref={trackRef} $gap={itemGap}>
           {items.map((it) => (
             <Card key={it.id} to={it.link} $w={itemWidth} $h={itemHeight}>
+              {/*  delegamos present a it.componente , sera portada etc*/}
               {it.component}
             </Card>
           ))}

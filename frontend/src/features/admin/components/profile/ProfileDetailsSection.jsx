@@ -50,17 +50,18 @@ const Muted = styled.small`
 
 export default function ProfileDetailsSection({
   editing,
-  current,
-  form,
+  current, // act data
+  form, // buffer edit
   onChangeForm,
-  pw,
+  pw, // { current, next }
   onChangePw,
-  showCurrent,
+  showCurrent, // ojos
   showNext,
-  setShowCurrent,
+  setShowCurrent, // ← setters
   setShowNext,
   pwMsg
 }) {
+  // bloqueo grupo de pwrd cuando no se este en edit
   const lockStyle = {
     opacity: editing ? 1 : 0.6,
     pointerEvents: editing ? 'auto' : 'none'
@@ -74,7 +75,8 @@ export default function ProfileDetailsSection({
         <Label>Nombre</Label>
         <Input
           disabled={!editing}
-          placeholder={current.name || '—'}
+          placeholder={current.name || '—'} // actual si empty
+          // binging condicionado
           value={editing ? form.name : current.name}
           onChange={onChangeForm('name')}
         />
@@ -91,18 +93,20 @@ export default function ProfileDetailsSection({
         />
       </Field>
 
+      {/* GRUPO CAMBIO CONTRA*/}
       <div style={{ display: 'grid', gap: 10, ...lockStyle }}>
         <Field>
           <Label>Contraseña actual</Label>
           <div style={{ position: 'relative' }}>
             <Input
-              type={showCurrent ? 'text' : 'password'}
+              type={showCurrent ? 'text' : 'password'} //ojos
               placeholder='••••••••'
               value={pw.current}
               onChange={onChangePw('current')}
             />
             <button
               type='button'
+              // togglingg
               onClick={() => setShowCurrent((v) => !v)}
               title={showCurrent ? 'Ocultar' : 'Mostrar'}
               style={{
@@ -119,7 +123,6 @@ export default function ProfileDetailsSection({
             </button>
           </div>
         </Field>
-
         <Field>
           <Label>Nueva contraseña</Label>
           <div style={{ position: 'relative' }}>
@@ -131,6 +134,7 @@ export default function ProfileDetailsSection({
             />
             <button
               type='button'
+              // same toggling
               onClick={() => setShowNext((v) => !v)}
               title={showNext ? 'Ocultar' : 'Mostrar'}
               style={{
@@ -147,7 +151,6 @@ export default function ProfileDetailsSection({
             </button>
           </div>
         </Field>
-
         {pwMsg ? <Muted>{pwMsg}</Muted> : null}
       </div>
 

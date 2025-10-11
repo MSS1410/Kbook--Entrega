@@ -38,6 +38,8 @@ export default function AuthorFormFields({ author, model, setModel, editing }) {
             }}
           />
         ) : (
+          // modo lectura
+
           <div>{author.name || '—'}</div>
         )}
       </Field>
@@ -59,6 +61,7 @@ export default function AuthorFormFields({ author, model, setModel, editing }) {
             }}
           />
         ) : (
+          // modo lectura
           <div>{author.biography || '—'}</div>
         )}
       </Field>

@@ -3,10 +3,10 @@ import styled from 'styled-components'
 import { BookOpen } from 'lucide-react'
 
 const Wrap = styled.footer`
-  border-top: 1px solid #e2e8f0;
-  margin-top: 40px;
-  background: rgb(90, 24, 133);
-  color: #e8e8ea;
+  border-top: 1px solid #e2e8f0; // separa superior
+  margin-top: 40px; // airea
+  background: rgb(90, 24, 133); // morado kbook
+  color: #e8e8ea; // claro sobre oscuro
 `
 const Container = styled.div`
   max-width: 1120px;
@@ -24,12 +24,12 @@ const Brand = styled.div`
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-weight: 700;
+  font-weight: 700; // marca mas fuerte
 `
 const MutedRight = styled.div`
-  color: #00b67a;
+  color: #00b67a; // verde
   font-size: 14px;
-  text-align: right;
+  text-align: right; // alinea derecha en desk con 3a columna
 `
 
 export default function AdminFooter() {
@@ -38,6 +38,7 @@ export default function AdminFooter() {
       <Container>
         <div>
           <Brand>
+            {/* logo y titulo */}
             <BookOpen size={18} /> KBOOK Admin
           </Brand>
           <div style={{ marginTop: 8, color: '#00b67a', fontSize: 14 }}>
@@ -45,7 +46,7 @@ export default function AdminFooter() {
             reseñas.
           </div>
         </div>
-        <div />
+        <div /> {/* centro empty equilibro */}
         <MutedRight>
           © {new Date().getFullYear()} KBOOK. Todos los derechos reservados.
         </MutedRight>

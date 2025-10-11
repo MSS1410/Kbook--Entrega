@@ -1,4 +1,3 @@
-// components/ContactHeader.jsx
 import React from 'react'
 import styled from 'styled-components'
 
@@ -39,7 +38,8 @@ const ToggleBtn = styled.button`
     transform: translateY(1px);
   }
 `
-
+// muestra titulo, lead con texto descriptivo
+// boton para open close form
 export default function ContactHeader({ open, onToggle }) {
   return (
     <Header>

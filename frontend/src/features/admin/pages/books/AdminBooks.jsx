@@ -35,26 +35,39 @@ const HeadRow = styled.div`
   align-items: center;
   gap: 12px;
   margin-bottom: 16px;
+  flex-wrap: wrap; /*  phone, permite que el toolbar baje a otra linea */
 `
+
 const GridWrap = styled.div`
   display: grid;
-  gap: 16px;
+  gap: 12px;
   align-items: stretch;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  @media (min-width: 900px) {
+  grid-template-columns: repeat(2, minmax(0, 1fr)); /* movil 2 col */
+  @media (min-width: 480px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr)); /* 3 de ancho en movil */
+  }
+  @media (min-width: 700px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  @media (min-width: 1024px) {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 `
+
 const ListWrap = styled.div`
   display: grid;
   gap: 12px;
+  /* “solo grid” movil y tablet bajo 1024  */
+  @media (max-width: 1023px) {
+    display: none;
+  }
 `
 
 export default function AdminBooks() {
-  const [books, setBooks] = useState([])
-  const [authors, setAuthors] = useState([])
-  const [q, setQ] = useState('')
-  const [category, setCategory] = useState('')
+  const [books, setBooks] = useState([]) // fuente local de libros
+  const [authors, setAuthors] = useState([]) // need para combo autor
+  const [q, setQ] = useState('') // busuqeda por titulo
+  const [category, setCategory] = useState('') // filtrado por categoria
   const [view, setView] = useState('grid')
   const [loading, setLoading] = useState(true)
 
@@ -73,10 +86,10 @@ export default function AdminBooks() {
     priceSoft: '',
     priceHard: '',
     priceEbook: ''
-  })
+  }) //modelo controlado
   const [savingCreate, setSavingCreate] = useState(false)
-  const [coverFile, setCoverFile] = useState(null)
-  const [coverPreview, setCoverPreview] = useState('')
+  const [coverFile, setCoverFile] = useState(null) // archivo de portada
+  const [coverPreview, setCoverPreview] = useState('') // preview
 
   useEffect(() => {
     ;(async () => {
@@ -91,16 +104,18 @@ export default function AdminBooks() {
       } finally {
         setLoading(false)
       }
-    })()
+    })() // carga inicial
   }, [])
 
   const filtered = useMemo(() => {
     let arr = [...books]
     if (q.trim()) {
       const s = q.trim().toLowerCase()
+      // busqueda por titulo
       arr = arr.filter((b) => (b.title || '').toLowerCase().includes(s))
     }
     if (category)
+      //filtrado categoria
       arr = arr.filter((b) => String(b.category) === String(category))
     return arr
   }, [books, q, category])
@@ -111,18 +126,20 @@ export default function AdminBooks() {
   }, [totalPages])
   const pageItems = useMemo(() => {
     const start = (page - 1) * pageSize
+    // ventana paginada
     return filtered.slice(start, start + pageSize)
   }, [filtered, page])
 
   const onDelete = async (id) => {
     if (!confirm('¿Eliminar este libro?')) return
-    await deleteBook(id)
-    const all = await listBooksAll()
+    await deleteBook(id) //  borra en backend
+    const all = await listBooksAll() // refetch para consistencia
     setBooks(all)
   }
 
   const openCreateModal = () => {
     setCreating({
+      // limpia form
       title: '',
       author: '',
       category: '',
@@ -140,6 +157,7 @@ export default function AdminBooks() {
 
   const saveCreate = async () => {
     const required = [
+      // validacion de campos
       'title',
       'author',
       'category',
@@ -178,8 +196,9 @@ export default function AdminBooks() {
         coverImage: creating.coverImage || '',
         formats
       }
+      // crea el libro
       const created = await createBook(payload)
-
+      // si hay archivo, lo sube como portada
       if (created?._id && coverFile) {
         try {
           await uploadBookCover(created._id, coverFile)
@@ -193,6 +212,7 @@ export default function AdminBooks() {
 
       setOpenCreate(false)
       const all = await listBooksAll()
+      // refresj listado
       setBooks(all)
     } finally {
       setSavingCreate(false)
@@ -211,11 +231,13 @@ export default function AdminBooks() {
           setQ={(v) => {
             setQ(v)
             setPage(1)
+            // resset de pagina al filtrar
           }}
           category={category}
           setCategory={(v) => {
             setCategory(v)
             setPage(1)
+            // reset de pagina al cambiar de categoria
           }}
           categoriesEnum={categoriesEnum}
           view={view}
@@ -233,6 +255,7 @@ export default function AdminBooks() {
           <GridWrap>
             {pageItems.map((b) => (
               <BookCard key={b._id} b={b} onDelete={onDelete} />
+              // tarjeta compacta
             ))}
           </GridWrap>
           <Pagination
@@ -246,7 +269,7 @@ export default function AdminBooks() {
         <>
           <ListWrap>
             {pageItems.map((b) => (
-              <BookRow key={b._id} b={b} onDelete={onDelete} />
+              <BookRow key={b._id} b={b} onDelete={onDelete} /> // fila con sinopsis cortada si hace falta
             ))}
           </ListWrap>
           <Pagination
@@ -272,6 +295,7 @@ export default function AdminBooks() {
         authors={authors}
         categoriesEnum={categoriesEnum}
         AuthorComboComp={
+          // inyecta combo already configurado
           <AuthorCombo
             authors={authors}
             value={creating.author}

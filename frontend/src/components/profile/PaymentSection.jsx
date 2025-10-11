@@ -1,4 +1,3 @@
-// frontend/src/components/profile/PaymentSection.jsx
 import React, { useMemo, useState } from 'react'
 import styled from 'styled-components'
 import useAuth from '../../hooks/useAuth'
@@ -61,35 +60,52 @@ const ErrorText = styled.div`
   margin-top: 4px;
 `
 
-/* ===== Helpers ===== */
+/*  Helpers  */
+
 const digitsOnly = (v) => (v || '').replace(/\D+/g, '')
+// devuelve solo digitos de una chain
+// si v es null.undefined ,, evito errores = convierto a ""
+// \D = no dígit --- g = global. = Remplaza todo lo q no es digito por "" nada
+
+// para limpiar entrada del user, espacios guiones etc, para guardar klean
 
 const formatCardNumber = (raw) => {
   const d = digitsOnly(raw).slice(0, 19)
   return d.replace(/(\d{4})(?=\d)/g, '$1 ').trim()
 }
+// limpia entrada de  digitsOnly. // maximo 19 digitos,
+// inserta espacio cada digitos RegEx: / (\d{4}) (?=\d)/g
+// // // // //  (\d{4})  = captura bloques de 4 digitos
+// // // // // (?=\d) = LOOKAHEAD, exige q despues haya algun digito
+// // // // // '$1 ' :: reemplazo bloque captures + espacio [$(___))']
+// .trim quita ultimo posible space
 
 const formatExpiry = (raw) => {
-  const d = digitsOnly(raw).slice(0, 4) // MMYY
+  const d = digitsOnly(raw).slice(0, 4) // toma hasta 4 digitos, 2 mes 2 año
+
   if (!d) return ''
-  let mm = d.slice(0, 2)
-  let yy = d.slice(2)
+  let mm = d.slice(0, 2) //seprro mes
+  let yy = d.slice(2) // separo año
   if (mm.length === 2) {
     const n = parseInt(mm, 10)
     if (n === 0) mm = '01'
     else if (n > 12) mm = '12'
   }
   return yy ? `${mm}/${yy}` : mm.length === 2 ? `${mm}/` : mm
+  // guiamos al usuario si solo introduce mientras
 }
 
+// enmascaro numero tarjeta solo mostraremos  los4 ultimos digitos
 const maskLast4 = (last4) =>
   last4 ? `•••• •••• •••• ${String(last4).slice(-4)}` : ''
 
+// guarda titular, caducidad, last4 card number.
 export default function PaymentSection() {
   const { user, setUser } = useAuth()
 
-  // 🔁 Leemos SIEMPRE del objeto anidado user.payment
-  // 👇 Fallbacks: primero intentamos anidado, si no, alias planos
+  //  leo SIEMPRE del objeto anidado user.payment
+  // Fallbacks: primero intentamos anidado, , si no lo ha completado aun , alias planos
+
   const initialHolder =
     user?.payment?.cardHolderName || user?.cardHolderName || ''
 
@@ -100,8 +116,9 @@ export default function PaymentSection() {
   const initialExpiry = user?.payment?.expiry || user?.payment?.expiry || ''
 
   const [form, setForm] = useState({
+    // (holderName, cardNumber, expiry, cvc), edit, errors.
     holderName: initialHolder,
-    cardNumber: maskLast4(initialLast4), // mostramos máscara si hay last4
+    cardNumber: maskLast4(initialLast4), // mostramos oculto si hay last4
     expiry: initialExpiry,
     cvc: ''
   })
@@ -113,6 +130,7 @@ export default function PaymentSection() {
     [form.cardNumber]
   )
 
+  // Controlamos los valores que el usuario introduce en los campos de pago
   const validate = () => {
     const e = {}
 
@@ -139,7 +157,7 @@ export default function PaymentSection() {
 
   const enterEdit = () => {
     setEdit(true)
-    // Si el número está enmascarado, limpiamos para que el user escriba uno real
+    // Si el partimos con el numero ocult, limpiamos para que el user escriba uno real
     if (form.cardNumber.includes('•')) {
       setForm((f) => ({ ...f, cardNumber: '' }))
     }
@@ -152,13 +170,13 @@ export default function PaymentSection() {
         holderName: form.holderName.trim(),
         cardNumber: digitsOnly(form.cardNumber), // server solo guarda last4
         expiry: form.expiry,
-        cvc: digitsOnly(form.cvc) // no se almacena; solo validación de ejemplo
+        cvc: digitsOnly(form.cvc) // no se almacena.
       }
       const res = await api.put('/api/users/profile', payload)
-      // 🔄 Actualizamos el context con lo que el backend SÍ guarda (anidado)
+      // actualizo para que backend guarde payload completo
       setUser(res.data.user)
 
-      // Rehidratar form con máscara y valores persistidos
+      // refresh formulario con valores act
       const p = res.data.user?.payment || {}
       setForm((f) => ({
         holderName: p.cardHolderName || f.holderName,
@@ -175,8 +193,9 @@ export default function PaymentSection() {
 
   return (
     <Card>
+      {/* render form */}
       <SectionTitle>Información de pago</SectionTitle>
-
+      {/* campo nombre */}
       <Field>
         <Label htmlFor='cc-name'>Nombre titular</Label>
         <Input
@@ -190,7 +209,7 @@ export default function PaymentSection() {
         />
         {errors.holderName && <ErrorText>{errors.holderName}</ErrorText>}
       </Field>
-
+      {/* campo num trj */}
       <Field>
         <Label htmlFor='cc-number'>Número de tarjeta</Label>
         <Input
@@ -218,11 +237,11 @@ export default function PaymentSection() {
         {errors.cardNumber && <ErrorText>{errors.cardNumber}</ErrorText>}
         {!edit && initialLast4 && (
           <div style={{ color: '#666', fontSize: 12, marginTop: 4 }}>
-            Solo almacenamos los últimos 4: {initialLast4}
+            Solo almacenamos los últimos 4 digitos: {initialLast4}
           </div>
         )}
       </Field>
-
+      {/* caducity number */}
       <Field>
         <Label htmlFor='cc-exp'>Caducidad (MM/AA)</Label>
         <Input
@@ -239,7 +258,7 @@ export default function PaymentSection() {
         />
         {errors.expiry && <ErrorText>{errors.expiry}</ErrorText>}
       </Field>
-
+      {/* private cvc */}
       <Field>
         <Label htmlFor='cc-csc'>CVC</Label>
         <Input
@@ -259,7 +278,7 @@ export default function PaymentSection() {
         />
         {errors.cvc && <ErrorText>{errors.cvc}</ErrorText>}
       </Field>
-
+      {/* habilito edicion */}
       <Row>
         {!edit ? (
           <Button type='button' onClick={enterEdit}>
@@ -267,9 +286,11 @@ export default function PaymentSection() {
           </Button>
         ) : (
           <>
+            {/* permitimos save */}
             <Button type='button' onClick={save}>
               Guardar
             </Button>
+            {/* habilitado cancel */}
             <GhostButton
               type='button'
               onClick={() => {

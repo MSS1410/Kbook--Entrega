@@ -1,4 +1,3 @@
-// components/ContactForm.jsx
 import React from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
@@ -55,6 +54,8 @@ export default function ContactForm({
 }) {
   return (
     <SectionBox>
+      {/* // si no hay token , muestra aviso con enlaces login register */}
+
       {!token ? (
         <>
           <h2 style={{ margin: 0, color: 'inherit' }}>Escríbenos</h2>
@@ -66,6 +67,7 @@ export default function ContactForm({
         </>
       ) : (
         <>
+          {/* si hay token, formulario con asunto mensaje y boton enviar */}
           <h2 style={{ margin: 0, color: 'inherit' }}>Escríbenos</h2>
           <form onSubmit={onSubmit} style={{ display: 'grid', gap: 10 }}>
             <label>
@@ -97,7 +99,7 @@ export default function ContactForm({
           </form>
           <Muted style={{ fontSize: 12 }}>
             Responderemos lo antes posible. Si tu consulta está vinculada a un
-            pedido, por favor incluye el número de pedido.
+            pedido, facilite el nombre del libro adquirido o numero de pedido.
           </Muted>
         </>
       )}

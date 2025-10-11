@@ -1,4 +1,3 @@
-// frontend/src/components/CartAside.jsx
 import React from 'react'
 import styled, { keyframes } from 'styled-components'
 import { FiTrash2, FiMinus, FiPlus, FiX, FiChevronLeft } from 'react-icons/fi'
@@ -143,7 +142,7 @@ const Empty = styled.div`
   padding: ${({ theme }) => theme.spacing.lg};
   color: ${({ theme }) => theme.colors.onSurfaceVariant};
 `
-// --- Spinner ---
+//  Spinner
 const spin = keyframes`
   to { transform: rotate(360deg); }
 `
@@ -165,8 +164,9 @@ const LoadingBox = styled.div`
 `
 
 export default function CarritoAside({ onClose }) {
+  // onClose viene de layout
   const navigate = useNavigate()
-  const { cart, addOrUpdate, removeItem, loading } = useCart()
+  const { cart, addOrUpdate, removeItem, loading } = useCart() // estado y acciones del carrito
 
   const subtotal = cart.items.reduce(
     (sum, it) => sum + it.price * it.quantity,
@@ -174,12 +174,14 @@ export default function CarritoAside({ onClose }) {
   )
 
   const handleQuantityChange = (item, delta) => {
+    // modifica + - 1 cantidad
     const newQty = Math.max(1, item.quantity + delta)
     addOrUpdate({
       bookId: item.book._id,
       format: item.format,
       quantity: newQty
     })
+    // delega en hook, actualiza y persiste
   }
 
   const handleRemove = (item) => {
@@ -187,9 +189,9 @@ export default function CarritoAside({ onClose }) {
   }
 
   const handleCheckout = () => {
-    if (cart.items.length === 0) return
-    window.dispatchEvent(new Event('cart:close'))
-    navigate('/checkout')
+    if (cart.items.length === 0) return // nada si vacio
+    window.dispatchEvent(new Event('cart:close')) // cierro drawer
+    navigate('/checkout') // navegar a checkout
   }
 
   return (
@@ -197,20 +199,23 @@ export default function CarritoAside({ onClose }) {
       <Header>
         <Title>Tu carrito</Title>
         <CloseBtn onClick={onClose} aria-label='Cerrar carrito'>
+          {/* cierro drawer */}
           <FiChevronLeft />
         </CloseBtn>
       </Header>
 
       <ItemsWrapper>
-        {loading ? (
+        {loading ? ( // estado de carga
           <LoadingBox>
             <Spinner />
             Cargando carrito…
           </LoadingBox>
-        ) : !cart?.items || cart.items.length === 0 ? (
+        ) : !cart?.items || cart.items.length === 0 ? ( // empty
           <Empty>No hay productos en el carrito</Empty>
         ) : (
+          // items
           cart.items.map((it) => (
+            // key por id y formato
             <ItemCard key={`${it.book._id}-${it.format}`}>
               <Cover src={it.book.coverImage} alt={it.book.title} />
               <Info>
@@ -221,9 +226,11 @@ export default function CarritoAside({ onClose }) {
                     aria-label='disminuir'
                     onClick={() => handleQuantityChange(it, -1)}
                     disabled={it.quantity <= 1}
+                    // nunca menos de 1
                   >
                     <FiMinus />
                   </QtyButton>
+
                   <div>{it.quantity}</div>
                   <QtyButton
                     aria-label='aumentar'
@@ -233,6 +240,7 @@ export default function CarritoAside({ onClose }) {
                   </QtyButton>
                   <div style={{ marginLeft: 'auto' }}>
                     {(it.price * it.quantity).toFixed(2)} €
+                    {/* // total por item */}
                   </div>
                 </QuantityRow>
               </Info>
@@ -251,7 +259,7 @@ export default function CarritoAside({ onClose }) {
         </TotalRow>
         <CheckoutButton
           onClick={handleCheckout}
-          disabled={cart.items.length === 0}
+          disabled={cart.items.length === 0} // si cart empty desabilito
           aria-label='Continuar con la compra'
         >
           Continuar con la compra

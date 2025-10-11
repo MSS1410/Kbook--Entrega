@@ -1,13 +1,12 @@
+// frontend/src/admin/pages/users/.jsx
 import React from 'react'
 import styled from 'styled-components'
 import { Search, Grid, List } from 'lucide-react'
 import Button from '../../components/Button.jsx'
 import useScrollToTopOn from '../../../../hooks/useScrollToTopOn.js'
-import useUsersList from '../../hooks/useUsersList.js'
+import useUsersList from '../../hooks/useUsersList.js' // hook: search pag y orden
 import UserGridCard from '../../components/users/usersAdmin/UserGridCard.jsx'
 import UserListRow from '../../components/users/usersAdmin/UserListRow.jsx'
-import { listAllUsersAdmin, toggleUserBlockAdmin } from '../../api/adminApi.js'
-import { absUrl } from '../../../../utils/absUrl.js'
 
 const HeadRow = styled.div`
   display: flex;
@@ -80,7 +79,9 @@ const Pager = styled.div`
 `
 
 export default function AdminUsers() {
-  const [view, setView] = React.useState('grid') // grid | list
+  const [view, setView] = React.useState('grid') // alterno grid/list
+
+  // Hook: maneja carga, search por q, orden, pags y accion con  toggle de bloqueo
   const {
     loading,
     q,
@@ -90,9 +91,9 @@ export default function AdminUsers() {
     page,
     setPage,
     totalPages,
-    pageItems,
-    onToggleBlock
-  } = useUsersList(12)
+    pageItems, // usuarios de la página
+    onToggleBlock // callback a API -> actualiza estado global de la lista
+  } = useUsersList(12) // pagesize12
 
   useScrollToTopOn(page, q, order)
 
@@ -100,6 +101,8 @@ export default function AdminUsers() {
     <>
       <HeadRow>
         <h2 style={{ fontSize: 22 }}>Usuarios</h2>
+
+        {/* control de search , orden, grid/list */}
         <Controls>
           <div style={{ position: 'relative' }}>
             <Search
@@ -116,13 +119,16 @@ export default function AdminUsers() {
               style={{ paddingLeft: 32 }}
               placeholder='Buscar por nombre'
               value={q}
+              // actualiza query ---  hook refresca datos
               onChange={(e) => setQ(e.target.value)}
             />
           </div>
+
           <select
             value={order}
             onChange={(e) => {
               setOrder(e.target.value)
+              // cambia orden y reset a pg 1
               setPage(1)
             }}
           >
@@ -149,12 +155,15 @@ export default function AdminUsers() {
         </Controls>
       </HeadRow>
 
+      {/* contenido  loading / vacio  / grid / list */}
+
       {loading ? (
         <div style={{ padding: 16 }}>Cargando…</div>
       ) : pageItems.length === 0 ? (
         <div style={{ padding: 16, color: '#64748b' }}>Sin resultados.</div>
       ) : view === 'grid' ? (
         <>
+          {/* grid */}
           <GridWrap>
             {pageItems.map((u) => (
               <UserGridCard key={u._id} u={u} onToggleBlock={onToggleBlock} />
@@ -181,6 +190,7 @@ export default function AdminUsers() {
           </Pager>
         </>
       ) : (
+        // list
         <>
           <ListWrap>
             {pageItems.map((u) => (

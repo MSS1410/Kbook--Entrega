@@ -57,16 +57,16 @@ const SmallNote = styled.p`
 const digitsOnly = (v) => (v || '').replace(/\D+/g, '')
 
 export default function PaymentSection({
-  useAltPayment,
-  onToggle,
+  useAltPayment, // perfil y otros datos
+  onToggle, // setter
   brand,
-  form,
+  form, // { holderName, cardNumber, expiry, cvc } local
   errors,
-  onChange,
+  onChange, // setForm
   setErrors,
-  formatCardNumber,
-  maskLast4,
-  user
+  formatCardNumber, // helpers
+  maskLast4, //
+  user // poder mostrar datos guardados
 }) {
   return (
     <Card>
@@ -76,12 +76,12 @@ export default function PaymentSection({
           id='other-pay'
           type='checkbox'
           checked={useAltPayment}
-          onChange={(e) => onToggle(e.target.checked)}
+          onChange={(e) => onToggle(e.target.checked)} //  edit tarjeta
         />
         <label htmlFor='other-pay'>Usar otros datos de pago</label>
       </Row>
 
-      {!useAltPayment ? (
+      {!useAltPayment ? ( // solo lectura con datos del perfil
         <>
           <SummaryRow>
             <div>Titular:</div>
@@ -90,17 +90,18 @@ export default function PaymentSection({
           <SummaryRow>
             <div>Tarjeta:</div>
             <div>{maskLast4(user?.payment?.last4)}</div>
+            {/* muestra hidden num */}
           </SummaryRow>
           <SummaryRow>
             <div>Caducidad:</div>
             <div>{user?.payment?.expiry || '—'}</div>
           </SummaryRow>
           <SmallNote>
-            Origen: tu perfil. Marca “Usar otros datos de pago” para introducir
-            otra tarjeta.
+            Marca “Usar otros datos de pago” para introducir otra tarjeta.
           </SmallNote>
         </>
       ) : (
+        // formulario para edicion
         <>
           <Field>
             <Label>Nombre titular</Label>
@@ -116,8 +117,8 @@ export default function PaymentSection({
               placeholder='1234 5678 9012 3456'
               value={form.cardNumber}
               inputMode='numeric'
-              onChange={(e) =>
-                onChange('cardNumber', formatCardNumber(e.target.value))
+              onChange={
+                (e) => onChange('cardNumber', formatCardNumber(e.target.value)) // espacios, 19 digitos
               }
               onPaste={(e) => {
                 const text = (e.clipboardData || window.clipboardData).getData(
@@ -126,7 +127,7 @@ export default function PaymentSection({
                 e.preventDefault()
                 onChange('cardNumber', formatCardNumber(text))
               }}
-              onKeyDown={blockNonNumericKeys}
+              onKeyDown={blockNonNumericKeys} // no letras no simbolos
             />
             {errors.cardNumber && <ErrorText>{errors.cardNumber}</ErrorText>}
           </Field>
@@ -137,6 +138,7 @@ export default function PaymentSection({
               value={form.expiry}
               inputMode='numeric'
               onChange={(e) => onChange('expiry', formatExpiry(e.target.value))}
+              // inserta "/" normalizo a MM
               onKeyDown={blockNonNumericKeys}
               maxLength={5}
               onBlur={() =>
@@ -159,6 +161,7 @@ export default function PaymentSection({
                 const max =
                   detectBrand(digitsOnly(form.cardNumber)) === 'AMEX' ? 4 : 3
                 onChange('cvc', digitsOnly(e.target.value).slice(0, max))
+                // limito cvc segun marca trjt
               }}
               onKeyDown={blockNonNumericKeys}
             />

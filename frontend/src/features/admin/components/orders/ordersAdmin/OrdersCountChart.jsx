@@ -1,4 +1,3 @@
-// frontend/src/admin/pages/orders/OrdersCountChart.jsx
 import React from 'react'
 import styled from 'styled-components'
 import {
@@ -9,7 +8,7 @@ import {
   XAxis,
   YAxis,
   Tooltip
-} from 'recharts'
+} from 'recharts' // barras utiles para conteo de pedidos
 
 const ChartBox = styled.div`
   border: 1px solid ${({ theme }) => theme.colors.border};
@@ -32,6 +31,8 @@ const ChartBody = styled.div`
 `
 
 export default function OrdersCountChart({ data }) {
+  //  DATA:  day: 'MM-DD', count: number
+
   return (
     <ChartBox>
       <ChartHead>Pedidos / últimos 30 días</ChartHead>
@@ -43,8 +44,9 @@ export default function OrdersCountChart({ data }) {
           >
             <CartesianGrid strokeDasharray='3 3' opacity={0.2} />
             <XAxis dataKey='day' tick={{ fontSize: 12 }} />
-            <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
-            <Tooltip />
+            {/* enteros */}
+            <YAxis tick={{ fontSize: 12 }} allowDecimals={false} /> <Tooltip />
+            {/* barra por cada dia */}
             <Bar dataKey='count' />
           </BarChart>
         </ResponsiveContainer>

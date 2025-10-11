@@ -1,4 +1,3 @@
-// frontend/src/features/admin/pages/contact/NewMessageModal.jsx
 import React from 'react'
 import styled from 'styled-components'
 import Modal from '../../components/Modal.jsx'
@@ -28,20 +27,20 @@ const Avatar = styled.img`
 `
 
 export default function NewMessageModal({
-  open,
+  open, // visible/oculto
   onClose,
   q,
-  setQ,
+  setQ, //  query y setter para user search
   searching,
-  onSearch,
-  results,
+  onSearch, //  handler llama listUsersAdmin para search
+  results, //  array users
   newTo,
-  setNewTo,
+  setNewTo, //  user destino
   newSubject,
   setNewSubject,
   newBody,
   setNewBody,
-  onSend
+  onSend // enviar msg
 }) {
   return (
     <Modal
@@ -58,18 +57,20 @@ export default function NewMessageModal({
       }
     >
       <div style={{ display: 'grid', gap: 10 }}>
+        {/*  user searcher*/}
         <div style={{ display: 'flex', gap: 8 }}>
           <Input
             placeholder='Buscar usuario por nombre o email…'
             value={q}
-            onChange={(e) => setQ(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && onSearch()}
+            onChange={(e) => setQ(e.target.value)} // ← escribe query
+            onKeyDown={(e) => e.key === 'Enter' && onSearch()} // ← enter = buscar
           />
           <Button onClick={onSearch} disabled={searching}>
             {searching ? 'Buscando…' : 'Buscar'}
           </Button>
         </div>
 
+        {/* ======== Resultados de búsqueda (selección de destinatario) ======== */}
         {!!results.length && (
           <div
             style={{
@@ -82,7 +83,7 @@ export default function NewMessageModal({
             {results.map((u) => (
               <div
                 key={u._id}
-                onClick={() => setNewTo(u)}
+                onClick={() => setNewTo(u)} // ← elegir destinatario
                 style={{
                   padding: 8,
                   border: '1px solid #e5e7eb',
@@ -92,7 +93,7 @@ export default function NewMessageModal({
                   gap: 8,
                   cursor: 'pointer',
                   background:
-                    String(newTo?._id) === String(u._id) ? '#f5f3ff' : '#fff'
+                    String(newTo?._id) === String(u._id) ? '#f5f3ff' : '#fff' // ← resalta seleccionado
                 }}
                 title={u.email}
               >
@@ -100,6 +101,7 @@ export default function NewMessageModal({
                   src={u.avatar || AVATAR_PLACEHOLDER}
                   alt={u.name || u.email}
                   onError={(e) => {
+                    // ← fallback avatar
                     if (e.currentTarget.src !== AVATAR_PLACEHOLDER)
                       e.currentTarget.src = AVATAR_PLACEHOLDER
                   }}
@@ -122,17 +124,19 @@ export default function NewMessageModal({
           </div>
         )}
 
+        {/* ======== Asunto + cuerpo ======== */}
         <Input
           placeholder='Asunto'
           value={newSubject}
-          onChange={(e) => setNewSubject(e.target.value)}
+          onChange={(e) => setNewSubject(e.target.value)} // ← 2-way
         />
         <Textarea
           placeholder='Escribe el mensaje…'
           value={newBody}
-          onChange={(e) => setNewBody(e.target.value)}
+          onChange={(e) => setNewBody(e.target.value)} // ← 2-way
         />
 
+        {/* ======== Ayuda de contexto ======== */}
         {newTo ? (
           <div style={{ fontSize: 12, color: '#64748b' }}>
             Para: <b>{newTo.name || newTo.email}</b>

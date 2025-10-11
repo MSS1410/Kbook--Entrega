@@ -21,13 +21,14 @@ const Fallback = styled.div`
   height: 100%;
   background: #f0f0f0;
 `
-
+// misma estructura que bestSeller
 export default function NewArrivalsSect() {
   const [items, setItems] = useState([])
 
   useEffect(() => {
     ;(async () => {
       try {
+        // ordenamos por fecha libro creado
         const { data } = await api.get('/api/books', {
           params: { sort: '-createdAt', limit: 24 }
         })
@@ -36,7 +37,9 @@ export default function NewArrivalsSect() {
           : Array.isArray(data)
           ? data
           : []
+        // normalizo data.books o data array
         const mapped = list.map((b) => {
+          // construyo items con portada y link al libro
           const cover = b.coverImage || b.cover || b.coverImageUrl || ''
           return {
             id: b._id,
@@ -69,6 +72,7 @@ export default function NewArrivalsSect() {
 
   return (
     <HomeCarrusel
+      // construyo items con portada y link al libro
       title='Nuevas Publicaciones'
       items={items}
       viewAllLink='/new-arrivals'

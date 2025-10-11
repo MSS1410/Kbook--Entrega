@@ -3,19 +3,24 @@ import { useState, useEffect } from 'react'
 import api from '../api/index'
 import useAuth from './useAuth'
 
+// uso para hacer llamadas a get,post,delete,clear cart
+
 export default function useCart() {
+  //declaro estados necesarios y saco token
   const { token } = useAuth()
   const [cart, setCart] = useState({ items: [] })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const openDrawer = () => window.dispatchEvent(new Event('cart:open'))
 
+  // busco carrito con token
   const fetchCart = async () => {
     if (!token) {
       setCart({ items: [] })
       setLoading(false)
       return
     }
+    // muestro si existe
     try {
       setLoading(true)
       const res = await api.get('/api/cart')
@@ -30,9 +35,9 @@ export default function useCart() {
 
   useEffect(() => {
     fetchCart()
-    // eslint-disable-next-line
   }, [token])
 
+  // encargado de añadir o sumar elementos carrito
   const addOrUpdate = async ({ bookId, format, quantity = 1 }) => {
     try {
       const res = await api.post('/api/cart', {
@@ -48,7 +53,7 @@ export default function useCart() {
       throw err
     }
   }
-
+  // se encarga de eliminar los elementos en cart
   const removeItem = async ({ bookId, format }) => {
     try {
       const res = await api.delete('/api/cart', {
@@ -62,7 +67,7 @@ export default function useCart() {
       throw err
     }
   }
-
+  // limpiamos de cualquier libro
   const clear = async () => {
     try {
       const res = await api.post('/api/cart/clear')

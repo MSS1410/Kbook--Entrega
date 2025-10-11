@@ -85,7 +85,9 @@ const StartBtn = styled.button`
 `
 
 export default function NewChatModal({ open, onClose, onConfirm }) {
+  // texto busqueda
   const [query, setQuery] = useState('')
+  // results
   const [results, setResults] = useState([])
   const [loadingSearch, setLoadingSearch] = useState(false)
   const [selectedUser, setSelectedUser] = useState(null)
@@ -102,12 +104,13 @@ export default function NewChatModal({ open, onClose, onConfirm }) {
     }
   }, [open])
 
-  // Búsqueda con sugerencias (debounce 250ms)
+  // search with debounce sugg
   useEffect(() => {
     if (!open) return
     if (debounceRef.current) clearTimeout(debounceRef.current)
     const q = query.trim()
     if (q.length < 2) {
+      // 2 words
       setResults([])
       setSelectedUser(null)
       return
@@ -116,6 +119,7 @@ export default function NewChatModal({ open, onClose, onConfirm }) {
     debounceRef.current = setTimeout(async () => {
       try {
         const { data } = await searchUsers(q)
+        // buscar usuarios normalizar resp a array
         setResults(Array.isArray(data?.users) ? data.users : [])
       } catch {
         setResults([])
@@ -129,6 +133,7 @@ export default function NewChatModal({ open, onClose, onConfirm }) {
   const handleConfirm = () => {
     if (!selectedUser) return
     onConfirm?.(selectedUser)
+    // devuelvo al padre
   }
 
   return (
@@ -144,6 +149,7 @@ export default function NewChatModal({ open, onClose, onConfirm }) {
           placeholder='Nombre o email…'
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          // actualiza query -> dispara debounce
         />
       </SearchBox>
 
@@ -161,13 +167,16 @@ export default function NewChatModal({ open, onClose, onConfirm }) {
               type='button'
               key={u._id}
               $active={active}
+              // borde morado si select
               onClick={() => setSelectedUser(u)}
+              // elegir destinatario
               title={active ? 'Seleccionado' : 'Seleccionar'}
             >
               <SmallAvatar
                 src={u.avatar || AVATAR_PLACEHOLDER}
                 alt={u.name}
                 onError={(e) => {
+                  // fallback
                   if (e.currentTarget.src !== AVATAR_PLACEHOLDER) {
                     e.currentTarget.src = AVATAR_PLACEHOLDER
                   }
@@ -189,9 +198,11 @@ export default function NewChatModal({ open, onClose, onConfirm }) {
 
       <StartRow>
         <CancelBtn type='button' onClick={onClose}>
+          {/* // cierre de modal */}
           Cancelar
         </CancelBtn>
         <StartBtn disabled={!selectedUser} onClick={handleConfirm}>
+          {/* habilito con seleccion poder iniciar shat */}
           Iniciar chat
         </StartBtn>
       </StartRow>

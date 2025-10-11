@@ -24,8 +24,9 @@ const Price = styled.div`
   font-weight: 700;
   font-size: 1rem;
 `
-
+// mini control que combina, formatos y precio calculado
 export default function FormatPriceSelector({
+  // props:
   formats = [],
   selectedType,
   price,
@@ -33,6 +34,7 @@ export default function FormatPriceSelector({
   alignCenter = false
 }) {
   return (
+    // si no hay formato, no muestro el select.
     <Row style={alignCenter ? { justifyContent: 'center' } : undefined}>
       {formats.length > 0 && (
         <Select
@@ -48,6 +50,7 @@ export default function FormatPriceSelector({
         </Select>
       )}
       <Price>{price != null ? `${price.toFixed(2)} €` : ''}</Price>
+      {/* precio a 2 decimales */}
     </Row>
   )
 }

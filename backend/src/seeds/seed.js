@@ -12,13 +12,13 @@ import User from '../models/User.js'
 
 dotenv.config()
 
-// Cache para no repetir llamadas de un mismo autor
+//  para no repetir llamadas de un mismo autor
 const authorMetaCache = new Map()
 
 /**
- * Busca en OpenLibrary por nombre de autor y devuelve { bio, photo }
- * - photo: URL de la foto (si existe); si no hay, string vacío
- * - bio: biografía completa o string vacío
+ en OpenLibrary por nombre de autor y devuelve { bio, photo }
+  - photo: URL de la foto (si existe); si no hay, string vacío
+  -bio: biografía completa o string vacío
  */
 async function getAuthorMetaByName(name) {
   const key = name.trim().toLowerCase()

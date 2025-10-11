@@ -3,7 +3,7 @@ import User from '../models/User.js'
 import Order from '../models/Order.js'
 import Book from '../models/Book.js'
 
-// ✅ Normaliza el perfil con forma anidada (canónica) + alias planos (compat)
+// normalizo el perfil para usuarios antiguos y los nuevos
 const shapeUserProfile = (u) => {
   if (!u) return null
 
@@ -14,14 +14,14 @@ const shapeUserProfile = (u) => {
   const id = String(u._id || u.id || '')
 
   return {
-    _id: id, // ← por compat
-    id, // ← el front nuevo usa este
+    _id: id, // compatible
+    id, //  en front uso id
     name: u.name,
     email: u.email,
     avatar: u.avatar || '',
     description: u.description || '',
 
-    // ---- Alias planos (compat antiguo) ----
+    // nombres de campos viejos para no romper
     address: shipping.address || '',
     city: shipping.city || '',
     postalCode: shipping.postalCode || '',
@@ -30,7 +30,7 @@ const shapeUserProfile = (u) => {
     expiry: payment.expiry || '',
     cardNumber: last4 ? `•••• •••• •••• ${last4}` : '',
 
-    // ---- Canónico (front nuevo) ----
+    // para los datos nuevos par ano romper
     shipping: {
       address: shipping.address || '',
       city: shipping.city || '',
@@ -127,15 +127,19 @@ export const updateProfile = async (req, res, next) => {
 }
 
 /**
- * Libros comprados (status=paid)
+devuelvo los libros comprados por usuario
  */
 export const getPurchasedBooks = async (req, res, next) => {
   try {
+    //usuario y orders del usuario pagadas
     const userId = req.user._id
+
     const orders = await Order.find({ user: userId, status: 'paid' })
       .select('items createdAt')
       .lean()
 
+    // recorro las lineas de todos los pedidos y extrae ids de los libros.
+    //set para desduplicar i compre el mismo libro en varios pedidos o varias veces, se guarda idUnico.
     const idSet = new Set()
     for (const o of orders)
       for (const it of o.items || []) {
@@ -144,14 +148,17 @@ export const getPurchasedBooks = async (req, res, next) => {
       }
     const bookIds = Array.from(idSet)
 
+    // si hay Ids, traigo libros con sus campos necesarios
     const bookDocs = bookIds.length
       ? await Book.find({ _id: { $in: bookIds } })
           .select('title author coverImage')
           .populate('author', 'name')
           .lean()
       : []
-
+    // map de acceso por _id id= docDeLibro
     const bookMap = new Map(bookDocs.map((b) => [String(b._id), b]))
+
+    // aplano relacion pedidos - items-lirbo en array de objetos "compras"
 
     const flattened = []
     for (const o of orders)
@@ -159,11 +166,14 @@ export const getPurchasedBooks = async (req, res, next) => {
         const id = String(it?.book?._id ?? it?.book ?? '')
         if (!id) continue
         const b = bookMap.get(id)
+        //resuelvo libro desde bookMap
         if (!b) continue
+        //nombre author
         const authorName =
           typeof b.author === 'string'
             ? b.author
             : b.author?.name || 'Autor desconocido'
+        // objeto para front
         flattened.push({
           _id: id,
           title: b.title,
@@ -174,6 +184,7 @@ export const getPurchasedBooks = async (req, res, next) => {
         })
       }
 
+    // ahora duplicacion por libro, si el libro ha sido comprado varias cveces, mantengo la compra mas reciente
     const byBook = new Map()
     for (const item of flattened) {
       const prev = byBook.get(item._id)
@@ -181,6 +192,7 @@ export const getPurchasedBooks = async (req, res, next) => {
         byBook.set(item._id, item)
       }
     }
+    // convierto map en array y ordeno por ultimo comprado primero
     const books = Array.from(byBook.values()).sort(
       (a, b) => new Date(b.purchasedAt) - new Date(a.purchasedAt)
     )

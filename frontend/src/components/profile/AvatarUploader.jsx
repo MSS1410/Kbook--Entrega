@@ -52,14 +52,14 @@ const Note = styled.p`
   color: #666;
   font-size: 12px;
 `
-
+// sube o elimina avatar user
 export default function AvatarUploader({ maxMB = 10 }) {
   const { user, setUser } = useAuth()
   const [uploading, setUploading] = useState(false)
   const fileRef = useRef()
 
   const pick = () => fileRef.current?.click()
-
+  //  onFile →->FormData -> POST /api/users/profile/avatar -> actualiza setUser.
   const onFile = async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -71,7 +71,7 @@ export default function AvatarUploader({ maxMB = 10 }) {
     }
 
     const fd = new FormData()
-    fd.append('file', file) // <- el middleware espera 'file'
+    fd.append('file', file) // <- el middlware espera 'file'
 
     setUploading(true)
     try {
@@ -89,6 +89,7 @@ export default function AvatarUploader({ maxMB = 10 }) {
     }
   }
 
+  // remove -> DELETE /api/users/profile/avatar -> limpia avatar y emite evento profile:avatar-updated.
   const remove = async () => {
     if (!confirm('¿Quitar foto de perfil?')) return
     try {
@@ -107,6 +108,7 @@ export default function AvatarUploader({ maxMB = 10 }) {
   return (
     <Wrap>
       <Avatar
+        // vista previa, botones cambiar, quitar foto
         src={src}
         alt={user?.name || 'Avatar'}
         onError={(e) => {
@@ -117,9 +119,11 @@ export default function AvatarUploader({ maxMB = 10 }) {
       />
       <div>
         <BtnRow>
+          {/* button que da acceso a los ficheros */}
           <Button type='button' onClick={pick} disabled={uploading}>
             {uploading ? 'Subiendo…' : 'Cambiar foto'}
           </Button>
+          {/* habilitado para eliminar img */}
           {user?.avatar && (
             <Ghost type='button' onClick={remove} disabled={uploading}>
               Quitar foto
@@ -127,12 +131,15 @@ export default function AvatarUploader({ maxMB = 10 }) {
           )}
         </BtnRow>
         <HiddenFile
-          ref={fileRef}
+          // input que abre el selector de archivos, oculto porque usamos boton "cambiar foto"
+          // HiddenFile: es un input type file con display: non; lo ocultas para no mostrar el input nativo feo
+          ref={fileRef} // se guarda referencia del input para poder disparar click desde buton custom
           type='file'
           accept='image/*'
           onChange={onFile}
         />
         <Note>Formato JPG/PNG/WEBP. Tamaño máximo {maxMB} MB.</Note>
+        {/* instrucciones de reglaje */}
       </div>
     </Wrap>
   )

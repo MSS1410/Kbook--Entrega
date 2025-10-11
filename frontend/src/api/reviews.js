@@ -1,4 +1,3 @@
-// frontend/src/api/reviews.js
 import api from './index'
 
 export const createOrUpdateReview = ({ bookId, rating, comment, avatar }) =>

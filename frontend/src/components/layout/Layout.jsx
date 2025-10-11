@@ -34,24 +34,30 @@ export default function Layout({ children }) {
     window.addEventListener('cart:close', close)
     return () => {
       window.removeEventListener('cart:open', open)
+      // escucho eventos globales de cart, al loro con las compritas
       window.removeEventListener('cart:close', close)
     }
   }, [])
 
   useEffect(() => {
     setCartOpen(false)
+    // al navegadr , cierro cart
   }, [location.pathname])
 
   return (
     <>
       <Header />
-      <ScrollToTop /> {/* 👈 siempre arriba */}
+      <ScrollToTop /> {/*  siempre arriba... como españita */}
       <Main>{children ?? <Outlet />}</Main>
+      {/* soporta childreno rutas anidadas */}
       <Footer />
       {cartOpen && (
+        // over del cart
         <>
           <Backdrop onClick={() => setCartOpen(false)} />
+          {/* OUTCLICK close cart igual que */}
           <CarritoAside onClose={() => setCartOpen(false)} />
+          {/* "x" */}
         </>
       )}
     </>

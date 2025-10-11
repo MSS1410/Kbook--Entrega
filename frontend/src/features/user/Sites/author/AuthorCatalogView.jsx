@@ -159,9 +159,10 @@ const PageEllipsis = styled.span`
   place-items: center;
   color: #888;
 `
-
+// crea una lista de paginas con (...), cuando tiene mucha, usa paginador compacto con numeros.
 function usePagination(page, totalPages, delta = 1) {
   return useMemo(() => {
+    // use Memo para recalcular cuando cambian page, totalPages, delta
     if (totalPages <= 7)
       return Array.from({ length: totalPages }, (_, i) => i + 1)
     const range = [1]
@@ -175,19 +176,23 @@ function usePagination(page, totalPages, delta = 1) {
   }, [page, totalPages, delta])
 }
 
+// catalogo para autores, revibe un array de items autores ya preparados, lo smuesstra en tarjetas con un rail horizontal de libros x autor y pag inferior
+
 export default function AuthorCatalogView({
   title = 'Autores',
   items = [],
   pageSize = 5
 }) {
   const [page, setPage] = useState(1)
-
+  // estado pagina
   const total = items.length
   const totalPages = Math.max(1, Math.ceil(total / pageSize))
+  // calculo total de apginas. Si el num de paginas cambia, y la actual "salta", nos resetea en 1
   useEffect(() => {
     if (page > totalPages) setPage(1)
   }, [totalPages, page])
 
+  // calculo ventana visible, ventana de authors a renderizar
   const start = (page - 1) * pageSize
   const visible = items.slice(start, start + pageSize)
   const pages = usePagination(page, totalPages, 1)
@@ -198,19 +203,24 @@ export default function AuthorCatalogView({
       <ResultCount>
         {total} autor{total === 1 ? '' : 'es'} · Mostrando{' '}
         {Math.min(total, start + 1)}–{Math.min(total, start + visible.length)}
+        {/* render de cada tarjeta autor */}
       </ResultCount>
 
       {!total && <Empty>Sin autores.</Empty>}
 
       {visible.map((a) => {
-        const stripRef = useRef(null)
+        // mapeo de autores en ventana visible
+        const stripRef = useRef(null) // refLocal, por tarjeta, para scroll con botones
+        // tira de libros del autor
         const scroll = (dx) => () => {
+          // mapea books a mini-cards
           const el = stripRef.current
           if (!el) return
           el.scrollBy({ left: dx, behavior: 'smooth' })
         }
 
         return (
+          // render card del author
           <AuthorCard key={a._id}>
             <LeftCol>
               <Avatar
@@ -233,9 +243,12 @@ export default function AuthorCatalogView({
             <Bio>{a.biography || ' '}</Bio>
 
             <BooksStripWrap>
+              {/* ocupa toda la fila, la tira se extiende en lo ancho de tarjeta */}
               <StripHeader>
                 <StripTitle>Libros de {a.name}</StripTitle>
+                {/* titulo de la tira */}
                 <StripControls>
+                  {/* controles de tira */}
                   <ArrowBtn onClick={scroll(-260)} aria-label='Anterior'>
                     ‹
                   </ArrowBtn>
@@ -246,6 +259,8 @@ export default function AuthorCatalogView({
               </StripHeader>
 
               <StripRow ref={stripRef}>
+                {/* strio ref = useReff null, crea scroll programatico */}
+                {/* stripRow, fila de libros del autor. */}
                 {(a.books || []).map((b) => (
                   <BookCard key={b._id} to={`/books/${b._id}`}>
                     <Cover

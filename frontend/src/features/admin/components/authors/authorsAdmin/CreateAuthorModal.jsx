@@ -3,13 +3,13 @@ import Modal from '../../../components/Modal'
 
 export default function CreateAuthorModal({
   open,
-  onClose,
+  onClose, // control visibilidad
   creating,
-  setCreating,
+  setCreating, // modelo controlado creacion
   file,
-  setFile,
+  setFile, // archivo y setter
   previewUrl,
-  setPreviewUrl,
+  setPreviewUrl, // objeto url y setter
   saving,
   onSave
 }) {
@@ -84,10 +84,11 @@ export default function CreateAuthorModal({
               const f = e.target.files?.[0] || null
               setFile(f)
               if (previewUrl) {
+                // evita leaks al cambiar archivo
                 URL.revokeObjectURL(previewUrl)
                 setPreviewUrl('')
               }
-              if (f) setPreviewUrl(URL.createObjectURL(f))
+              if (f) setPreviewUrl(URL.createObjectURL(f)) // crea objectUrl para preview
             }}
             style={{
               width: '100%',

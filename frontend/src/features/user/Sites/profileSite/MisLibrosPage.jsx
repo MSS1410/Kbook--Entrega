@@ -1,4 +1,3 @@
-// frontend/src/features/mybooks/MyBooksPage.jsx
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
@@ -63,7 +62,7 @@ const CoverImg = styled.img`
   display: block;
 `
 
-/* Empuja el footer al fondo, dejando el espacio flexible arriba */
+// footer al fonto
 const Spacer = styled.div`
   flex: 1 1 auto;
 `
@@ -101,10 +100,11 @@ const PrimaryBtn = styled.button`
   }
 `
 
-// Normaliza posibles nombres de campo desde el backend
+// Normaliza posibles nombres de campo desde el backend (No lo ncdsito porque modelo b. = coverImage, )
 const resolveCover = (b) =>
   b?.coverImage || b?.cover || b?.coverImageUrl || b?.image || ''
 
+// pagina mi biblioteca, muestra lo sejemplares adquiridos por el usuario
 export default function MyBooksPage() {
   const [books, setBooks] = useState([])
   const [selected, setSelected] = useState(null)
@@ -114,8 +114,10 @@ export default function MyBooksPage() {
   useEffect(() => {
     ;(async () => {
       try {
+        // carga de los libros adquiridos
         setLoading(true)
         const { data } = await getMyBooks()
+
         const arr = Array.isArray(data?.books) ? data.books : []
         setBooks(arr)
       } catch (err) {
@@ -129,6 +131,7 @@ export default function MyBooksPage() {
 
   return (
     <Container>
+      {/* titulo */}
       <Title>Mi Librería</Title>
 
       {loading && <p>Cargando…</p>}
@@ -138,9 +141,11 @@ export default function MyBooksPage() {
       )}
 
       <Grid>
+        {/* mapeado de los ejemplares adquiridos */}
         {books.map((b) => {
           const src = resolveCover(b)
           return (
+            // elementos a mostrar de cada compra realizada.
             <Card key={b._id}>
               <BookTitle title={b.title}>{b.title}</BookTitle>
 
@@ -157,8 +162,10 @@ export default function MyBooksPage() {
               <Spacer />
 
               <Actions>
+                {/* botones de accion, acceder al detalle del libro */}
                 <LinkBtn to={`/books/${b._id}`}>Ver detalle</LinkBtn>
                 <PrimaryBtn onClick={() => setSelected(b)}>
+                  {/* botones de accion, adejar reseña sobre el libro */}
                   Deja tu huella Kbook
                 </PrimaryBtn>
               </Actions>
@@ -168,6 +175,7 @@ export default function MyBooksPage() {
       </Grid>
 
       {selected && (
+        // form habilitado para escritura de reseña
         <ReviewForm
           book={selected}
           onClose={() => setSelected(null)}

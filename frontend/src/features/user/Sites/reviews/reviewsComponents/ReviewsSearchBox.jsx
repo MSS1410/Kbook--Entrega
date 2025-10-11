@@ -1,4 +1,3 @@
-// components/ReviewsSearchBox.jsx
 import React from 'react'
 import styled from 'styled-components'
 
@@ -80,11 +79,12 @@ export default function ReviewsSearchBox({
           type='search'
           placeholder='Buscar por título de libro…'
           value={q}
-          onChange={(e) => onChangeQ(e.target.value)}
+          onChange={(e) => onChangeQ(e.target.value)} // controlado por padre
           aria-label='Buscar libro por título'
         />
         <ClearBtn onClick={onClear} disabled={!q}>
           Limpiar
+          {/* desactivado cuando empty */}
         </ClearBtn>
       </Row>
 
@@ -92,13 +92,7 @@ export default function ReviewsSearchBox({
         <Results>
           {results.map((b) => (
             <Item key={b._id} onClick={() => onPick(b)}>
-              <img
-                src={
-                  b.coverImage || 'https://via.placeholder.com/64x96?text=Libro'
-                }
-                alt={b.title}
-                loading='lazy'
-              />
+              <img src={b.coverImage || ''} alt={b.title} loading='lazy' />
               <div>
                 <div className='t'>{b.title}</div>
                 <div className='a'>{b.author?.name || ''}</div>

@@ -105,6 +105,7 @@ const Detail = styled(Link)`
 
 const getAuthorName = (a) => (typeof a === 'string' ? a : a?.name || '')
 
+// tarjeta del libro en rejilla
 export default function CatalogGridItem({
   book,
   formats = [],
@@ -118,6 +119,7 @@ export default function CatalogGridItem({
 
   return (
     <Card>
+      {/* mostramos portada, titulo, autor, selector de formato, precio y botones de detalle */}
       <Thumb>{cover ? <img src={cover} alt={book.title} /> : null}</Thumb>
       <Body>
         <Title to={`/books/${book._id}`}>{book.title}</Title>
@@ -129,9 +131,11 @@ export default function CatalogGridItem({
           price={price}
           onChangeType={onChangeType}
           alignCenter
+          // centramos selector en layout
         />
 
         <Footer>
+          {/* botones dentro del card de libro */}
           <Btns>
             <Add onClick={onAdd} aria-label='Añadir al carrito'>
               Añadir al carrito

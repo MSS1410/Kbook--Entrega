@@ -68,15 +68,15 @@ const SeeAll = styled(Link)`
   color: ${({ theme }) => theme.colors.primary};
   text-decoration: underline;
 `
-
+// acordeon, al abrirse, fetch de mis libros, ordena y muestra los 3 recientes
 export default function BooksAccordion({ open: controlledOpen, onToggle }) {
-  // Soporte controlado / no controlado
   const [internalOpen, setInternalOpen] = useState(false)
+  // control de apertura de acordeon
   const open = controlledOpen ?? internalOpen
   const toggle = onToggle ?? (() => setInternalOpen((o) => !o))
 
   const [loading, setLoading] = useState(false)
-  const [loaded, setLoaded] = useState(false) // <- evita refetch infinito con lista vacía
+  const [loaded, setLoaded] = useState(false) //  evita refetch infinito con lista vacía
   const [books, setBooks] = useState([])
   const [error, setError] = useState(null)
 
@@ -93,12 +93,12 @@ export default function BooksAccordion({ open: controlledOpen, onToggle }) {
         setError('No pudimos cargar tus libros.')
       } finally {
         setLoading(false)
-        setLoaded(true) // <- marcamos como cargado SIEMPRE (haya libros o no)
+        setLoaded(true) // haya libros o no lo marco siempre como cargado
       }
     })()
   }, [open, loading, loaded])
 
-  // Ordenamos por fecha de compra desc y tomamos 3
+  // orden por fecha de compra desc y tomamos 3 ultimos
   const latest = useMemo(
     () =>
       [...books]
@@ -112,6 +112,7 @@ export default function BooksAccordion({ open: controlledOpen, onToggle }) {
 
   return (
     <Card>
+      {/* seccion donde se expande tras el click */}
       <Toggle onClick={toggle} aria-expanded={open} role='button'>
         <div style={{ fontWeight: 700 }}>Mis Libros</div>
         <div>{open ? '▾' : '▸'}</div>
@@ -119,6 +120,7 @@ export default function BooksAccordion({ open: controlledOpen, onToggle }) {
 
       {open && (
         <>
+          {/* cuando la tenemos abierta */}
           {loading && <p>Cargando tus libros…</p>}
           {error && <p style={{ color: '#dc2626' }}>{error}</p>}
 
@@ -131,10 +133,12 @@ export default function BooksAccordion({ open: controlledOpen, onToggle }) {
           {latest.length > 0 && (
             <Grid>
               {latest.map((b) => {
+                // mapeamos los 3 ultimos ejemplares, mostrando fecha compra, img, validDate
                 const src = b.cover || b.coverImage || b.coverImageUrl || ''
                 const safeDate = b.purchasedAt ? new Date(b.purchasedAt) : null
                 const hasValidDate = safeDate && !isNaN(+safeDate)
                 return (
+                  //  portada para cada libro
                   <Item key={`${b._id}-${b.purchasedAt || b.title}`}>
                     {src ? (
                       <Cover
@@ -148,12 +152,15 @@ export default function BooksAccordion({ open: controlledOpen, onToggle }) {
                       <CoverBox />
                     )}
                     <div>
+                      {/* titulo para cada libro */}
                       <Title>{b.title}</Title>
                       <Meta>
+                        {/* autor */}
                         {typeof b.author === 'string'
                           ? b.author
                           : b.author?.name}
                       </Meta>
+                      {/* fecha tras validarla */}
                       {hasValidDate && (
                         <Meta>
                           Comprado el{' '}

@@ -34,8 +34,14 @@ const ViewAll = styled(Link)`
 `
 
 const TrackOuter = styled.div`
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   position: relative;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  padding-bottom: 2px;
 `
 
 const Track = styled.div`
@@ -44,6 +50,9 @@ const Track = styled.div`
   align-items: stretch;
   scroll-behavior: smooth;
   justify-content: ${({ $center }) => ($center ? 'center' : 'flex-start')};
+  & > * {
+    scroll-snap-align: start;
+  }
 `
 
 const CardBase = `
@@ -100,41 +109,46 @@ const NavButton = styled.button`
     display: none;
   }
 `
-
+// props: title, items, viewALL, viewAllLabel, altura, ancho y separacion
 export default function HomeCarrusel({
   title,
   items,
   viewAllLink,
-  viewAllLabel = 'Ver todos', // 👈 nuevo prop con valor por defecto
+  viewAllLabel = 'Ver todos',
   itemWidth = 160,
   itemHeight = 240,
   itemGap = 10
 }) {
-  const outerRef = useRef(null)
-  const trackRef = useRef(null)
+  const outerRef = useRef(null) // contenedor visible
+  const trackRef = useRef(null) // banda interna
   const [center, setCenter] = useState(false)
-
+  // center, si cabe en el ancho bisible, centro los items
   useEffect(() => {
     const check = () => {
+      // calculo si necesito el scroll y decido si centro o resize
       const outer = outerRef.current
       const track = trackRef.current
       if (!outer || !track) return
       setCenter(track.scrollWidth <= outer.clientWidth)
     }
+
     check()
     window.addEventListener('resize', check)
     return () => window.removeEventListener('resize', check)
   }, [items, itemWidth, itemHeight, itemGap])
 
+  // separo el contenedor un 90% del ancho visible der y izq
   const scrollBy = (dir) => {
     const outer = outerRef.current
     if (!outer) return
     const step = outer.clientWidth * 0.9
     outer.scrollBy({ left: dir * step, behavior: 'smooth' })
   }
-
+  // flechas si mas de un item
   const showArrows = (items?.length || 0) > 1
 
+  // renderizamos header con titulo y ver all
+  //
   return (
     <Wrapper>
       <TitleBar>
@@ -152,7 +166,7 @@ export default function HomeCarrusel({
           </NavButton>
         </>
       )}
-
+      {/* overflow hidden , track con flex, decide justify-content segun si es center o resize */}
       <TrackOuter ref={outerRef}>
         <Track ref={trackRef} $center={center} $gap={itemGap}>
           {items.map((item) => {
@@ -166,6 +180,7 @@ export default function HomeCarrusel({
                 {item.component}
               </SlideBox>
             )
+            // por cada item, saco el slide con link y slideBox de saver por si no hay link(siempre lo hay)
           })}
         </Track>
       </TrackOuter>

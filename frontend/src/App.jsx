@@ -10,20 +10,19 @@ import GlobalStyles from './styles/globalStyles.js'
 import theme from './styles/theme'
 import Layout from './components/layout/Layout.jsx'
 
+/* Auth pages */
 import LoginPage from './features/auth/LoginPage'
 import RegisterPage from './features/auth/RegisterPage'
 
+/* Public/USER */
 import HomePage from './features/user/Home/HomePage.jsx'
 import ProfilePage from './features/user/Sites/profileSite/ProfilePage.jsx'
 import BestSellerPage from './features/user/booksBy/bestSeller/BestSellerPage.jsx'
 import NewArrivalsPage from './features/user/booksBy/newArrivals/newArrivalsPage.jsx'
-
 import AuthorsPage from './features/user/Sites/author/AuthorsPage.jsx'
 import AuthorDetailPage from './features/user/Sites/author/AuthorDetailPage.jsx'
-
-import ReviewsPage from './features/user/Sites/reviews/ReviewsPage/ReviewsPage.jsx'
+import ReviewsPage from './features/user/Sites/reviews/ReviewsPage.jsx'
 import BookReviewsPage from './features/user/Sites/reviews/BookReviewsPage.jsx'
-
 import CategoryPage from './features/user/booksBy/cats/CategoryPage.jsx'
 import BooksPage from './features/user/Sites/Books/PageBooks/BooksPage.jsx'
 import BookSingularPage from './features/user/Sites/Books/SingularBook/BookSingularPage.jsx'
@@ -33,12 +32,15 @@ import CheckoutPage from './features/user/Sites/saleProcess/checkoutPage/CheckOu
 import OrderConfirm from './features/user/Sites/saleProcess/OrderConfirm/OrderConfirm.jsx'
 import ContactPage from './features/user/Sites/contact/Contact.jsx'
 import useAuth, { AuthProvider } from './hooks/useAuth'
+
+/* ADMIN */
 import AdminRoutes from './routes/AdminRoutes.jsx'
 import AdminRoute from './routes/AdminRoute.jsx'
 
-// 🚀 Bandeja de entrada de usuario
+/* Bandeja usuario */
 import InboxUser from './features/user/Sites/message/InboxUser.jsx'
 
+/* proteccion simple por token USER */
 function ProtectedRoute({ children }) {
   const { token } = useAuth()
   return token ? children : <Navigate to='/login' replace />
@@ -51,7 +53,7 @@ export default function App() {
       <AuthProvider>
         <Router>
           <Routes>
-            {/* Público/usuario con Layout */}
+            {/* RUTAS PUBLICAS, USER CON LAYOUT GENERAL */}
             <Route element={<Layout />}>
               <Route path='/' element={<HomePage />} />
               <Route path='/books' element={<BooksPage />} />
@@ -65,15 +67,16 @@ export default function App() {
               <Route path='/books/:id/reviews' element={<BookReviewsPage />} />
               <Route path='/contact' element={<ContactPage />} />
 
+              {/* checkout y confirmacion de pedido */}
               <Route path='/checkout' element={<CheckoutPage />} />
               <Route path='/order-confirm' element={<OrderConfirm />} />
               <Route path='/orders/:id' element={<OrderConfirm />} />
 
-              {/* Auth */}
+              {/* AUTH */}
               <Route path='/login' element={<LoginPage />} />
               <Route path='/register' element={<RegisterPage />} />
 
-              {/* Protegidas user */}
+              {/* protected zones ADMIN */}
               <Route
                 path='/profile'
                 element={
@@ -99,7 +102,7 @@ export default function App() {
                 }
               />
 
-              {/* 📥 Bandeja: lista y conversación */}
+              {/* bandeja mensajes USERS // list y conversacion */}
               <Route
                 path='/inbox'
                 element={
@@ -118,7 +121,7 @@ export default function App() {
               />
             </Route>
 
-            {/* Área Admin (rol) */}
+            {/* ADMIN AREA:  AdminRoute valida rol admin internamente */}
             <Route
               path='/admin/*'
               element={
@@ -128,7 +131,7 @@ export default function App() {
               }
             />
 
-            {/* Fallback */}
+            {/* fallback  a Home */}
             <Route path='*' element={<Navigate to='/' replace />} />
           </Routes>
         </Router>

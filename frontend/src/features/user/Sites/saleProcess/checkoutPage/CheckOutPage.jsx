@@ -13,7 +13,7 @@ import {
   isValidCVC
 } from '../../../../../utils/validators'
 
-// Presentacionales (solo UI)
+// import components
 import StepBar from './checkoutComponents/StepBar'
 import ShippingForm from './checkoutComponents/ShippingForm'
 import PaymentForm from './checkoutComponents/PaymentForm'
@@ -28,36 +28,47 @@ const Container = styled.div`
   gap: ${({ theme }) => theme.spacing.lg};
 `
 
-// Helpers locales
+// Helpers local
+
+//Solo digitos en cadena
 const digitsOnly = (v) => (v || '').replace(/\D+/g, '')
+
+// formatea a 19 digitos, 4 espacio 4
 const formatCardNumber = (raw) =>
   digitsOnly(raw)
     .slice(0, 19)
     .replace(/(\d{4})(?=\d)/g, '$1 ')
     .trim()
 
+// implemento checkOut en 3 pasos: Envio , Pago , Revision
+// Envio - Direccion de entrega
+// Pago - Datos Trjeta o guardados perfil
+// revision - resumen del pedido , eleccion entrega, totales finales y confirm
+
 export default function CheckoutPage() {
   const navigate = useNavigate()
   const { cart, removeItem } = useCart()
   const { user, setUser } = useAuth()
 
-  // Carga de perfil si faltan datos
+  // Carga de perfil
   useEffect(() => {
     const needs =
-      !user ||
-      typeof user.address === 'undefined' ||
-      (user?.payment == null && user?.cardNumber == null)
+      !user || // si no hay user
+      typeof user.address === 'undefined' || // faltan campos de envio
+      (user?.payment == null && user?.cardNumber == null) // faltan datos de pago
     if (needs) {
       ;(async () => {
         try {
-          const { data } = await api.get('/api/users/profile')
-          if (data?.user) setUser(data.user)
+          const { data } = await api.get('/api/users/profile') // get perfil complet
+          if (data?.user) setUser(data.user) // actualiza contexto usuer
         } catch (_) {}
       })()
     }
   }, [user, setUser])
 
-  // Prefills desde perfil (admite plano y anidado)
+  // PreRellenado si tengo los datos from profile, en todos admitiremos el plano y el anidado de profile
+
+  // prerellenado desde perfil - envio
   const profileShipping = {
     name: user?.name || '',
     address: user?.address || user?.shipping?.address || '',
@@ -65,14 +76,17 @@ export default function CheckoutPage() {
     postalCode: user?.postalCode || user?.shipping?.postalCode || '',
     country: user?.country || user?.shipping?.country || ''
   }
+
+  // rellenado desde perfil  : pago
   const profilePayment = {
     holderName:
       user?.payment?.cardHolderName || user?.holderName || user?.name || '',
     last4:
-      user?.payment?.last4 ||
+      user?.payment?.last4 || // last 4 saved on server
       (user?.cardNumber ? user.cardNumber.replace(/\D+/g, '').slice(-4) : ''),
-    expiry: user?.payment?.expiry || user?.expiry || ''
+    expiry: user?.payment?.expiry || user?.expiry || '' // saved expir date
   }
+  // flags, si hay datos de perfil los pasamos sin tener q editar
   const hasProfileShipping =
     !!profileShipping.address &&
     !!profileShipping.city &&
@@ -84,13 +98,18 @@ export default function CheckoutPage() {
     !!profilePayment.last4 &&
     !!profilePayment.expiry
 
+  // paso del wizard  1envio  2pago  3revision
+  // estado 1 Envio
   const [step, setStep] = useState(1)
-  const [submitting, setSubmitting] = useState(false)
+  const [submitting, setSubmitting] = useState(false) // mientras confirmo pedido
   const [submitError, setSubmitError] = useState(null)
 
-  // ===== Envío =====
+  // Envio
+
   const [useAltShipping, setUseAltShipping] = useState(!hasProfileShipping)
+  // ofrecemos usuario posibilidad de  introducir nueva direccion o por default
   const [shipping, setShipping] = useState({
+    // editable , inicial copia perfil
     name: profileShipping.name,
     address: profileShipping.address,
     city: profileShipping.city,
@@ -118,8 +137,9 @@ export default function CheckoutPage() {
     profileShipping.country
   ])
 
+  // validacion de envio
   const validateShipping = () => {
-    if (!useAltShipping && hasProfileShipping) return true
+    if (!useAltShipping && hasProfileShipping) return true // si usamos perfil i es OK -> directo
     const e = {}
     if (!shipping.name.trim()) e.name = 'Este campo es obligatorio'
     if (!shipping.address.trim()) e.address = 'Este campo es obligatorio'
@@ -130,38 +150,44 @@ export default function CheckoutPage() {
     return Object.keys(e).length === 0
   }
 
-  // ===== Pago =====
-  const [useAltPayment, setUseAltPayment] = useState(!hasProfilePayment)
+  // estado pago (2)
+  const [useAltPayment, setUseAltPayment] = useState(!hasProfilePayment) // otros datos ?
   const [payment, setPayment] = useState({
-    holderName: profilePayment.holderName,
+    // editables
+    holderName: profilePayment.holderName, // rellenado aut
     cardNumber: '',
     cvc: '',
     expiry: ''
   })
-  const [paymentErrors, setPaymentErrors] = useState({})
+
+  const [paymentErrors, setPaymentErrors] = useState({}) // err
+
   const brand = useMemo(
+    // Detecta marca, VISA , MC , ANEX
     () => detectBrand(digitsOnly(payment.cardNumber)),
     [payment.cardNumber]
   )
-  // Refrescar titular desde perfil si no está en alterno
+
+  // Refrescar titular desde perfil si no USA el editable
   useEffect(() => {
     if (useAltPayment) return
     setPayment((p) => ({ ...p, holderName: profilePayment.holderName }))
   }, [useAltPayment, profilePayment.holderName])
 
+  // Validacion de Pago
   const validatePayment = () => {
-    if (!useAltPayment && hasProfilePayment) return true
+    if (!useAltPayment && hasProfilePayment) return true // Si perfil valido -> directo
     const e = {}
     if (!payment.holderName.trim()) e.holderName = 'Este campo es obligatorio'
 
-    const digits = digitsOnly(payment.cardNumber)
+    const digits = digitsOnly(payment.cardNumber) // solo digitos para validar
     if (digits.length < 13 || digits.length > 19) {
       e.cardNumber = 'Debe contener entre 13 y 19 dígitos'
     } else if (!luhnCheck(digits)) {
-      e.cardNumber = 'Tarjeta inválida'
+      e.cardNumber = 'Tarjeta inválida' // LUHN
     }
 
-    if (!isValidExpiry(payment.expiry)) e.expiry = 'Caducidad inválida (MM/AA)'
+    if (!isValidExpiry(payment.expiry)) e.expiry = 'Caducidad inválida (MM/AA)' //CHeck de length de num card para permitir valido cvc
 
     if (!isValidCVC(digitsOnly(payment.cvc), brand)) {
       e.cvc = brand === 'AMEX' ? 'CVC de 4 dígitos' : 'CVC de 3 dígitos'
@@ -170,7 +196,7 @@ export default function CheckoutPage() {
     return Object.keys(e).length === 0
   }
 
-  // ===== Envío: opciones =====
+  //Opciones de envio
   const shippingOptions = [
     {
       key: 'standard',
@@ -186,38 +212,42 @@ export default function CheckoutPage() {
     }
   ]
   const [selectedShippingOption, setSelectedShippingOption] = useState(
-    shippingOptions[0]
+    shippingOptions[0] // por default -> sin coste
   )
 
-  // ===== Totales =====
+  //  Totales
   const subtotal = cart.items.reduce(
+    // suma precio + cantidad de cada item
     (sum, it) => sum + it.price * it.quantity,
     0
   )
-  const shippingCost = selectedShippingOption.extra
-  const total = subtotal + shippingCost
+  const shippingCost = selectedShippingOption.extra // coste por opcion
+  const total = subtotal + shippingCost // añade si hay coste envio
 
-  // Navegación de pasos
+  // Pasar al siguiente step
   const handleNext = () => {
     if (step === 1) {
-      if (!validateShipping()) return
+      if (!validateShipping()) return // de envio a pago
       setStep(2)
     } else if (step === 2) {
-      if (!validatePayment()) return
+      if (!validatePayment()) return // de Pago a sRevision
       setStep(3)
     }
   }
+
+  //<-
   const handleBack = () => {
-    if (step > 1) setStep((s) => s - 1)
+    if (step > 1) setStep((s) => s - 1) // back 1step si no esta en el 1r paso
   }
 
   // Confirmar compra
   const handleConfirm = async () => {
-    setSubmitError(null)
-    setSubmitting(true)
+    setSubmitError(null) // limpia
+    setSubmitting(true) // bloqueo boton
     try {
+      // 1 - Construir direcc final ,
       const shippingAddress =
-        useAltShipping || !hasProfileShipping
+        useAltShipping || !hasProfileShipping // usa la q el usuario ha escrito en el momento
           ? {
               fullName: shipping.name,
               address: shipping.address,
@@ -226,31 +256,32 @@ export default function CheckoutPage() {
               country: shipping.country
             }
           : {
-              fullName: profileShipping.name,
+              fullName: profileShipping.name, // usa la de perfil antigua
               address: profileShipping.address,
               city: profileShipping.city,
               postalCode: profileShipping.postalCode,
               country: profileShipping.country
             }
 
-      // Etiqueta método (no guardamos tarjeta real)
-      const last4Alt = digitsOnly(payment.cardNumber).slice(-4)
+      // 2 - Etiqueta meotodo pago
+      const last4Alt = digitsOnly(payment.cardNumber).slice(-4) // si nuevo, tomar 4 digitos si hay
       const paymentMethod =
         useAltPayment || !hasProfilePayment
           ? last4Alt
-            ? `Tarjeta •••• ${last4Alt}`
+            ? `Tarjeta •••• ${last4Alt}` // mask
             : 'Tarjeta'
           : profilePayment.last4
-          ? `Tarjeta •••• ${profilePayment.last4}`
+          ? `Tarjeta •••• ${profilePayment.last4}` // with profile use last 4
           : 'Tarjeta'
 
+      // 3 -  Crear y Pagar orden - apis
       const { data: order } = await createOrder({
         shippingAddress,
         paymentMethod
       })
       const { data: paidOrder } = await payOrder(order._id)
 
-      // Persistir opción de envío
+      // 4 . persisitir opcion de envio
       try {
         sessionStorage.setItem(
           'kbook:lastShippingOption',
@@ -258,13 +289,14 @@ export default function CheckoutPage() {
         )
       } catch (_) {}
 
-      // Limpiar carrito cliente (compatibilidad con firma distinta)
+      //5 -  Limpiar carrito cliente
       try {
-        if (typeof cart.clear === 'function') cart.clear()
+        if (typeof cart.clear === 'function') cart.clear() // si tengo clear uso
         else
-          for (const it of [...cart.items]) removeItem(it.book._id, it.format)
+          for (const it of [...cart.items]) removeItem(it.book._id, it.format) // cada item removeItem
       } catch (_) {}
 
+      // 6 - IR a confirmacion
       navigate('/order-confirm', {
         state: { order: paidOrder, shippingOption: selectedShippingOption }
       })
@@ -274,23 +306,27 @@ export default function CheckoutPage() {
         e?.response?.data?.message || 'No pudimos procesar tu compra.'
       )
     } finally {
-      setSubmitting(false)
+      setSubmitting(false) // devuelvo boton
     }
   }
 
   return (
+    // flujo del wzrd
     <Container>
+      {/* layout princ */}
       <h1>Compra</h1>
 
       <StepBar step={step} />
-
-      {/* Paso 1: Envío */}
+      {/* barra de pasos
+      
+      */}
+      {/* 1 - ENVIO */}
       {step === 1 && (
         <ShippingForm
-          hasProfileShipping={hasProfileShipping}
-          useAltShipping={useAltShipping}
-          onToggleAlt={setUseAltShipping}
-          // valores visibles (prefill vs alterno)
+          hasProfileShipping={hasProfileShipping} //datos de perfil para no editar?
+          useAltShipping={useAltShipping} // usar otra dire ?
+          onToggleAlt={setUseAltShipping} // activo edicion
+          // valores a mostrar segun editado o perfil
           values={{
             name: useAltShipping ? shipping.name : profileShipping.name,
             address: useAltShipping
@@ -303,21 +339,21 @@ export default function CheckoutPage() {
             country: useAltShipping ? shipping.country : profileShipping.country
           }}
           errors={shippingErrors}
-          editable={useAltShipping || !hasProfileShipping}
-          onChange={(key, val) => setShipping((s) => ({ ...s, [key]: val }))}
-          onBack={handleBack}
-          onNext={handleNext}
+          editable={useAltShipping || !hasProfileShipping} // inputs habilitados si edita o no tiene datos en el perfil
+          onChange={(key, val) => setShipping((s) => ({ ...s, [key]: val }))} // act editados
+          onBack={handleBack} // back no funciona en paso 1
+          onNext={handleNext} // valida y pasa a 2
         />
       )}
 
-      {/* Paso 2: Pago */}
+      {/* 2 PAGO */}
       {step === 2 && (
         <PaymentForm
-          hasProfilePayment={hasProfilePayment}
-          useAltPayment={useAltPayment}
-          onToggleAlt={setUseAltPayment}
-          brand={brand}
-          // valores visibles
+          hasProfilePayment={hasProfilePayment} //perfil pago valido?
+          useAltPayment={useAltPayment} // otros datos?
+          onToggleAlt={setUseAltPayment} // edit mode
+          brand={brand} // clasifico marca
+          // valores a mostrar segun caso
           values={{
             holderName: useAltPayment
               ? payment.holderName
@@ -332,50 +368,62 @@ export default function CheckoutPage() {
           }}
           errors={paymentErrors}
           editable={useAltPayment || !hasProfilePayment}
-          formatCardNumber={formatCardNumber}
+          formatCardNumber={formatCardNumber} // hlp para formato
           onChange={(key, val) => setPayment((p) => ({ ...p, [key]: val }))}
           setErrors={setPaymentErrors}
-          onBack={handleBack}
-          onNext={handleNext}
+          onBack={handleBack} // 1 <-
+          onNext={handleNext} // -> 2
         />
       )}
 
-      {/* Paso 3: Revisión */}
+      {/* 3 REVISION */}
       {step === 3 && (
         <ReviewStep
+          // datos de envio a mostrar
           shippingDisplay={{
             name: useAltShipping ? shipping.name : profileShipping.name,
             address: useAltShipping
               ? shipping.address
               : profileShipping.address,
+
             city: useAltShipping ? shipping.city : profileShipping.city,
             postalCode: useAltShipping
               ? shipping.postalCode
               : profileShipping.postalCode,
+
             country: useAltShipping ? shipping.country : profileShipping.country
           }}
+          // datos para el pago (last4)
+
           paymentDisplay={{
             holderName: useAltPayment
               ? payment.holderName
               : profilePayment.holderName,
+
             last4: useAltPayment
               ? digitsOnly(payment.cardNumber).slice(-4)
               : profilePayment.last4,
+
             expiry: useAltPayment ? payment.expiry : profilePayment.expiry
           }}
+          // opcion para seleccionar tipo de envio
           shippingOptions={shippingOptions}
           selectedShippingOption={selectedShippingOption}
           onChangeShippingOption={(key) => {
             const opt =
               shippingOptions.find((o) => o.key === key) || shippingOptions[0]
+
             setSelectedShippingOption(opt)
           }}
+          // totales y cart
           items={cart?.items ?? []}
           subtotal={subtotal}
           shippingCost={shippingCost}
           total={total}
+          // estados submit
           submitError={submitError}
           submitting={submitting}
+          // nav
           onBack={handleBack}
           onConfirm={handleConfirm}
         />

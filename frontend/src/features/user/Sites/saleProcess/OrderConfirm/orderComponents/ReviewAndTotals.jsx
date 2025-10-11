@@ -27,7 +27,7 @@ const DetailsCard = styled.div`
 `
 const LV = styled.div`
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto 1fr; /* Label + Valor */
   column-gap: 8px;
   row-gap: 4px;
   font-size: 0.95rem;
@@ -48,20 +48,20 @@ const Divider = styled.hr`
 `
 const ItemRow = styled.div`
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 1fr auto; /* Descripción y precio */
   align-items: baseline;
   gap: 12px;
   margin-bottom: 6px;
 `
 
 export default function ReviewAndTotals({
-  shipForm,
-  useAltPayment,
-  payForm,
-  user,
-  order,
-  shippingLabel,
-  deliveryPhrase,
+  shipForm, // direccion final mostrada
+  useAltPayment, // decido que muestro en pago
+  payForm, // datos en editables
+  user, // datos perfil
+  order, // metodo de pago
+  shippingLabel, // opcion elegida
+  deliveryPhrase, // recibo frase
   subtotal,
   shippingCost,
   total
@@ -76,6 +76,7 @@ export default function ReviewAndTotals({
           <LV>
             <b>Nombre:</b>
             <div>{shipForm.fullName || user?.name || '—'}</div>
+            {/* Prioriza form edicion local */}
           </LV>
           <LV>
             <b>Dirección:</b>
@@ -101,12 +102,14 @@ export default function ReviewAndTotals({
             <b>Titular:</b>
             <div>
               {useAltPayment
-                ? payForm.holderName || '—'
-                : user?.payment?.cardHolderName || user?.name || '—'}
+                ? payForm.holderName || '—' // si hay editado leerlo
+                : user?.payment?.cardHolderName || user?.name || '—'}{' '}
+              {/* leer perfil sino hay editado */}
             </div>
           </LV>
           <LV>
             <b>Método:</b>
+            {/* etiquet generada en checkout */}
             <div>{order.paymentMethod || 'Tarjeta'}</div>
           </LV>
           <LV>

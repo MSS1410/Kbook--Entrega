@@ -54,6 +54,7 @@ const ErrorText = styled.div`
   font-size: 12px;
   margin-top: 4px;
 `
+// edita direccion de envio.
 
 export default function ShippingSection() {
   const { user, setUser } = useAuth()
@@ -67,10 +68,13 @@ export default function ShippingSection() {
   const [errors, setErrors] = useState({})
 
   const validate = () => {
+    //valida campos, avisos para requerir a user
+
     const e = {}
     if (!form.address.trim()) e.address = 'Dirección obligatoria.'
     if (!form.city.trim()) e.city = 'Ciudad obligatoria.'
     if (!form.country.trim()) e.country = 'País obligatorio.'
+
     if (!isValidPostal(form.postalCode, form.country))
       e.postalCode = 'Código postal inválido.'
     setErrors(e)
@@ -90,6 +94,7 @@ export default function ShippingSection() {
 
   return (
     <Card>
+      {/* direccion de envio */}
       <SectionTitle>Dirección de envío</SectionTitle>
       <Field>
         <Label>Dirección</Label>
@@ -101,6 +106,7 @@ export default function ShippingSection() {
         {errors.address && <ErrorText>{errors.address}</ErrorText>}
       </Field>
       <Field>
+        {/* city */}
         <Label>Ciudad</Label>
         <Input
           value={form.city}
@@ -110,6 +116,7 @@ export default function ShippingSection() {
         {errors.city && <ErrorText>{errors.city}</ErrorText>}
       </Field>
       <Field>
+        {/* postal code */}
         <Label>Código postal</Label>
         <Input
           value={form.postalCode}
@@ -121,6 +128,7 @@ export default function ShippingSection() {
         {errors.postalCode && <ErrorText>{errors.postalCode}</ErrorText>}
       </Field>
       <Field>
+        {/* country */}
         <Label>País</Label>
         <Input
           value={form.country}
@@ -132,14 +140,17 @@ export default function ShippingSection() {
 
       <Row>
         {!edit ? (
+          // boton que habilita la edicion
           <Button type='button' onClick={() => setEdit(true)}>
             Editar
           </Button>
         ) : (
           <>
+            {/* save button */}
             <Button type='button' onClick={save}>
               Guardar
             </Button>
+            {/* cancel */}
             <GhostButton
               type='button'
               onClick={() => {

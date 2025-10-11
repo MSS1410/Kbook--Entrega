@@ -6,6 +6,7 @@ import api from '../../../../api'
 const Section = styled.section`
   margin-bottom: 2rem;
 `
+// props: cat title y view all link
 export default function ListCategory({ category, title, viewAllLink }) {
   const [books, setBooks] = useState([])
   useEffect(() => {

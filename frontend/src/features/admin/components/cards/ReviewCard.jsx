@@ -15,14 +15,15 @@ const Body = styled.div`
 const Header = styled.div`
   display: flex;
   gap: 8px;
-  align-items: center;
+  align-items: center; // avatar nombre/fecha
 `
+
 const Name = styled.div`
   font-size: 14px;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+  text-overflow: ellipsis; //nombres largos
 `
 const Small = styled.div`
   font-size: 12px;
@@ -32,7 +33,7 @@ const Text = styled.div`
   margin-top: 8px;
   font-size: 14px;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 3; // clamped text a 3 lines
   -webkit-box-orient: vertical;
   overflow: hidden;
 `
@@ -45,16 +46,22 @@ export default function ReviewCard({ r }) {
       <Body>
         <Header>
           <Avatar
-            name={r?.user?.name || r?.user?.email || 'U'}
-            src={avatarSrc(r?.user?.avatar)}
+            name={r?.user?.name || r?.user?.email || 'U'} // inicial como fall
+            src={avatarSrc(r?.user?.avatar)} // resuelve url VALIDA
           />
           <div style={{ minWidth: 0 }}>
+            {/* nombre visible */}
             <Name>{r?.user?.name || r?.user?.email}</Name>
+            {/* fecha visible */}
             <Small>{fmtDate(r?.createdAt)}</Small>
           </div>
         </Header>
+
+        {/* cuerpo de reseña */}
         <Text>{r?.comment || r?.text}</Text>
+
         {r?.book && (
+          // libro asociated if epanded
           <Small style={{ marginTop: 6 }}>
             en <strong>{r?.book?.title}</strong>
           </Small>

@@ -1,4 +1,3 @@
-// frontend/src/components/Footer.jsx
 import React from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
@@ -29,7 +28,7 @@ const Inner = styled.div`
   row-gap: 28px;
 `
 
-/* ============ ROW 1 (descargas) ============ */
+/*  ROW 1 descargas  */
 const Row1 = styled.div`
   display: grid;
   grid-template-columns: 1fr minmax(280px, 540px) 1fr;
@@ -85,7 +84,7 @@ const StoreText = styled.span`
   font-size: 0.9rem;
 `
 
-/* ============ ROW 2 (3 columnas) ============ */
+/*  ROW 2 COLumnas*/
 const Row2 = styled.div`
   display: grid;
   grid-template-columns: 1.1fr 1fr 1.2fr;
@@ -98,7 +97,7 @@ const Row2 = styled.div`
 
 const Col = styled.div``
 
-/* Centradas: para columnas 2 y 3 */
+// columna 2 y 3 centradas
 const ColCenter = styled(Col)`
   text-align: center;
   display: flex;
@@ -245,7 +244,7 @@ const PayRow = styled.div`
   }
 `
 
-/* ============ ROW 3 (bottom bar centrado y dividido) ============ */
+/*  ROW 3 dividir y centrar bottom   */
 const Row3 = styled.div`
   display: grid;
   grid-template-columns: 1fr auto auto auto 1fr; /* left links | copy | right links */
@@ -301,14 +300,15 @@ const BottomLinks = styled.div`
     justify-content: center;
   }
 `
-
+// footer responsive con 3 filas : descargas, info/pagos, bottom
 export default function Footer() {
+  // como los enlaces seran "fake", prevenimos la recarga del page ante el click
   const avoidNav = (e) => e.preventDefault()
 
   return (
     <Wrap>
       <Inner>
-        {/* ===== Row 1 ===== */}
+        {/*  Row 1  */}
         <Row1>
           <div />
           <StoreButtons>
@@ -316,6 +316,7 @@ export default function Footer() {
               <FaApple />
               <StoreText>Descargar en App Store</StoreText>
             </StoreBtn>
+            {/* todos los links como placeholder */}
             <StoreBtn onClick={avoidNav} aria-label='Descargar en Google Play'>
               <FaGooglePlay />
               <StoreText>Descargar en Google Play</StoreText>
@@ -324,9 +325,9 @@ export default function Footer() {
           <div />
         </Row1>
 
-        {/* ===== Row 2 ===== */}
+        {/* Row 2  */}
         <Row2>
-          {/* Col 1: Trustpilot + Climate */}
+          {/* Col 1 Trustpilot y cambio climatico fake*/}
           <Col>
             <Card aria-label='Trustpilot (falso)'>
               <TrustpilotBadge>
@@ -357,7 +358,7 @@ export default function Footer() {
             </Card>
           </Col>
 
-          {/* Col 2: enlaces (centrado) */}
+          {/* Col 2 enlaces center */}
           <ColCenter>
             <ListTitle>Información</ListTitle>
             <LinksList $center>
@@ -379,7 +380,7 @@ export default function Footer() {
             </LinksList>
           </ColCenter>
 
-          {/* Col 3: redes + pagos (centrado) */}
+          {/* Col 3 redes y pago fake  */}
           <ColCenter>
             <ListTitle>Síguenos</ListTitle>
             <SocialRow>
@@ -415,7 +416,7 @@ export default function Footer() {
           </ColCenter>
         </Row2>
 
-        {/* ===== Row 3 (centrado y dividido) ===== */}
+        {/*  Row 3 bottom center / 2  */}
         <Row3>
           <BottomLinks>
             <Link to='#'>Términos de Uso</Link>

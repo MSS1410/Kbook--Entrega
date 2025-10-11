@@ -1,4 +1,3 @@
-// src/components/carrouseles/CategoriesCarrusel.jsx
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
@@ -27,12 +26,12 @@ const ViewAll = styled(Link)`
   }
 `
 
-/* Grid/Wrap en lugar de carrusel: no hay flechas ni scroll horizontal */
+/* sin flechas ni scroll */
 const Grid = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
-  justify-content: center; /* centrado si caben en una fila */
+  justify-content: center; /* centrado si me caben en una fila */
 `
 
 const Slide = styled(Link)`
@@ -78,7 +77,7 @@ const Name = styled.div`
   overflow: hidden;
 `
 
-/* Imágenes fijas */
+/* img fijas */
 const DEFAULT_CATEGORIES = [
   { name: 'Ciencia Ficción', image: 'src/assets/images/cienciaFiccion.webp' },
   { name: 'Ciencia', image: 'src/assets/images/ciencia.jpg' },
@@ -90,11 +89,7 @@ const DEFAULT_CATEGORIES = [
 ]
 
 /**
- * Props:
- * - title?: string
- * - itemDiameter?: number (px)
- * - viewAllLink?: string
- * - categories?: Array<{ name: string, image?: string }>
+Props: tittle=categories / itemDiamt/ viewaLLlink, cateogires/defaultcategories
  */
 export default function CategoriesCarousel({
   title = 'Categorías',
@@ -103,7 +98,7 @@ export default function CategoriesCarousel({
   categories: categoriesProp
 }) {
   const [cats, setCats] = useState([])
-
+  // estado cats= deriva categoriesProp o del default
   useEffect(() => {
     const source =
       Array.isArray(categoriesProp) && categoriesProp.length
@@ -122,11 +117,13 @@ export default function CategoriesCarousel({
   return (
     <Wrap>
       <Header>
+        {/* render de header con titulo y view all */}
         <H2>{title}</H2>
         <ViewAll to={viewAllLink}>Ver todos</ViewAll>
       </Header>
 
       <Grid>
+        {/* grid flexible no carro no scroll. */}
         {cats.map((c) => (
           <Slide
             key={c.name}

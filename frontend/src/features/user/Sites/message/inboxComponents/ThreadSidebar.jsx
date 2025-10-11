@@ -57,6 +57,8 @@ const Name = styled.div`
 const Time = styled.small`
   color: #666;
 `
+// props: threads : array {id, user, lastAt} loading, error
+// onOpenNew -> abre modal, onOpenThread(t), selecciona hilo
 
 export default function ThreadSidebar({
   loading,
@@ -68,15 +70,17 @@ export default function ThreadSidebar({
   return (
     <div>
       <SearchRow>
+        {/* inout de busqueda disabled */}
         <Input placeholder='Buscar en tus chats…' disabled />
         <PlusBtn onClick={onOpenNew}>+</PlusBtn>
       </SearchRow>
-
       <Wrap style={{ marginTop: 12 }}>
         {loading && <p>Cargando…</p>}
         {error && <p>{error}</p>}
         {!loading && !error && (
           <List>
+            {/* lista de hilos con avatar, nombre ultimo mensaje, hora del mensaje */}
+
             {threads.map((t) => (
               <Item key={t.id} onClick={() => onOpenThread(t)}>
                 <Avatar

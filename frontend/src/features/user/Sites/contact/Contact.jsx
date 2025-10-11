@@ -1,15 +1,14 @@
-// Contact.jsx
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { sendContactMessage } from '../../../../api/contact'
 import useAuth from '../../../../hooks/useAuth'
 
-// Presentacionales
+// briing em here
 import ContactHeader from './contactComponents/ContactHeader'
 import ContactForm from './contactComponents/ContactForm'
 import InfoSection from './contactComponents/InfoSection'
 
-// ======= UI base mínima (layout/collapse) =======
+// =layout
 const Page = styled.section`
   max-width: 1100px;
   margin: 0 auto;
@@ -33,7 +32,7 @@ const CollapseInner = styled.div`
   min-height: 0;
 `
 
-// ======= Contenido Info (imágenes/textos) =======
+//  Contenido Info (img/textos)
 const INFO = [
   {
     title: '¿Qué es Kbook?',
@@ -60,21 +59,22 @@ const INFO = [
     alt: 'Nuevas publicaciones'
   }
 ]
-
+// muestra CTA para abrir formulario
 export default function ContactPage() {
-  const { token } = useAuth()
+  const { token } = useAuth() // session check
 
-  // Toggle mensajería
-  const [open, setOpen] = useState(false)
+  // Toggle mnsjs
+  const [open, setOpen] = useState(false) //abrir formulario
 
   // Form state
-  const [subject, setSubject] = useState('')
-  const [body, setBody] = useState('')
-  const [sending, setSending] = useState(false)
-  const [sentOk, setSentOk] = useState(false)
+  const [subject, setSubject] = useState('') //campos formulario
+  const [body, setBody] = useState('') // campos form
+  const [sending, setSending] = useState(false) // disable sending durante Post
+  const [sentOk, setSentOk] = useState(false) // muestra mensaje enviado
   const [error, setError] = useState('')
 
   const onSubmit = async (e) => {
+    // valida que hay texto
     e.preventDefault()
     setError('')
     setSentOk(false)
@@ -83,11 +83,13 @@ export default function ContactPage() {
       return
     }
     try {
+      // llama a sendContactMessage
       setSending(true)
       await sendContactMessage({ subject, body })
       setSubject('')
       setBody('')
       setSentOk(true)
+      //limpia form i marca senOk
     } catch (e) {
       console.error(e)
       setError(e?.response?.data?.message || 'No se pudo enviar el mensaje')
@@ -98,9 +100,10 @@ export default function ContactPage() {
 
   return (
     <Page>
+      {/* titulo boton form */}
       <ContactHeader open={open} onToggle={() => setOpen((v) => !v)} />
 
-      {/* Formulario colapsable */}
+      {/* Formulario modo modal */}
       <Collapse open={open}>
         <CollapseInner>
           <ContactForm
@@ -119,7 +122,7 @@ export default function ContactPage() {
 
       <SectionSplit />
 
-      {/* Sección informativa */}
+      {/*  tarj informativas texto img */}
       <InfoSection items={INFO} />
     </Page>
   )

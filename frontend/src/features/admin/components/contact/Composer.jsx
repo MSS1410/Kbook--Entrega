@@ -19,25 +19,25 @@ const Textarea = styled.textarea`
 `
 
 export default function Composer({
-  subject,
-  setSubject,
+  subject, // asunto controlado por AdminContact
+  setSubject, // setter
   body,
-  setBody,
-  disabled,
-  onSend
+  setBody, // setter
+  disabled, //disabled when no hay usuario seleccionado
+  onSend // callback para envio
 }) {
   return (
     <>
       <Input
         placeholder='Asunto'
         value={subject}
-        onChange={(e) => setSubject(e.target.value)}
+        onChange={(e) => setSubject(e.target.value)} // 2-way binding
         disabled={disabled}
       />
       <Textarea
         placeholder={disabled ? 'Elige un usuario…' : 'Escribe tu respuesta…'}
         value={body}
-        onChange={(e) => setBody(e.target.value)}
+        onChange={(e) => setBody(e.target.value)} // 2-way binding
         disabled={disabled}
       />
       <div style={{ display: 'flex', gap: 8, justifyContent: 'end' }}>

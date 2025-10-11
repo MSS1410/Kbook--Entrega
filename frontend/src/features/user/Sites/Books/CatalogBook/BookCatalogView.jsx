@@ -5,13 +5,12 @@ import useCart from '../../../../../hooks/useCart'
 import api from '../../../../../api'
 import useScrollToTopOn from '../../../../../hooks/useScrollToTopOn'
 
-// Presentacionales (solo UI)
 import CatalogHeader from './catalogComponents/CatalogHeader'
 import CatalogListItem from './catalogComponents/CatalogListItem'
 import CatalogGridItem from './catalogComponents/CatalogGridItem'
 import Pager from './catalogComponents/Pager'
 
-/* ===== Layout y contenedores ===== */
+/* layout i contenedores */
 const Wrap = styled.div`
   max-width: 1100px;
   margin: 2rem auto;
@@ -45,7 +44,7 @@ const GridWrap = styled.div`
   }
 `
 
-/* ===== Helpers internos ===== */
+/*  Helpers   */
 const pickMinPrice = (formats) => {
   if (!Array.isArray(formats) || !formats.length) return null
   let min = formats[0].price
@@ -53,8 +52,9 @@ const pickMinPrice = (formats) => {
     if (formats[i].price < min) min = formats[i].price
   return min
 }
+// entre los formatos, devuelve el minimo precio.
 
-/* ===== Paginación: páginas con elipsis ===== */
+/*  Paginacion */
 function usePagination(page, totalPages, delta = 1) {
   return useMemo(() => {
     if (totalPages <= 7) {
@@ -72,10 +72,13 @@ function usePagination(page, totalPages, delta = 1) {
   }, [page, totalPages, delta])
 }
 
-/* ===== Componente principal ===== */
+/*  comp principal  */
+// catalogo de libros reutilizable con dos vistas, lista y rejilla.
+//pag en cliente, selector de formato y precio d libro, addToCard.
+
 export default function BookCatalogView({
   title = 'Libros',
-  items = [],
+  items = [], // libros cargados
   initialView = 'list',
   pageSize = 10
 }) {
@@ -83,44 +86,50 @@ export default function BookCatalogView({
   const { addOrUpdate, openDrawer } = useCart()
 
   const [view, setView] = useState(
+    // view se inicializa desde localStorage
     () => localStorage.getItem('booksView') || initialView
   )
   const [page, setPage] = useState(1)
 
-  // Estado: formato elegido por libro { [bookId]: 'TapaBlanda' | 'TapaDura' | 'Ebook' }
+  // diccionario, con el formato seleccionado
   const [choice, setChoice] = useState({})
   useScrollToTopOn(page)
 
   useEffect(() => {
     localStorage.setItem('booksView', view)
   }, [view])
+  // cada vez que user cambia vista, se guarda
 
-  // paginación cliente
+  // paginacion cliente: calculo total pages y ventana visible con slice.
+  //si baja el total y la page actual sale, resetea en 1.
+
   const total = items.length
   const totalPages = Math.max(1, Math.ceil(total / pageSize))
 
   useEffect(() => {
     if (page > totalPages) setPage(1)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [totalPages])
 
   const sliceStart = (page - 1) * pageSize
   const visible = items.slice(sliceStart, sliceStart + pageSize)
   const pages = usePagination(page, totalPages, 1)
 
-  // helpers de formato por item
+  // helpers de formato de libro
   const getFormats = (b) => (Array.isArray(b?.formats) ? b.formats : [])
+  // default, usa lo elegido en choice,
   const defaultType = (b) =>
     getFormats(b).find((f) => f.type === 'TapaBlanda')?.type ||
     getFormats(b)[0]?.type ||
     null
   const selectedType = (b) => choice[b._id] || defaultType(b)
   const findFmt = (b, type) =>
+    // buscara el objeto de formsto por tipo
     getFormats(b).find((f) => f.type === type) || null
 
-  // Añadir al carrito con formato seleccionado; si no viene, intenta fetch del libro por id
+  // Añadir al carrito con formato seleccionado; si no tiene, intenta fetch del libro por id
   const handleAdd = async (book, preferType) => {
     const formats = Array.isArray(book?.formats) ? book.formats : []
+    // fallback formats
     let fmt =
       (preferType && formats.find((f) => f.type === preferType)) ||
       formats.find((f) => f.type === 'TapaBlanda') ||
@@ -141,18 +150,20 @@ export default function BookCatalogView({
         console.warn('No se pudieron obtener formatos por id:', e)
       }
     }
-
+    // si aun asi no tenemos los formatos, avisamos al usuario.
     if (!fmt?.type) {
       alert('Este libro no tiene formatos disponibles ahora mismo.')
       return
     }
 
     try {
+      // llama a addorupdate del cart,
       await addOrUpdate({
         bookId: book._id,
         format: fmt.type,
         quantity: 1
       })
+      // si es ok, openDrawer
       if (typeof openDrawer === 'function') openDrawer()
       else window.dispatchEvent(new Event('cart:open'))
     } catch (e) {
@@ -171,9 +182,11 @@ export default function BookCatalogView({
 
   return (
     <Wrap>
+      {/* header titulo y toggles vista */}
       <CatalogHeader title={title} view={view} onSetView={setView} />
 
       <ResultCount>
+        {/* mostramos cuantos libros hay en vista */}
         {total} resultado{total === 1 ? '' : 's'} · Mostrando{' '}
         {Math.min(total, sliceStart + 1)}–
         {Math.min(total, sliceStart + visible.length)}
@@ -182,6 +195,7 @@ export default function BookCatalogView({
       {!total && <Empty>Sin resultados.</Empty>}
 
       {/* LISTA */}
+      {/* render de los libros en listado */}
       {view === 'list' && !!total && (
         <ListWrap>
           {visible.map((b) => {
@@ -208,6 +222,7 @@ export default function BookCatalogView({
 
       {/* REJILLA */}
       {view === 'grid' && !!total && (
+        // render de los libros en cuadricula
         <GridWrap>
           {visible.map((b) => {
             const selType = selectedType(b)
@@ -231,7 +246,7 @@ export default function BookCatalogView({
         </GridWrap>
       )}
 
-      {/* Paginación */}
+      {/* pager, botones prev next + numeros paginas */}
       {totalPages > 1 && (
         <Pager
           page={page}

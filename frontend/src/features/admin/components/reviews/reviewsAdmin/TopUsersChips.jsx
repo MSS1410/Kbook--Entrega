@@ -1,9 +1,9 @@
-// frontend/src/admin/pages/reviews/TopUsersChips.jsx
 import React from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { absUrl } from '../../../../../utils/absUrl'
 import { AVATAR_PLACEHOLDER } from '../../../../../constants/media.js'
+
 const Section = styled.section`
   display: grid;
   gap: 12px;
@@ -87,6 +87,7 @@ export default function TopUsersChips({ topUsers, loading }) {
                 alt={u.name}
               />
               <span>{u.name}</span>
+              {/* numerop reseñas del user */}
               <Badge>· {u.count}</Badge>
             </Chip>
           ))}

@@ -1,4 +1,3 @@
-// InboxUser.jsx
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useParams } from 'react-router-dom'
@@ -12,11 +11,10 @@ import {
 } from '../../../../api/messages'
 import useAuth from '../../../../hooks/useAuth'
 
-// Presentacionales
 import ThreadSidebar from './inboxComponents/ThreadSidebar'
 import ChatPanel from './inboxComponents/ChatPanel'
 
-/* ===== Layout contenedor ===== */
+/*  Layout contenedor  */
 const Page = styled.div`
   max-width: 1100px;
   margin: 24px auto;
@@ -29,9 +27,9 @@ const Page = styled.div`
   }
 `
 
-/* ===================== Helpers de normalización ===================== */
+/*  Helpers   */
 
-// Usuario normalizado (id, name, avatar)
+// Usuario normalizado, junto las formas variantes que pueda devolver el back
 function normalizeUser(u) {
   if (!u) return null
   const id = u._id || u.id || String(u)
@@ -44,7 +42,7 @@ function normalizeUser(u) {
   }
 }
 
-// Admin contraparte para agrupar threads en el fallback
+// identifica al otro admin en conversaciones sin hilo, thread
 function pickAdminCounterparty(m) {
   return (
     m.fromAdmin ||
@@ -55,7 +53,7 @@ function pickAdminCounterparty(m) {
   )
 }
 
-// Devuelve SIEMPRE un mensaje con `from` poblado (user o admin)
+//  SIEMPRE retorna un mensaje con from para user o admin
 function normalizeMessage(m) {
   const sender = m.from || m.fromUser || m.fromAdmin || m.sender || null
   return {
@@ -67,38 +65,42 @@ function normalizeMessage(m) {
   }
 }
 
-/* ===================== Componente ===================== */
+/*  componente princip
+muestra lista de hilos, threads, y panel de chat.
+permite responder dentro del hilo y crear uno nuevo mediante modal
+  */
 export default function InboxUser() {
   const { threadId } = useParams()
   const { user } = useAuth()
   const myId = user?._id
 
-  const [threads, setThreads] = useState([])
+  const [threads, setThreads] = useState([]) // hilos
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  const [active, setActive] = useState(null)
-  const [messages, setMessages] = useState([])
+  const [active, setActive] = useState(null) // active hilo thread
+  const [messages, setMessages] = useState([]) // msg del hilo active
   const [loadingMsgs, setLoadingMsgs] = useState(false)
 
-  const [openNew, setOpenNew] = useState(false)
-  const [compose, setCompose] = useState('')
+  const [openNew, setOpenNew] = useState(false) // modal nuevo chat
+  const [compose, setCompose] = useState('') // textarea para envio
 
-  // 1) Cargar threads; fallback con inbox si aún no hay threads
+  // carga de los threads con fallback
   useEffect(() => {
     ;(async () => {
       try {
         setLoading(true)
         try {
-          const { data } = await getThreads()
+          const { data } = await getThreads() // carga de hilos
           const arr = Array.isArray(data?.threads) ? data.threads : []
           setThreads(arr)
         } catch {
-          // Fallback: agrupar mensajes simples por admin
+          // Fallback -> agrupar mensajes simples por admin
           const { data } = await getMyMessages({ limit: 200 })
           const items = Array.isArray(data?.items) ? data.items : []
           const map = new Map()
           for (const m of items) {
+            // fallback del admin
             const otherAdmin = pickAdminCounterparty(m)
             if (!otherAdmin?._id && !otherAdmin?.id) continue
             const key = String(otherAdmin._id || otherAdmin.id)
@@ -113,6 +115,7 @@ export default function InboxUser() {
               lastAt
             })
           }
+
           setThreads([...map.values()].sort((a, b) => b.lastAt - a.lastAt))
         }
       } catch {
@@ -123,7 +126,7 @@ export default function InboxUser() {
     })()
   }, [])
 
-  // 2) Cargar mensajes del thread activo
+  //  carga de mensajes del thread activo
   const loadThread = async (t) => {
     setActive(t)
     setMessages([])
@@ -131,10 +134,11 @@ export default function InboxUser() {
     try {
       try {
         const { data } = await getThreadMessages(t.id)
+
         const arr = Array.isArray(data?.messages) ? data.messages : []
         setMessages(arr.map(normalizeMessage))
       } catch {
-        // Fallback filtrando por admin (t.id)
+        // si falla getMyMeSSAGES por el admin, fallback
         const { data } = await getMyMessages({ limit: 200 })
         const items = Array.isArray(data?.items) ? data.items : []
         const arr = items
@@ -152,7 +156,7 @@ export default function InboxUser() {
     }
   }
 
-  // Abrir thread por URL si llega :threadId
+  // Abrir thread por URL si llega :threadId, en ruta, localiza el hilo y llama a loadThread(found)
   useEffect(() => {
     if (!threadId || !threads.length) return
     const found = threads.find((t) => String(t.id) === String(threadId))
@@ -182,9 +186,10 @@ export default function InboxUser() {
     }
   }
 
-  // Confirmado desde el modal (usuario seleccionado)
+  // Confirmado desde el modal (user selected), nuevo chat modal
   const handleStartChat = async (u) => {
     if (!u?._id) return
+    // si la Api no existe, crea un thread minimo con ese usuario y lo pone el primero, y lo abre.
     try {
       const { data } = await startThread(u._id, '', '')
       const t = data?.thread || {
@@ -205,7 +210,7 @@ export default function InboxUser() {
 
   return (
     <Page>
-      {/* Aside izquierdo (presentacional) */}
+      {/* columna izquierda: lista de hilos y boton + */}
       <ThreadSidebar
         loading={loading}
         error={error}
@@ -214,7 +219,7 @@ export default function InboxUser() {
         onOpenThread={loadThread}
       />
 
-      {/* Panel de conversación (presentacional) */}
+      {/* zona derecha: panel chat, conversacion y composer para texto */}
       <ChatPanel
         active={active}
         messages={messages}
@@ -224,7 +229,7 @@ export default function InboxUser() {
         onSend={onSend}
       />
 
-      {/* Modal: Nuevo chat */}
+      {/*modal: new chat, crea hilos nuevos */}
       <NewChatModal
         open={openNew}
         onClose={() => setOpenNew(false)}

@@ -32,6 +32,13 @@ const Foot = styled.div`
   justify-content: flex-end;
   gap: 8px;
 `
+/** 
+Modal controlado:
+open: boolean, render con condicion
+title: string 
+ footer con acciones
+ onClose: cierra al click en backdrop
+ */
 
 export default function Modal({ open, title, children, footer, onClose }) {
   if (!open) return null

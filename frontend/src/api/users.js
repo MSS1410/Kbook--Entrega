@@ -1,5 +1,4 @@
-// frontend/src/api/users.js
 import api from './index'
 
-// Libros comprados por el usuario autenticado
+// devuelvo libros comprados por usuario auth
 export const getMyBooks = () => api.get('/api/users/profile/books')

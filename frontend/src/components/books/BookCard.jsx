@@ -33,7 +33,7 @@ const Author = styled.p`
   color: ${({ theme }) => theme.colors.onSurface};
   margin: 0;
 `
-
+// tarjeta simple para listas, carruseles; mostramos, portada, titulo, autor, todo link
 export default function BookCard({ book }) {
   return (
     <Link to={`/books/${book._id}`}>

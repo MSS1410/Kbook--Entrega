@@ -17,41 +17,132 @@ import ReviewsCarousel from '../../components/books/booksDet/ReviewsCarousel.jsx
 const Wrap = styled.div`
   display: grid;
   gap: 16px;
-  max-width: 100%;
+  max-width: 1200px; /* ← contención en desktop para que nada se desborde */
+  margin: 0 auto;
+  padding: 0 12px;
   overflow-x: clip;
+  box-sizing: border-box;
+  @media (min-width: 768px) {
+    padding: 0 16px;
+  }
+  @media (min-width: 1024px) {
+    padding: 0 20px;
+  }
 `
+
 const Top = styled.div`
   display: grid;
   gap: 16px;
   grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  /* asegura que los hijos no fuercen overflow horizontal */
+  > * {
+    min-width: 0;
+  }
   @media (min-width: 900px) {
     grid-template-columns: 280px minmax(0, 1fr);
   }
 `
 
+/* --- NUEVO: columnas con control responsivo de portada e info --- */
+const LeftCol = styled.div`
+  /* columna de portada */
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  justify-items: center;
+
+  /* tamaño máximo de la portada en móviles (iPhone) */
+  @media (max-width: 480px) {
+    /* bloquea ancho y alto máximos para que no “explote” */
+    & img {
+      width: 75vw !important;
+      max-width: 320px;
+      height: auto !important;
+      object-fit: contain !important;
+      aspect-ratio: 2 / 3;
+      max-height: 65vh;
+    }
+  }
+
+  /* tablets */
+  @media (min-width: 481px) and (max-width: 899px) {
+    & img {
+      width: 55vw !important;
+      max-width: 360px;
+      height: auto !important;
+      object-fit: contain !important;
+      aspect-ratio: 2 / 3;
+      max-height: 70vh;
+    }
+  }
+
+  /* desktop: alineado al ancho de columna (280px) */
+  @media (min-width: 900px) {
+    justify-items: stretch;
+    & img {
+      width: 100% !important;
+      height: auto !important;
+      object-fit: contain !important;
+      aspect-ratio: 2 / 3;
+      max-height: 80vh;
+    }
+  }
+
+  /* por si el uploader usa un wrapper interno con img dentro */
+  & img {
+    display: block;
+  }
+`
+
+const RightCol = styled.div`
+  /* columna de formulario/info */
+  min-width: 0;
+  overflow: hidden; /* ← evita que la info “siga” al carrusel de reseñas */
+  display: grid;
+  align-content: start;
+
+  /* títulos y campos no deben romper el layout */
+  & * {
+    min-width: 0;
+  }
+`
+
+/* --- NUEVO: envoltorio del carrusel de reseñas para evitar desbordes --- */
+const ReviewsWrap = styled.div`
+  overflow: hidden;
+  min-width: 0;
+  /* asegura que el carrusel no exceda el ancho disponible */
+  > * {
+    max-width: 100%;
+  }
+`
+
+// helper, extrae precio por tipo de formato
 const priceFrom = (formats, t) => {
   const f = Array.isArray(formats) ? formats.find((x) => x?.type === t) : null
   return typeof f?.price === 'number' ? f.price : null
 }
 
 export default function AdminBookDetail() {
-  const { id } = useParams()
+  const { id } = useParams() // id del libro
   const navigate = useNavigate()
 
-  const [book, setBook] = useState(null)
+  const [book, setBook] = useState(null) // el actual
   const [editing, setEditing] = useState(false)
-  const [model, setModel] = useState(null)
-  const [authors, setAuthors] = useState([])
-  const [reviews, setReviews] = useState([])
+  const [model, setModel] = useState(null) // form controlado
+  const [authors, setAuthors] = useState([]) // select author
+  const [reviews, setReviews] = useState([]) //reviews del libro
 
-  const [newCoverFile, setNewCoverFile] = useState(null)
-  const [newCoverPreview, setNewCoverPreview] = useState('')
+  const [newCoverFile, setNewCoverFile] = useState(null) // archivo portada nuevo
+  const [newCoverPreview, setNewCoverPreview] = useState('') //objecturl preview
 
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     let alive = true
     ;(async () => {
+      // carga de libro y autores en paralelo
       const [bRaw, auths] = await Promise.all([getBook(id), listAuthorsAll()])
       if (!alive) return
       const b = bRaw || {}
@@ -69,7 +160,8 @@ export default function AdminBookDetail() {
         priceEbook: priceFrom(b.formats, 'Ebook') ?? 0,
         formats: Array.isArray(b.formats) ? b.formats : [],
         coverImage: b.coverImage || ''
-      })
+      }) //normaliza modelo edicion
+
       setNewCoverFile(null)
       setNewCoverPreview('')
 
@@ -85,6 +177,7 @@ export default function AdminBookDetail() {
           : Array.isArray(resReviews)
           ? resReviews
           : []
+        // filtro por si api devuelve mas de un libro
         const filtered = arr.filter((r) => {
           const bk = r.book
           const bid = typeof bk === 'object' ? bk?._id || bk?.id : bk
@@ -92,6 +185,7 @@ export default function AdminBookDetail() {
         })
         if (!alive) return
         setReviews(filtered)
+        // tolera errores de reviews
       } catch {
         if (!alive) return
         setReviews([])
@@ -99,13 +193,14 @@ export default function AdminBookDetail() {
     })()
     return () => {
       alive = false
-      if (newCoverPreview) URL.revokeObjectURL(newCoverPreview)
+      if (newCoverPreview) URL.revokeObjectURL(newCoverPreview) // evita memory leaks
     }
   }, [id])
 
   const save = async () => {
     setSaving(true)
     try {
+      // reconfigura array de formato desde el form
       const formats = [
         { type: 'TapaBlanda', price: Number(model.priceSoft || 0) },
         { type: 'TapaDura', price: Number(model.priceHard || 0) },
@@ -117,9 +212,10 @@ export default function AdminBookDetail() {
         synopsis: model.synopsis,
         category: model.category,
         formats
-      })
+      }) // actualiza campos texto/num
 
       if (newCoverFile) {
+        // si nueva portada, la subo a parte
         try {
           const resp = await uploadBookCover(id, newCoverFile)
           setBook((b) => (b ? { ...b, coverImage: resp.coverImage } : b))
@@ -128,11 +224,12 @@ export default function AdminBookDetail() {
           setNewCoverPreview('')
         } catch (e) {
           alert(
-            'Los datos se guardaron, pero la actualización de portada ha fallado. Revisa /api/admin/books/:id/cover.'
+            'Los datos se guardaron, pero la actualización de portada ha fallado.'
           )
         }
       }
 
+      // recarga libro fresh desde backend
       const fresh = await getBook(id)
       setBook(fresh)
       setModel({
@@ -150,7 +247,7 @@ export default function AdminBookDetail() {
         formats: Array.isArray(fresh.formats) ? fresh.formats : [],
         coverImage: fresh.coverImage || ''
       })
-      setEditing(false)
+      setEditing(false) // vuelve modo lectura
     } finally {
       setSaving(false)
     }
@@ -159,6 +256,7 @@ export default function AdminBookDetail() {
   const cancel = () => {
     if (!book) return
     setModel({
+      // restaura modelo
       _id: book._id,
       title: book.title || '',
       author:
@@ -173,7 +271,7 @@ export default function AdminBookDetail() {
       formats: Array.isArray(book.formats) ? book.formats : [],
       coverImage: book.coverImage || ''
     })
-    if (newCoverPreview) URL.revokeObjectURL(newCoverPreview)
+    if (newCoverPreview) URL.revokeObjectURL(newCoverPreview) // limpia preview
     setNewCoverFile(null)
     setNewCoverPreview('')
     setEditing(false)
@@ -181,8 +279,8 @@ export default function AdminBookDetail() {
 
   const remove = async () => {
     if (!confirm('¿Eliminar este libro definitivamente?')) return
-    await deleteBook(id)
-    navigate('/admin/books')
+    await deleteBook(id) // elimina en backend
+    navigate('/admin/books') // vuelve al listado
   }
 
   if (!book) return <div style={{ padding: 16 }}>Cargando…</div>
@@ -206,27 +304,35 @@ export default function AdminBookDetail() {
           onSave={save}
           onCancel={cancel}
           onDelete={remove}
+          // acciones sobre contexto
         />
       </div>
 
       <Top>
-        <BookCoverUploader
-          book={book}
-          editing={editing}
-          newCoverPreview={newCoverPreview}
-          setNewCoverPreview={setNewCoverPreview}
-          setNewCoverFile={setNewCoverFile}
-        />
-        <BookFormFields
-          book={book}
-          authors={authors}
-          model={model}
-          setModel={setModel}
-          editing={editing}
-        />
-      </Top>
+        <LeftCol>
+          <BookCoverUploader
+            book={book}
+            editing={editing}
+            newCoverPreview={newCoverPreview}
+            setNewCoverPreview={setNewCoverPreview}
+            setNewCoverFile={setNewCoverFile}
+          />
+        </LeftCol>
 
-      <ReviewsCarousel reviews={reviews} />
+        <RightCol>
+          <BookFormFields
+            book={book}
+            authors={authors}
+            model={model}
+            setModel={setModel}
+            editing={editing}
+          />
+        </RightCol>
+      </Top>
+      {/* listado horizontal con scroll sobre las reviews */}
+      <ReviewsWrap>
+        <ReviewsCarousel reviews={reviews} />
+      </ReviewsWrap>
 
       {editing && (
         <div style={{ color: '#64748b', fontSize: 13 }}>

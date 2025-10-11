@@ -4,12 +4,12 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import api from '../../../../../api'
 import useCart from '../../../../../hooks/useCart'
 
-// Presentacionales locales (solo UI)
+// take em here
 import Header from './pageComponents/Header'
 import SearchListItem from './pageComponents/SearchListItem'
 import SearchGridItem from './pageComponents/SearchGridItem'
 
-/* ============== contenedor ============== */
+/*  contenedor  */
 const Page = styled.div`
   max-width: 1100px;
   margin: 2rem auto;
@@ -24,7 +24,7 @@ const Empty = styled.div`
   color: #666;
 `
 
-/* ===== contenedores de lista/rejilla ===== */
+/*  contenedores de lista/rejilla  */
 const ListWrap = styled.div`
   display: grid;
   gap: ${({ theme }) => theme.spacing.md};
@@ -45,11 +45,14 @@ const GridWrap = styled.div`
   }
 `
 
-/* ============== helpers ============== */
+/*  helpers  */
+// devuelve URLSearchParams from useMemo
 function useQueryParams() {
   const { search } = useLocation()
   return useMemo(() => new URLSearchParams(search), [search])
 }
+
+// precio minimo del array de formatos / null
 const pickMinPrice = (formats) => {
   if (!Array.isArray(formats) || !formats.length) return null
   let min = formats[0].price
@@ -57,14 +60,20 @@ const pickMinPrice = (formats) => {
     if (formats[i].price < min) min = formats[i].price
   return min
 }
+// eleccion de formato a tapa blanda, sino primer formato
 const chooseFormat = (book) => {
   const list = Array.isArray(book?.formats) ? book.formats : []
   const fav = list.find((f) => f.type === 'TapaBlanda') || list[0]
   return fav || null
 }
+// pagina de busqueda/listado de libros con:
+// lista o cuadricula
+// carga desde /api/books?search=<q>&limit=60
+// addToCart con formato ya elegido, o con el que lleva default
 
-/* ============== página ============== */
+/*  page  */
 export default function BooksPage() {
+  // estado principal
   const qp = useQueryParams()
   const navigate = useNavigate()
   const q = qp.get('search') || ''
@@ -88,6 +97,7 @@ export default function BooksPage() {
     if (view) params.set('view', view)
     if (q) params.set('search', q)
     navigate({ search: params.toString() }, { replace: true })
+    // mantiene vista actual en storage y en query string
   }, [view, q, navigate])
 
   // carga resultados
@@ -104,6 +114,7 @@ export default function BooksPage() {
           : Array.isArray(data?.books)
           ? data.books
           : []
+        // normalizamos la respuesta a array y nos quedamos con el total
         setItems(books)
         setTotal(typeof data?.total === 'number' ? data.total : books.length)
       } catch (e) {
@@ -115,15 +126,17 @@ export default function BooksPage() {
     })()
   }, [q])
 
+  // Añadir al carrito
   const handleAdd = async (book) => {
     const fmt = chooseFormat(book)
-    if (!fmt) return navigate(`/books/${book._id}`) // sin formato -> detalle
+    if (!fmt) return navigate(`/books/${book._id}`) // si no viene con formato mando usuario al detalle para que lo eliga y añada libro desde ahi al carrito
     try {
       await addOrUpdate({ bookId: book._id, format: fmt.type, quantity: 1 })
       if (typeof openDrawer === 'function') openDrawer()
       else window.dispatchEvent(new Event('cart:open'))
     } catch (err) {
       console.error('No se pudo añadir al carrito, abriendo detalle…', err)
+      // fallo = detalle
       navigate(`/books/${book._id}`)
     }
   }
@@ -131,17 +144,19 @@ export default function BooksPage() {
   return (
     <Page>
       <Header
+        // header con selector de vista
         title={q ? `Resultados para “${q}”` : 'Libros'}
         view={view}
         onSetView={setView}
       />
 
       {!!q && (
+        // si q, contador de resultados
         <ResultCount>
           {total} resultado{total === 1 ? '' : 's'}
         </ResultCount>
       )}
-
+      {/* estados loading/ error / vacio */}
       {loading && <div>Cargando…</div>}
       {error && <div style={{ color: 'crimson' }}>{error}</div>}
       {!loading && !error && items.length === 0 && (

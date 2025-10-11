@@ -40,13 +40,17 @@ const ToggleBtn = styled.button`
     border-right: 1px solid #e6e6e8;
   }
 `
-
+// barra superior del catalogo con titulo y vista elegible
 export default function CatalogHeader({ title, view, onSetView }) {
   return (
     <HeaderRow>
+      {/* mostraremos el titulo y los botones de eleccion de vista */}
+
       <H1>{title}</H1>
       <Tools>
         <ToggleGroup role='tablist' aria-label='Cambiar vista'>
+          {/* tablist = entiende que el contenedor es una lista de pestañas, tabs */}
+          {/* aria pressed = para botones conmutables */}
           <ToggleBtn
             type='button'
             active={view === 'list'}
@@ -54,6 +58,8 @@ export default function CatalogHeader({ title, view, onSetView }) {
             onClick={() => onSetView('list')}
             title='Vista lista'
           >
+            {/* patron Tabs -> role = tablist con hijos role = tab, state aria selected */}
+            {/* patron toggle button -> botones con aria-pressed y contenedor role="group" */}
             <FiList /> Lista
           </ToggleBtn>
           <ToggleBtn

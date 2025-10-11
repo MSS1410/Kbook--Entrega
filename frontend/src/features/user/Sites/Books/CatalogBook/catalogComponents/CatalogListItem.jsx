@@ -120,7 +120,8 @@ const excerpt = (s, n = 180) => {
   const space = cut.lastIndexOf(' ')
   return (space > 0 ? cut.slice(0, space) : cut) + '…'
 }
-
+// mostraremos listado de libro en vista lista
+// seguimos dinamica como en grid, pero mosraremos una lista y no la rejilla
 export default function CatalogListItem({
   book,
   formats = [],
@@ -148,7 +149,7 @@ export default function CatalogListItem({
         <Excerpt>
           {book.synopsis && book.synopsis.slice ? excerpt(book.synopsis) : ''}
         </Excerpt>
-
+        {/* mosramos un cachito, extracto de sinopsis con excertp */}
         <BottomRow>
           <FormatPriceSelector
             formats={formats}

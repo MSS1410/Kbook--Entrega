@@ -2,8 +2,8 @@
 import { useEffect } from 'react'
 
 /**
- * Sube al inicio cuando cambien las dependencias dadas (por ejemplo, page).
- * Intenta alinear con el <main>; si no existe, usa window.
+helper de ux, me mandara siempre al inicio de la pagina, para evitar que muestre el culo de las apges.
+cuando cambian las dependencias, sube hasta el inicio.
  */
 export default function useScrollToTopOn(...deps) {
   useEffect(() => {
@@ -13,6 +13,5 @@ export default function useScrollToTopOn(...deps) {
     } else {
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps)
 }

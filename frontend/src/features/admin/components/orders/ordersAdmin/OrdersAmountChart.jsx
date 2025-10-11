@@ -1,4 +1,3 @@
-// frontend/src/admin/pages/orders/OrdersAmountChart.jsx
 import React from 'react'
 import styled from 'styled-components'
 import {
@@ -9,13 +8,13 @@ import {
   XAxis,
   YAxis,
   Tooltip
-} from 'recharts'
+} from 'recharts' // libreria para preparar graficos
 
 const ChartBox = styled.div`
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: ${({ theme }) => theme.colors.radii?.lg || '12px'};
   background: ${({ theme }) => theme.colors.cardBg};
-  height: 320px;
+  height: 320px; // ← alto consistente con el otro gráfico
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -32,6 +31,7 @@ const ChartBody = styled.div`
 `
 
 export default function OrdersAmountChart({ data }) {
+  // DATA ::: [{ day: 'MM-DD', amount: nimber }, ....]
   return (
     <ChartBox>
       <ChartHead>Ingresos / últimos 30 días</ChartHead>
@@ -39,6 +39,7 @@ export default function OrdersAmountChart({ data }) {
         <ResponsiveContainer width='100%' height='100%'>
           <AreaChart
             data={data}
+            // retoque visual de margin
             margin={{ top: 8, right: 8, left: -12, bottom: 0 }}
           >
             <defs>
@@ -57,7 +58,7 @@ export default function OrdersAmountChart({ data }) {
               tick={{ fontSize: 12 }}
               tickFormatter={(v) =>
                 v >= 1000 ? `${(v / 1000).toFixed(1)}k` : v
-              }
+              } // formato k
             />
             <Tooltip
               formatter={(v) =>
@@ -65,12 +66,13 @@ export default function OrdersAmountChart({ data }) {
                   style: 'currency',
                   currency: 'EUR'
                 })
-              }
+              } // tooltip a EUR
             />
             <Area
               type='monotone'
               dataKey='amount'
               stroke='currentColor'
+              // INTENTO DE GRADIENT
               fill='url(#amt)'
             />
           </AreaChart>

@@ -1,8 +1,6 @@
-// frontend/src/features/user/Sites/Books/SingularBook/components/ReviewsSection.jsx
 import React from 'react'
 import styled, { useTheme } from 'styled-components'
 import { Link } from 'react-router-dom'
-// Ajusta esta ruta si tu estructura difiere:
 import HomeCarrusel from '../../../../../../components/carrouseles/HomeCarrusels'
 
 const Card = styled.div`
@@ -35,13 +33,14 @@ const Btn = styled.button`
   font-weight: 600;
 `
 
-// Helper local (sin utils/)
+// Helper local
 const truncateWords = (str = '', n = 12) => {
   const w = String(str).trim().split(/\s+/).filter(Boolean)
   if (w.length <= n) return w.join(' ')
   return w.slice(0, n).join(' ') + '…'
 }
-
+// SI HAY RESeñas, carrusel con tarjetas,
+// si no hay reseñas, mensaje con funcionalidad de dejar tu opinion sobre el libro
 export default function ReviewsSection({
   bookId,
   bookTitle,
@@ -59,7 +58,7 @@ export default function ReviewsSection({
         </Muted>
         <div style={{ marginTop: 8 }}>
           <Btn onClick={onOpenModal}>Deja tu huella</Btn>{' '}
-          {/* En el estado vacío, mantenemos el enlace original */}
+          {/* estado vacio, mantengo enlace original */}
           <Link to={`/reviews?book=${bookId}`}>Ver todas</Link>
         </div>
       </>

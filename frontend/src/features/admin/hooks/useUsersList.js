@@ -1,6 +1,7 @@
-// useUsersList.js
 import { useEffect, useMemo, useState } from 'react'
 import { listAllUsersAdmin, toggleUserBlockAdmin } from '../api/adminApi.js'
+
+// intencion, importar listado de users para el panel admin., list allusers, toggleuserblock, desde adminApi.js
 
 export default function useUsersList(pageSize = 12) {
   const [users, setUsers] = useState([])
@@ -9,6 +10,7 @@ export default function useUsersList(pageSize = 12) {
   const [order, setOrder] = useState('new') // new | old
   const [page, setPage] = useState(1)
 
+  // cargo todos usuarios
   useEffect(() => {
     ;(async () => {
       setLoading(true)
@@ -20,7 +22,8 @@ export default function useUsersList(pageSize = 12) {
       }
     })()
   }, [])
-
+  // aplico filtros orden y paginacion.
+  //useMemo, para derivar pageItems
   const filtered = useMemo(() => {
     let arr = [...users]
     if (q.trim()) {

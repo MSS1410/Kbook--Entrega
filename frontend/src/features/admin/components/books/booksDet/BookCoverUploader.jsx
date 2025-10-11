@@ -31,10 +31,10 @@ const FieldLabel = styled.span`
 `
 
 export default function BookCoverUploader({
-  book,
-  editing,
-  newCoverPreview,
-  onPickCover
+  book, // Objeto libro a mostrar en portada actual
+  editing, // si objeto esta en edicino, mostrar input file
+  newCoverPreview, //
+  onPickCover // handler : (e) setNewCoverField(file); setNewCoverPreview
 }) {
   return (
     <Card>
@@ -58,7 +58,7 @@ export default function BookCoverUploader({
             <input
               type='file'
               accept='image/*'
-              onChange={onPickCover}
+              onChange={onPickCover} // delega al contenedor para setear file y su previewww
               style={{
                 width: '100%',
                 padding: '8px',

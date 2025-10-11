@@ -1,11 +1,17 @@
-// frontend/src/admin/pages/orders/OrdersListToolbar.jsx
 import React from 'react'
 import styled from 'styled-components'
 
 const Head = styled.div`
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  h2 { font-size: 20px; } small { color: ${({ theme }) =>
-    theme.colors.mutedText}
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  h2 {
+    font-size: 20px;
+  }
+  small {
+    color: ${({ theme }) => theme.colors.mutedText};
+  } // ← nota de orden
 `
 const Controls = styled.div`
   display: flex;
@@ -31,6 +37,7 @@ export default function OrdersListToolbar({ order, onChangeOrder }) {
       <Controls>
         <Select
           value={order}
+          // AVISARe del cambio de orden al Padre
           onChange={(e) => onChangeOrder(e.target.value)}
           aria-label='Ordenar por fecha'
           title='Ordenar por fecha'

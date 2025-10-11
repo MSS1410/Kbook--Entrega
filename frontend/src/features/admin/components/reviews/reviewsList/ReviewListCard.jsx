@@ -1,4 +1,3 @@
-// frontend/src/admin/pages/reviews/ReviewListCard.jsx
 import React from 'react'
 import styled from 'styled-components'
 import Button from '../../Button.jsx'
@@ -159,6 +158,7 @@ export default function ReviewListCard({ r, onDelete, deleting }) {
         <RightActions>
           <Button
             $variant='danger'
+            //  paso confirm y borrado al padre
             onClick={() => onDelete(r)}
             disabled={deleting}
             title='Eliminar reseña'

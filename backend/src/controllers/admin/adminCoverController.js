@@ -8,7 +8,7 @@ export const adminUploadBookCover = async (req, res, next) => {
       return res.status(400).json({ message: 'Archivo "cover" requerido.' })
     }
 
-    // Guardamos la URL pública que servirá Express estático
+    // Guardo en urlpUBLICA que despues usare el static en server.js. cuando guardo archivo en Multer me llega como req.file.filename, se me guarda en covers.
     const publicUrl = `/uploads/covers/${req.file.filename}`
 
     const book = await Book.findByIdAndUpdate(

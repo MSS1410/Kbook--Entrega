@@ -33,12 +33,16 @@ const DateSm = styled.div`
 `
 
 export default function MessageCard({ m }) {
+  // robusto ante datos parciales
   const u = m?.fromUser || {}
   const d = m?.createdAt ? new Date(m.createdAt) : null
+  // formato local de fecha y hora
   const when = d ? d.toLocaleString() : ''
   return (
     <Card to='/admin/contact' title='Abrir bandeja'>
+      {/* navega a inbox admin */}
       {u.avatar ? (
+        // fallback fallo de avatar
         <Avatar src={u.avatar} alt={u.name || ''} />
       ) : (
         <div

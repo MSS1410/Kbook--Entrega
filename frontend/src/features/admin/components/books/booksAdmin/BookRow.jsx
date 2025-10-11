@@ -64,6 +64,7 @@ export default function BookRow({ b, onDelete }) {
         </div>
         <div className='syn'>
           {b.synopsis?.slice(0, 160) || '—'}
+          {/* sinopsis truncadqa con elipsis */}
           {(b.synopsis || '').length > 160 ? '…' : ''}
         </div>
       </RowMeta>

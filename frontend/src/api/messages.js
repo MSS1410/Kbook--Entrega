@@ -1,17 +1,18 @@
 import api from '../api/index'
 
-// Inbox “simple” (admin → usuario) ya existente
+// inbox de admin a usuario
 export const getMyMessages = async ({ limit = 50, page = 1, unread } = {}) => {
   const params = { limit, page }
   if (typeof unread !== 'undefined') params.unread = unread ? 1 : 0
   return api.get('/api/users/messages', { params })
 }
 
+// mensaje como leido
 export const markMessageRead = async (id, read = true) => {
   return api.patch(`/api/users/messages/${id}/read`, { read })
 }
 
-// Threads P2P (nuevo)
+// Threads doble banda de llegada envio
 export const getThreads = () => api.get('/api/messages/threads')
 
 export const getThreadMessages = (participantId) =>

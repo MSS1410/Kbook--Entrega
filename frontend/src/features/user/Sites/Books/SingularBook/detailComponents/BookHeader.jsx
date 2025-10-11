@@ -1,4 +1,3 @@
-// frontend/src/features/Books/SingularBook/components/BookHeader.jsx
 import React from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
@@ -41,7 +40,7 @@ const Badge = styled.span`
   font-size: ${({ theme }) => theme.fontSizes.xs};
   color: ${({ theme }) => theme.colors.onSurface};
 `
-
+// mostraremos titulo, autor, link, badge de categoria
 export default function BookHeader({ title, author, category }) {
   return (
     <HeaderBlock>

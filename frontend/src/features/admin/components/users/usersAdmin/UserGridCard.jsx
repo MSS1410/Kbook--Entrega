@@ -13,28 +13,22 @@ const Card = styled.div`
   background: ${({ theme }) => theme.colors.cardBg};
   overflow: hidden;
 `
-
 const AvatarWrap = styled.div`
   position: relative;
   width: 100%;
   overflow: hidden;
   background: #eee;
   flex: 0 0 auto;
-
-  /* cuadrado 1:1 */
   &::before {
     content: '';
     display: block;
     padding-bottom: 100%;
-  }
-
-  /* El Avatar ocupa todo el contenedor */
+  } /* cuadrado 1:1 */
   > div {
     position: absolute;
     inset: 0;
-  }
+  } /* Avatar ocupa todo */
 `
-
 const CardBody = styled.div`
   display: flex;
   flex-direction: column;
@@ -42,7 +36,6 @@ const CardBody = styled.div`
   padding: 12px;
   flex: 1;
 `
-
 const Name = styled.h3`
   font-size: 15px;
   line-height: 1.25;
@@ -50,9 +43,8 @@ const Name = styled.h3`
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: calc(1.25em * 2);
+  min-height: calc(1.25em * 2); /* asegura altura para 2 líneas */
 `
-
 const Badge = styled.span`
   display: inline-block;
   padding: 2px 8px;
@@ -61,7 +53,6 @@ const Badge = styled.span`
   background: ${({ theme }) => theme.colors.mutedSurface};
   color: ${({ theme }) => theme.colors.accent};
 `
-
 const Actions = styled.div`
   margin-top: auto;
   display: flex;
@@ -74,12 +65,11 @@ const Actions = styled.div`
 `
 
 export default function UserGridCard({ u, onToggleBlock }) {
-  const avatarSrc = u?.avatar?.url || u?.avatar
+  const avatarSrc = u?.avatar?.url || u?.avatar // acepto obj y string
 
   return (
     <Card>
       <AvatarWrap>
-        {/* fill + square => ocupa todo el “header” cuadrado */}
         <Avatar
           fill
           square
@@ -89,12 +79,14 @@ export default function UserGridCard({ u, onToggleBlock }) {
       </AvatarWrap>
 
       <CardBody>
+        {/* Nombre y espacio a rol/estado */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <Name title={u.name}>{u.name}</Name>
           {u.role === 'admin' && <Badge>admin</Badge>}
           {u.isBlocked && <Badge>bloqueado</Badge>}
         </div>
 
+        {/* actiones: ver perfil & bloquear/desbloquear */}
         <Actions>
           <Button as={Link} $variant='ghost' to={`/admin/users/${u._id}`}>
             <Eye size={16} /> Ver perfil

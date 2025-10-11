@@ -12,6 +12,7 @@ const Card = styled.div`
   border-radius: ${({ theme }) => theme.radii.lg};
   background: ${({ theme }) => theme.colors.cardBg};
   overflow: hidden;
+  min-width: 0; /* ← evita desbordes en grid estrechos */
 `
 const Cover = styled.div`
   position: relative;
@@ -39,6 +40,7 @@ const CardBody = styled.div`
   gap: 8px;
   padding: 12px;
   flex: 1 1 auto;
+  min-width: 0;
 `
 const Info = styled.div`
   display: grid;
@@ -53,6 +55,7 @@ const Title = styled.h3`
   -webkit-box-orient: vertical;
   overflow: hidden;
   min-height: calc(1.25em * 2);
+  margin: 0;
 `
 const Meta = styled.small`
   color: ${({ theme }) => theme.colors.mutedText};
@@ -71,6 +74,13 @@ const Actions = styled.div`
   button {
     font-size: 13px;
   }
+  @media (max-width: 480px) {
+    gap: 6px;
+    a,
+    button {
+      flex: 1 1 auto;
+    } /* ← en móviles, botones se adaptan y no rompen */
+  }
 `
 
 export default function BookCard({ b, onDelete }) {
@@ -80,6 +90,7 @@ export default function BookCard({ b, onDelete }) {
         {b.coverImage ? (
           <img src={absUrl(b.coverImage)} alt={b.title} />
         ) : (
+          // uso absUrl para evitar que se rompa el path
           <div
             style={{
               position: 'absolute',

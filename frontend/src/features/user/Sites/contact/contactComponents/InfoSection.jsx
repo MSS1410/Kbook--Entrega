@@ -1,4 +1,3 @@
-// components/InfoSection.jsx
 import React from 'react'
 import styled from 'styled-components'
 
@@ -54,7 +53,9 @@ const Img = styled.img`
   object-fit: contain;
   display: block;
 `
-
+// pinta lista de tarjetas informativas sobre kbook
+// props: card recibe $flip para decidir orden de columnas,
+// art recibe $left, para alinear imagen izq alternando
 export default function InfoSection({ items = [] }) {
   return (
     <InfoGrid>

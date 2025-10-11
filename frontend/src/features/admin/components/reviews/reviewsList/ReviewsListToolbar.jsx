@@ -1,4 +1,3 @@
-// frontend/src/admin/pages/reviews/ReviewsListToolbar.jsx
 import React from 'react'
 import styled from 'styled-components'
 
@@ -40,6 +39,7 @@ export default function ReviewsListToolbar({ order, total, onChangeOrder }) {
       <Controls>
         <Select
           value={order}
+          // notifica cambio al padre
           onChange={(e) => onChangeOrder(e.target.value)}
           aria-label='Ordenar por fecha'
           title='Ordenar por fecha'

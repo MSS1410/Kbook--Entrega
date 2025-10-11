@@ -11,7 +11,7 @@ const FormSection = styled.div`
 `
 const TopSummary = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr; /* Dos columnas: envío y pago */
   gap: ${({ theme }) => theme.spacing.lg};
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
@@ -25,7 +25,7 @@ const SummaryCard = styled.div`
 `
 const LV = styled.div`
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto 1fr; /* Etiqueta + valor */
   column-gap: 8px;
   row-gap: 4px;
   font-size: 0.95rem;
@@ -76,7 +76,7 @@ const ItemTitle = styled.div`
 `
 const PriceRow = styled.div`
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 1fr auto; // qty a la izq, precio a la dcha
   gap: 8px;
   align-items: baseline;
 `
@@ -87,7 +87,7 @@ const SummaryBox = styled.div`
   margin-top: ${({ theme }) => theme.spacing.lg};
 `
 const Note = styled.p`
-  color: ${({ theme }) => theme.colors.mutedText};
+  color: ${({ theme }) => theme.colors.mutedText}; // texto informativo
   font-size: 0.9rem;
   margin-top: 6px;
 `
@@ -115,12 +115,12 @@ const SecondaryButton = styled.button`
 `
 
 export default function ReviewStep({
-  shippingDisplay,
-  paymentDisplay,
-  shippingOptions,
+  shippingDisplay, // objeto con {name, address, city, postalCode, country}
+  paymentDisplay, // {holderName, last4, expiry}
+  shippingOptions, // array de opciones para el envio
   selectedShippingOption,
-  onChangeShippingOption,
-  items,
+  onChangeShippingOption, // setter de option (key)
+  items, // cart items
   subtotal,
   shippingCost,
   total,
@@ -129,9 +129,9 @@ export default function ReviewStep({
   onBack,
   onConfirm
 }) {
-  const baseDate = new Date()
-  const isFast = selectedShippingOption.key === 'fast'
-  const windowTxt = isFast
+  const baseDate = new Date() // Ahora
+  const isFast = selectedShippingOption.key === 'fast' // si es envio rapido
+  const windowTxt = isFast // condiciones de cada uno y consecuencias $$
     ? format(addBusinessDays(baseDate, 2), 'dd MMM yyyy')
     : `${format(addBusinessDays(baseDate, 5), 'dd MMM yyyy')} - ${format(
         addBusinessDays(baseDate, 6),
@@ -155,6 +155,7 @@ export default function ReviewStep({
             <LV key={k}>
               <b>{k}:</b>
               <div>{v || '—'}</div>
+              {/*  "-" si esta vacio */}
             </LV>
           ))}
         </SummaryCard>
@@ -164,12 +165,14 @@ export default function ReviewStep({
           <LV>
             <b>Titular:</b>
             <div>{paymentDisplay.holderName || '—'}</div>
+            {/* titular */}
           </LV>
           <LV>
             <b>Tarjeta:</b>
             <div>
               {paymentDisplay.last4
-                ? `•••• •••• •••• ${paymentDisplay.last4}`
+                ? // mask  last 4 o -
+                  `•••• •••• •••• ${paymentDisplay.last4}`
                 : '—'}
             </div>
           </LV>
@@ -182,7 +185,9 @@ export default function ReviewStep({
             <label style={{ display: 'block', marginBottom: 6 }}>
               Opción de envío
             </label>
+
             <ShippingSelect
+              // key actual st o fast
               value={selectedShippingOption.key}
               onChange={(e) => onChangeShippingOption(e.target.value)}
             >
@@ -192,35 +197,48 @@ export default function ReviewStep({
                 </option>
               ))}
             </ShippingSelect>
+
             <Note>{selectedShippingOption.description}</Note>
           </div>
         </SummaryCard>
       </TopSummary>
 
-      {/* Items */}
+      {/* cart items */}
       <div style={{ marginTop: 24 }}>
         <h3>Ejemplares adquiridos</h3>
+
         <ItemsGrid style={{ marginTop: 12 }}>
           {items.map((it, idx) => {
             const b = it?.book
+
             const bid =
-              (b && (b._id || b.id)) ||
-              (typeof b === 'string' ? b : null) ||
+              (b && (b._id || b.id)) /* id del libro si existe objeto */ ||
+              (typeof b === 'string' ? b : null) /* o si vino como string */ ||
               `idx-${idx}`
-            const key = `${bid}-${it?.format || 'n/a'}-${idx}`
+
+            const key = `${bid}-${it?.format || 'n/a'}-${idx}` /* key estable */
+
             const title =
-              (b && typeof b === 'object' && (b.title || b.name)) ||
+              (b &&
+                typeof b === 'object' &&
+                (b.title || b.name)) /* misma metodol. */ ||
               it?.title ||
               'Libro'
+
             const cover =
-              (b && typeof b === 'object' && b.coverImage) ||
+              (b &&
+                typeof b === 'object' &&
+                b.coverImage) /* aseguramos cover  */ ||
               it?.coverImage ||
               ''
-            const qty = Number(it?.quantity || 0)
+            const qty = Number(it?.quantity || 0) /* cantidad final */
+
             const priceNum = Number(it?.price || 0) * qty
+
             const price = Number.isFinite(priceNum)
               ? priceNum.toFixed(2)
-              : '0.00'
+              : '0.00' /* precio final */
+
             return (
               <ItemCard key={key}>
                 <Cover>
@@ -228,9 +246,11 @@ export default function ReviewStep({
                     <img src={cover} alt={`Portada de ${title}`} />
                   ) : null}
                 </Cover>
+
                 <ItemTitle>{title}</ItemTitle>
+
                 <PriceRow>
-                  <div>Cantidad: {qty}</div>
+                  <div>Cantidad: {qty}</div> {/* total por línea */}
                   <div>{price} €</div>
                 </PriceRow>
               </ItemCard>
@@ -244,21 +264,27 @@ export default function ReviewStep({
           >
             <div>Subtotal</div>
             <div>{subtotal.toFixed(2)} €</div>
+            {/* suma items */}
             <div>Envío</div>
             <div>{shippingCost.toFixed(2)} €</div>
+            {/* coste opcion envio */}
             <div style={{ fontWeight: 700 }}>Total</div>
             <div style={{ fontWeight: 700 }}>{total.toFixed(2)} €</div>
           </div>
         </SummaryBox>
       </div>
 
-      {/* Entrega */}
+      {/* ventana aprox de entrega */}
       <div style={{ marginTop: 24 }}>
         <h3>
           Su{items.length > 1 ? 's' : ''} ejemplar{items.length > 1 ? 'es' : ''}{' '}
           llegará{items.length > 1 ? 'n' : ''}…
+          {/* tener en cuenta plural, singular */}
         </h3>
+
         <p style={{ marginTop: 6 }}>{windowTxt}</p>
+
+        {/* fecha o rango estimado */}
         <Note>¡Gracias por su compra! En Kbook apreciamos su confianza.</Note>
       </div>
 
@@ -270,7 +296,9 @@ export default function ReviewStep({
         <SecondaryButton onClick={onBack} disabled={submitting}>
           Atrás
         </SecondaryButton>
+
         <PrimaryButton onClick={onConfirm} disabled={submitting}>
+          {/* confirma compra */}
           {submitting ? 'Procesando…' : 'Finalizar compra'}
         </PrimaryButton>
       </ButtonRow>

@@ -21,6 +21,12 @@ const Subtitle = styled.p`
   color: #64748b;
 `
 
+/**
+-- Cabecera de section reusable: -- 
+ - title, subtitle
+- accion: buton o link a la derecha
+- children: contenido seccion
+ */
 export default function Section({ title, subtitle, action, children }) {
   return (
     <SectionWrap>

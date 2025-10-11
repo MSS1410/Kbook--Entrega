@@ -1,7 +1,6 @@
-// frontend/src/admin/pages/orders/OrderCard.jsx
 import React from 'react'
 import styled from 'styled-components'
-import { absUrl } from '../../../../../utils/absUrl' // 👈 4 niveles desde /src/admin/pages/orders
+import { absUrl } from '../../../../../utils/absUrl'
 
 const Card = styled.div`
   border: 1px solid ${({ theme }) => theme.colors.border};
@@ -59,10 +58,12 @@ const Footer = styled.div`
 export default function OrderCard({ o }) {
   const Ux = o.user
   const userName =
-    (typeof Ux === 'object' && (Ux?.name || Ux?.email)) || 'Usuario'
+    (typeof Ux === 'object' && (Ux?.name || Ux?.email)) || 'Usuario' // nombre fallback
   const userAvatar =
+    // normaliza URL
     typeof Ux === 'object' && Ux?.avatar ? absUrl(Ux.avatar) : ''
 
+  // items del pedido
   const items = Array.isArray(o.items) ? o.items : []
 
   return (
@@ -70,20 +71,21 @@ export default function OrderCard({ o }) {
       <Top>
         <U>
           {userAvatar ? (
-            <Avatar src={userAvatar} alt={userName} />
+            <Avatar src={userAvatar} alt={userName} /> // avatar si hay
           ) : (
-            <Avatar as='div' />
+            <Avatar as='div' /> // plchldr
           )}
           <div style={{ fontWeight: 600 }}>{userName}</div>
         </U>
-        <Meta>#{String(o._id).slice(-6).toUpperCase()}</Meta>
+        <Meta>#{String(o._id).slice(-6).toUpperCase()}</Meta>{' '}
+        {/* codigo cort del pedido para que sea facil de leer en la interface */}
       </Top>
 
       <ItemsWrap>
         {items.map((it, idx) => {
           const b = typeof it.book === 'object' ? it.book : null
-          const title = b?.title || it?.label || 'Artículo'
-          const cover = b?.coverImage ? absUrl(b.coverImage) : ''
+          const title = b?.title || it?.label || 'Artículo' // ← título del ítem
+          const cover = b?.coverImage ? absUrl(b.coverImage) : '' // ← portada si existe
           return (
             <Item key={o._id + '-' + idx}>
               {cover ? <Cover src={cover} alt={title} /> : <Cover as='div' />}
@@ -103,12 +105,13 @@ export default function OrderCard({ o }) {
       </ItemsWrap>
 
       <Footer>
-        <Meta>Estado: {o.status || '—'}</Meta>
+        <Meta>Estado: {o.status || '—'}</Meta> {/* ← estado textual */}
         <div style={{ fontWeight: 700 }}>
           {(o.totalPrice || 0).toLocaleString(undefined, {
             style: 'currency',
             currency: 'EUR'
-          })}
+          })}{' '}
+          {/* ← total en € */}
         </div>
       </Footer>
     </Card>

@@ -3,28 +3,29 @@ import React from 'react'
 import styled from 'styled-components'
 
 const FormSection = styled.div`
-  background: ${({ theme }) => theme.colors.surface};
+  background: ${({ theme }) => theme.colors.surface}; // tarjeta clara
+
   padding: ${({ theme }) => theme.spacing.lg};
   border-radius: ${({ theme }) => theme.radii.md};
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
 `
 const Field = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* label arriba, input down */
   margin-bottom: ${({ theme }) => theme.spacing.md};
 `
 const Label = styled.label`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-size: ${({ theme }) => theme.fontSizes.sm}; // label peque
   margin-bottom: 4px;
 `
 const Input = styled.input`
   padding: ${({ theme }) => theme.spacing.sm};
-  border: 1px solid ${({ hasError }) => (hasError ? 'red' : '#ccc')};
+  border: 1px solid ${({ hasError }) => (hasError ? 'red' : '#ccc')}; // rojo sin error
   border-radius: ${({ theme }) => theme.radii.sm};
   font-size: ${({ theme }) => theme.fontSizes.base};
 `
 const ErrorText = styled.div`
-  color: red;
+  color: red; /* Mensaje de error */
   font-size: 0.75rem;
   margin-top: 2px;
 `
@@ -34,7 +35,7 @@ const ButtonRow = styled.div`
   margin-top: ${({ theme }) => theme.spacing.lg};
 `
 const PrimaryButton = styled.button`
-  background: ${({ theme }) => theme.colors.primary};
+  background: ${({ theme }) => theme.colors.primary}; /* but principal */
   color: ${({ theme }) => theme.colors.onPrimary};
   border: none;
   padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.lg};
@@ -42,6 +43,7 @@ const PrimaryButton = styled.button`
   cursor: pointer;
 `
 const SecondaryButton = styled.button`
+  /* but secundario con contorn */
   background: none;
   border: 1px solid
     ${({ theme }) => theme.colors.onSurfaceVariant || theme.colors.border};
@@ -51,13 +53,13 @@ const SecondaryButton = styled.button`
 `
 
 export default function ShippingForm({
-  hasProfileShipping,
-  useAltShipping,
-  onToggleAlt,
+  hasProfileShipping, //ture si perfil tiene otra direcion
+  useAltShipping, // true si usuario quiere usar otra
+  onToggleAlt, // setter de checkboz
   values,
   errors,
   editable,
-  onChange,
+  onChange, // key,value, actualiz edit
   onBack,
   onNext
 }) {
@@ -68,6 +70,7 @@ export default function ShippingForm({
       {hasProfileShipping && (
         <label
           style={{
+            // si perfil tiene datos, ofrezco editarlos
             display: 'flex',
             alignItems: 'center',
             gap: 8,
@@ -76,14 +79,15 @@ export default function ShippingForm({
         >
           <input
             type='checkbox'
-            checked={useAltShipping}
-            onChange={(e) => onToggleAlt(e.target.checked)}
+            checked={useAltShipping} // estado actual
+            onChange={(e) => onToggleAlt(e.target.checked)} // act desact, modo alterno
           />
           Usar otra dirección
         </label>
       )}
 
       {[
+        //  campos para render
         ['name', 'Nombre completo'],
         ['address', 'Dirección'],
         ['city', 'Ciudad'],
@@ -92,11 +96,12 @@ export default function ShippingForm({
       ].map(([key, label]) => (
         <Field key={key}>
           <Label>{label}</Label>
+
           <Input
-            value={values[key] || ''}
-            onChange={(e) => editable && onChange(key, e.target.value)}
-            hasError={!!errors[key]}
-            disabled={!editable}
+            value={values[key] || ''} //muestra antiguo o editado
+            onChange={(e) => editable && onChange(key, e.target.value)} // act
+            hasError={!!errors[key]} // red cover when err
+            disabled={!editable} // bloqueo inputs si tenemos datos extraidos
           />
           {errors[key] && <ErrorText>{errors[key]}</ErrorText>}
         </Field>
@@ -104,9 +109,9 @@ export default function ShippingForm({
 
       <ButtonRow>
         <SecondaryButton onClick={onBack} disabled>
-          {' '}
-          Atrás{' '}
+          {/* // step back disabled */} Atrás{' '}
         </SecondaryButton>
+        {/* next 2 pago */}
         <PrimaryButton onClick={onNext}> Siguiente </PrimaryButton>
       </ButtonRow>
     </FormSection>

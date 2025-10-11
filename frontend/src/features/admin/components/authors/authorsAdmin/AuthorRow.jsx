@@ -15,6 +15,7 @@ const Row = styled.div`
   padding: 8px;
   overflow: hidden;
 `
+// layout tipo tabla, thumb FIJO
 const Bio = styled.div`
   color: ${({ theme }) => theme.colors.mutedText};
   font-size: 13px;
@@ -23,6 +24,7 @@ const Bio = styled.div`
   -webkit-box-orient: vertical;
   overflow: hidden;
 `
+// resumen bio 2 lineas
 
 export default function AuthorRow({ a, onDelete }) {
   return (

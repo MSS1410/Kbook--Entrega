@@ -52,16 +52,17 @@ const ComboItem = styled.button`
 `
 
 export default function AuthorCombo({ authors, value, onChange, extraButton }) {
-  const [query, setQuery] = useState('')
-  const [open, setOpen] = useState(false)
-  const ref = useRef(null)
+  const [query, setQuery] = useState('') // texto del input
+  const [open, setOpen] = useState(false) // dropdown open closed
+  const ref = useRef(null) // outclick para cerrar
 
   const selectedName = useMemo(
     () => authors.find((a) => String(a._id) === String(value))?.name || '',
     [authors, value]
   )
+  // nombre del autor selected por id
 
-  useEffect(() => setQuery(selectedName), [selectedName])
+  useEffect(() => setQuery(selectedName), [selectedName]) // cuando cambia el value, refleja el nombre
 
   useEffect(() => {
     const onDoc = (e) => {
@@ -69,12 +70,15 @@ export default function AuthorCombo({ authors, value, onChange, extraButton }) {
       if (!ref.current.contains(e.target)) setOpen(false)
     }
     document.addEventListener('mousedown', onDoc)
+    // UX cierra cick fuera
     return () => document.removeEventListener('mousedown', onDoc)
   }, [])
 
   const list = useMemo(() => {
     const s = query.trim().toLowerCase()
+
     if (!s) return authors.slice(0, 20)
+    // primeras 20 lineas si no hay query
     return authors
       .filter((a) => (a.name || '').toLowerCase().includes(s))
       .slice(0, 20)

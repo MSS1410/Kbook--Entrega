@@ -77,13 +77,15 @@ const Name = styled.div`
 
 export default function AuthorsCarousel() {
   const [authors, setAuthors] = useState([])
-
+  // estado autores
   useEffect(() => {
     ;(async () => {
       try {
+        // get sobre 12 autores
         const res = await api.get('/api/authors/for-carousel', {
           params: { limit: 12 }
         })
+        // priorizo res.data.authors, despues veo si veien en aray
         const list = Array.isArray(res.data?.authors)
           ? res.data.authors
           : Array.isArray(res.data)
@@ -98,17 +100,20 @@ export default function AuthorsCarousel() {
   }, [])
 
   if (!authors.length) return null
-
   return (
     <Wrap>
       <Header>
         <H2>Autores</H2>
+        {/* // render de el header para ver todos */}
+
         <ViewAll to='/authors'>Ver todos</ViewAll>
       </Header>
 
       <Row>
+        {/* scroll horizontal sin flechas. */}
         {authors.map((a) => (
           <Card key={a._id} to={`/authors/${a._id}`}>
+            {/* cada card es iun Link a aurthors:id */}
             {a.photo && (
               <Avatar
                 src={a.photo}

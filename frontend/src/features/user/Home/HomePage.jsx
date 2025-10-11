@@ -6,24 +6,30 @@ import AuthorsCarousel from '../../../components/authors/AuthorsCarousel'
 import CategoriesCarousel from '../../../components/carrouseles/CategoriesCarrusel'
 import ListCategories from './sections/ListCategories'
 import ReviewsCarrusel from '../../../components/review/ReviewCarrusel'
+
 import api from '../../../api'
+//api para reseñas
 
 export default function HomePage() {
-  const [homeReviews, setHomeReviews] = useState([])
-  const [loadingReviews, setLoadingReviews] = useState(false)
+  // estados local para reseñas del home
+  const [homeReviews, setHomeReviews] = useState([]) // lista de reseñas a mostrar
+  const [loadingReviews, setLoadingReviews] = useState(false) // flag de carga para controlar render
 
+  //Carga de reseñas
   useEffect(() => {
     ;(async () => {
       try {
         setLoadingReviews(true)
         const { data } = await api.get('/api/reviews', {
           params: { limit: 20, sort: '-createdAt' }
+          // get a api reviews pidiendo max 20
         })
-        // 👇 desenvuelve: puede venir como array, o {items}, o {reviews}
+        //  como puede venir como array items o reviews, desfiguro: si devvuelve array lo uso, si devuelve {} uso el campo llegado
+
         const list = Array.isArray(data)
           ? data
           : data?.items || data?.reviews || []
-        setHomeReviews(Array.isArray(list) ? list : [])
+        setHomeReviews(Array.isArray(list) ? list : []) //[] nada coincide array empty
       } catch (e) {
         console.error('Error cargando reseñas del Home:', e)
         setHomeReviews([])
@@ -33,16 +39,17 @@ export default function HomePage() {
     })()
   }, [])
 
+  // render de secciones
   return (
     <>
       <BannerSect />
       <BestsellerSection />
-      {/* Carrusel de autores: sólo foto + nombre */}
+      {/* carro de autores:  foto + nombre */}
       <AuthorsCarousel />
       <NewArrivalsSect />
 
       <CategoriesCarousel itemDiameter={150} />
-      {/* Secciones por categoría */}
+      {/* sect por cat */}
       <ListCategories
         category='Ciencia Ficción'
         title='Ciencia Ficción'
@@ -79,7 +86,7 @@ export default function HomePage() {
         viewAllLink='/categories/Natura'
       />
 
-      {/* Carrusel de reseñas */}
+      {/* carro de reseñas */}
       {!loadingReviews && (
         <ReviewsCarrusel
           reviews={homeReviews}

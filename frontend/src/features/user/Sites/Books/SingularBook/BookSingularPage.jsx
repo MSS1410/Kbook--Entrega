@@ -1,4 +1,3 @@
-// frontend/src/features/Books/BookSingularPage.jsx
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
@@ -8,7 +7,7 @@ import useCart from '../../../../../hooks/useCart'
 import useAuth from '../../../../../hooks/useAuth'
 import CarritoAside from '../../../../../components/carrito/carritoAside'
 
-// Presentacionales (solo UI)
+//  bring em here
 import BookHeader from './detailComponents/BookHeader'
 import FormatsPicker from './detailComponents/FormatsPicker'
 import PurchaseActions from './detailComponents/PurchaseActions'
@@ -17,7 +16,7 @@ import AuthorMore from './detailComponents/AuthorMore'
 import ReviewsSection from './detailComponents/ReviewsSection'
 import ReviewModal from './detailComponents/ReviewModal'
 
-/* ==================== Estilos de layout ==================== */
+/*  style para layout  */
 const Page = styled.div`
   display: flex;
   max-width: 1200px;
@@ -83,7 +82,7 @@ const SectionTitle = styled.h2`
   font-size: ${({ theme }) => theme.fontSizes.xl};
 `
 
-/* === Bloque inferior (debajo de todo, a la izquierda del contenedor) === */
+/*  Bloque inferior , zona izquierda */
 const BottomWrap = styled.div`
   max-width: 1200px;
   margin: 0 auto 2rem; /* debajo del bloque superior */
@@ -100,7 +99,10 @@ const truncateWords = (str = '', n = 8) => {
   return w.slice(0, n).join(' ') + '…'
 }
 
-/* ==================== Página ==================== */
+/*  page  */
+// pagina de detalle de un libro, carga libro por id.
+// permite; elegir formato, comprar, carrito
+// muestra: descripcion, autor +, recs, reseñas
 export default function BookSingularPage() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -108,39 +110,47 @@ export default function BookSingularPage() {
   const { token, user } = useAuth()
   const { addOrUpdate } = useCart()
 
-  const [book, setBook] = useState(null)
-  const [selected, setSelected] = useState(null)
-  const [recs, setRecs] = useState([])
-  const [authorBooks, setAuthorBooks] = useState([])
-  const [showCart, setShowCart] = useState(false)
+  // estado princcipal
+  const [book, setBook] = useState(null) // doc del libro cargado /api/books/:id
+  const [selected, setSelected] = useState(null) // formato seleccionado inicia en 0
+  const [recs, setRecs] = useState([]) // recomendaciones por cateogria
+  const [authorBooks, setAuthorBooks] = useState([]) // mas del mismo autor
+  const [showCart, setShowCart] = useState(false) // mostrar carrito
+
+  // flags de progreso para botones añadir/comprar
   const [adding, setAdding] = useState(false)
   const [buying, setBuying] = useState(false)
 
   // Reseñas
-  const [reviews, setReviews] = useState([])
-  const [openReview, setOpenReview] = useState(false)
+  const [reviews, setReviews] = useState([]) // reviews del libro en detalle
+  const [openReview, setOpenReview] = useState(false) //abre cierra modal para escribir
+
+  //inputs y estado guardado para nueva reseña
   const [newRating, setNewRating] = useState(5)
   const [newComment, setNewComment] = useState('')
   const [savingReview, setSavingReview] = useState(false)
 
   const wordCount = (text = '') =>
     String(text).trim().split(/\s+/).filter(Boolean).length
+  // para maximo de palabras en reseña
 
+  // carga en serie lo necesario
   useEffect(() => {
     async function load() {
+      // try catch interno para cada bloque, si algo falla, vacia listas sin romper pagina
       try {
         const { data: b } = await api.get(`/api/books/${id}`)
         setBook(b)
         setSelected(b.formats?.[0] || null)
 
-        // Recs por categoría
+        // recs por categoria
         const { data: others } = await api.get(
           `/api/books?category=${encodeURIComponent(b.category)}&limit=8`
         )
         const arr = Array.isArray(others) ? others : others.books || []
         setRecs(arr.filter((x) => x._id !== id))
 
-        // Más del autor
+        // + del autor
         if (b.author?._id) {
           try {
             const { data: authorData } = await api.get(
@@ -155,7 +165,7 @@ export default function BookSingularPage() {
           setAuthorBooks([])
         }
 
-        // Reseñas del libro
+        // reseñas del libro
         try {
           const { data: rv } = await api.get(`/api/reviews/book/${b._id}`)
           setReviews(Array.isArray(rv) ? rv : [])
@@ -186,6 +196,7 @@ export default function BookSingularPage() {
         Seleccionando formato…
       </p>
     )
+  // si no hay toquen login con next. si hay, sigue el proceso
 
   const addToCart = async () => {
     if (!token) {
@@ -194,6 +205,7 @@ export default function BookSingularPage() {
     }
     try {
       setAdding(true)
+      // adding=true  -> addOrUpdate({bookId, format, quantity:1}) -> showCart=true.
       await addOrUpdate({ bookId: id, format: selected.type, quantity: 1 })
       setShowCart(true)
     } catch (err) {
@@ -206,7 +218,7 @@ export default function BookSingularPage() {
       setAdding(false)
     }
   }
-
+  //igual que add , pero redirije a /chekout
   const buyNow = async () => {
     if (!token) {
       navigate(`/login?next=/books/${id}`)
@@ -226,7 +238,7 @@ export default function BookSingularPage() {
       setBuying(false)
     }
   }
-
+  // exige token sino login
   const openReviewModal = () => {
     if (!token) {
       navigate(`/login?next=/books/${id}`)
@@ -234,12 +246,13 @@ export default function BookSingularPage() {
     }
     setOpenReview(true)
   }
-
+  //  valida el rating,   close modal
   const submitReview = async () => {
     if (!newRating || newRating < 1 || newRating > 5) {
       alert('Elige una puntuación entre 1 y 5.')
       return
     }
+    // comentario 150 palabras,
     if (wordCount(newComment) > 50) {
       alert('Máximo 50 palabras en la reseña.')
       return
@@ -259,12 +272,14 @@ export default function BookSingularPage() {
       setOpenReview(false)
       setNewRating(5)
       setNewComment('')
+      // POST en /api/reviews,
     } catch (err) {
       const status = err?.response?.status
       if (status === 401) {
         navigate(`/login?next=/books/${id}`)
         return
       }
+      // si usuario no compra libro no puede escribir reseña
       if (status === 403) {
         alert('Solo puedes reseñar libros que compraste.')
       } else {
@@ -281,7 +296,7 @@ export default function BookSingularPage() {
 
   return (
     <>
-      {/* ===== Bloque superior: portada + info del libro ===== */}
+      {/*  Bloque superior: portada + info del libro  */}
       <Page>
         <Sidebar>
           <CoverCard>
@@ -290,14 +305,14 @@ export default function BookSingularPage() {
         </Sidebar>
 
         <Content>
-          {/* Header estilizado (presentacional) */}
+          {/* header */}
           <BookHeader
             title={book.title}
             author={book.author}
             category={book.category}
           />
 
-          {/* Formatos disponibles (título en la página + picker presentacional) */}
+          {/* formatos */}
           <Section>
             <SectionTitle>Formatos disponibles</SectionTitle>
             <FormatsPicker
@@ -307,7 +322,7 @@ export default function BookSingularPage() {
             />
           </Section>
 
-          {/* Botones de compra (presentacional) */}
+          {/* botones para compra */}
           <PurchaseActions
             selected={selected}
             adding={adding}
@@ -316,16 +331,16 @@ export default function BookSingularPage() {
             onBuyNow={buyNow}
           />
 
-          {/* Descripción (presentacional) */}
+          {/* descripcion) */}
           <Section>
             <BookDescription synopsis={book.synopsis} />
           </Section>
         </Content>
       </Page>
 
-      {/* ===== Bloque inferior: secciones alineadas a la izquierda ===== */}
+      {/*  bloque inferior: secciones  a la izquierda  */}
       <BottomWrap>
-        {/* También te puede gustar */}
+        {/* also could like, recomendaciones */}
         <Section>
           <SectionTitle>También te puede gustar</SectionTitle>
           <HomeCarrusel
@@ -352,14 +367,14 @@ export default function BookSingularPage() {
           />
         </Section>
 
-        {/* Conoce más del autor (presentacional) */}
+        {/* + del autor */}
         {book.author?._id && (
           <Section>
             <AuthorMore author={book.author} authorBooks={authorBooks} />
           </Section>
         )}
 
-        {/* Reseñas (presentacional) */}
+        {/* reseñas  */}
         <Section>
           <SectionTitle>Reseñas</SectionTitle>
           <ReviewsSection
@@ -373,7 +388,7 @@ export default function BookSingularPage() {
 
       {showCart && <CarritoAside onClose={() => setShowCart(false)} />}
 
-      {/* Modal reseña (presentacional) */}
+      {/* Modal para nueva reseña  */}
       <ReviewModal
         open={openReview}
         onClose={() => setOpenReview(false)}

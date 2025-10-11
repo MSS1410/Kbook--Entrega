@@ -27,18 +27,19 @@ const Avatar = styled.div`
 `
 
 export default function AuthorAvatarUploader({
-  editing,
-  author,
+  editing, // muestra input si editing is true
+  author, // actual data, existen foto
   previewUrl,
   newPhotoFile,
-  setNewPhotoFile,
-  setPreviewUrl
+  setNewPhotoFile, // selected img
+  setPreviewUrl // setters al padre
 }) {
   return (
     <Card>
       <Avatar>
         {(previewUrl || author.photo) && (
           <img src={previewUrl || author.photo} alt={author.name} />
+          // si tengo preview, prioridad
         )}
       </Avatar>
 
@@ -58,10 +59,10 @@ export default function AuthorAvatarUploader({
                 setNewPhotoFile(file)
                 if (previewUrl) {
                   URL.revokeObjectURL(previewUrl)
-                  setPreviewUrl('')
+                  setPreviewUrl('') // limpiar preview Anterior
                 }
                 if (file) {
-                  const url = URL.createObjectURL(file)
+                  const url = URL.createObjectURL(file) // nueva preview
                   setPreviewUrl(url)
                 }
               }}

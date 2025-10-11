@@ -1,4 +1,3 @@
-// frontend/src/features/Books/SingularBook/components/ReviewModal.jsx
 import React from 'react'
 import styled from 'styled-components'
 import Modal from '../../../../../../components/modal/Modal'
@@ -38,7 +37,7 @@ const ModalButton = styled.button`
     $ghost ? theme.colors.primary : theme.colors.onPrimary};
   cursor: pointer;
 `
-
+// modal habilitado para escritura de reseña
 export default function ReviewModal({
   open,
   onClose,
@@ -54,7 +53,7 @@ export default function ReviewModal({
     <Modal open={open} onClose={onClose}>
       <h3 style={{ marginTop: 0 }}>Escribe una reseña</h3>
       <div style={{ marginBottom: 12 }}>Puntúa tu experiencia:</div>
-
+      {/* eleccion de valoracion */}
       <StarPicker>
         {[1, 2, 3, 4, 5].map((n) => (
           <span
@@ -73,6 +72,7 @@ export default function ReviewModal({
       </StarPicker>
 
       <div style={{ marginTop: 12 }}>
+        {/* contenido de la reseña */}
         <ReviewTextarea
           placeholder='Cuéntanos qué te ha parecido… (máx. 50 palabras)'
           value={comment}
@@ -80,11 +80,12 @@ export default function ReviewModal({
         />
         <SmallMeta>{wordCount} / 50 palabras</SmallMeta>
       </div>
-
+      {/* cancelar quita el modal , ghost */}
       <ModalActions>
         <ModalButton $ghost type='button' onClick={onClose}>
           Cancelar
         </ModalButton>
+        {/* submit para colgar review */}
         <ModalButton type='button' onClick={onSubmit} disabled={saving}>
           {saving ? 'Guardando…' : 'Publicar'}
         </ModalButton>

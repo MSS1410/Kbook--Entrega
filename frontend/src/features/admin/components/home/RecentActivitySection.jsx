@@ -1,4 +1,3 @@
-// frontend/src/features/admin/components/home/RecentActivitySection.jsx
 import React, { useMemo } from 'react'
 import styled from 'styled-components'
 import Section from '../../components/Section.jsx'
@@ -17,13 +16,21 @@ const Panel = styled.div`
   background: ${({ theme }) => theme.colors.cardBg};
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: ${({ theme }) => theme.radii.lg};
+  min-width: 0;
+  @media (max-width: 480px) {
+    padding: 12px;
+  }
 `
 
 const Grid = styled.div`
   display: grid;
   gap: 16px;
-  @media (min-width: 768px) {
-    grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: 1fr;
+  @media (min-width: 480px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(4, 1fr); // ← 4 KPIs en desktop
   }
 `
 
@@ -33,13 +40,14 @@ const currency = (n) =>
     : n
 
 export default function RecentActivitySection({ metrics }) {
+  // METRICAS: { usersTotal, totalOrders, totalAmount, series }
   const kpis = useMemo(() => {
     const totalUsers = metrics?.usersTotal ?? 0
     const totalOrders = metrics?.totalOrders ?? 0
     const totalSales = metrics?.totalAmount ?? 0
     const avgTicket =
       totalOrders > 0 ? Number(totalSales / totalOrders).toFixed(2) : 0
-
+    // a preparar 4 KPIs principales para el dashboard
     return [
       {
         label: 'Usuarios (total)',
@@ -72,6 +80,7 @@ export default function RecentActivitySection({ metrics }) {
       />
       <Grid>
         {kpis.map((k) => (
+          //    KPICard recibe {label, value, icon}
           <Kpi key={k.label} {...k} />
         ))}
       </Grid>

@@ -44,11 +44,11 @@ const Close = styled.button`
   line-height: 1;
   cursor: pointer;
 `
+// pagina de perfil compuesta por, personal Section, shipping sect, payment sect
 
 export default function ProfilePage() {
-  // 'books' | 'messages' | null
-  const [expanded, setExpanded] = useState(null)
-  const [showOnboarding, setShowOnboarding] = useState(false)
+  const [expanded, setExpanded] = useState(null) // controla que acordeon esta abierto
+  const [showOnboarding, setShowOnboarding] = useState(false) // se activa 1 vez, se borra la flag del sessionstrg
 
   useEffect(() => {
     try {
@@ -66,6 +66,7 @@ export default function ProfilePage() {
           <div>
             <strong>¡Bienvenido/a a Kbook!</strong>
             <div style={{ marginTop: 6 }}>
+              {/* alerta para completar informacion del perfil */}
               Te recomendamos completar tus datos de <b>envío</b> y <b>pago</b>{' '}
               antes de explorar la tienda para agilizar tus compras.
             </div>
@@ -78,17 +79,17 @@ export default function ProfilePage() {
           </Close>
         </Alert>
       )}
-
-      {/* Sección 1: Personal */}
+      {/* secciones */}
+      {/* seccion 1: Personal */}
       <PersonalSection />
 
-      {/* Sección 2: Envío & Pago */}
+      {/* seccion 2: Send & Pay */}
       <GridTwo>
         <ShippingSection />
         <PaymentSection />
       </GridTwo>
 
-      {/* Sección 3: Mis Libros & Mensajes */}
+      {/* seccion 3: Mis Libros & Mensajes */}
       <GridTwo>
         <BooksAccordion
           open={expanded === 'books'}

@@ -38,13 +38,13 @@ const ViewToggle = styled.div`
 
 export default function BooksToolbar({
   q,
-  setQ,
+  setQ, // binding busqueda
   category,
-  setCategory,
+  setCategory, // select category
   categoriesEnum,
   view,
-  setView,
-  onAdd
+  setView, // toggle de vista
+  onAdd // abre mdoal crear
 }) {
   return (
     <Filters>

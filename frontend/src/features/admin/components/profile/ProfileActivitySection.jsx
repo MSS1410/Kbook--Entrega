@@ -19,6 +19,7 @@ const Muted = styled.div`
 `
 
 export default function ProfileActivitySection({ lastLogin }) {
+  // fecha de ultimo login + formateo de esta
   return (
     <Card>
       <SectionTitle>Actividad reciente</SectionTitle>
@@ -27,7 +28,7 @@ export default function ProfileActivitySection({ lastLogin }) {
         {lastLogin ? new Date(lastLogin).toLocaleString() : '—'}
       </Muted>
       <div style={{ color: '#9CA3AF', fontSize: 13, marginTop: 6 }}>
-        Historial de acciones (solo muestreo). Más adelante podemos habilitar un{' '}
+        Historial de acciones (solo muestreo).
         <em>audit log</em>.
       </div>
     </Card>

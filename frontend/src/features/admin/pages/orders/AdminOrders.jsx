@@ -1,14 +1,13 @@
-// frontend/src/admin/pages/orders/AdminOrders.jsx
 import React, { useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import Button from '../../components/Button.jsx'
-import { listOrders, fetchOrdersForLastDays } from '../../api/adminApi.js'
+import { listOrders, fetchOrdersForLastDays } from '../../api/adminApi.js' //  endpoints pedidos
 import { ArrowRight, ShoppingCart } from 'lucide-react'
 import RecentOrdersCarousel from '../../components/orders/ordersAdmin/RecentordersCarousel.jsx'
-import OrdersCountChart from '../../components/orders/ordersAdmin/OrdersCountChart.jsx'
-import OrdersAmountChart from '../../components/orders/ordersAdmin/OrdersAmountChart.jsx'
-import { absUrl } from '../../../../utils/absUrl'
+import OrdersCountChart from '../../components/orders/ordersAdmin/OrdersCountChart.jsx' // grafica de conteo
+import OrdersAmountChart from '../../components/orders/ordersAdmin/OrdersAmountChart.jsx' // ← grafica ingresos
+import { absUrl } from '../../../../utils/absUrl' //
 
 const Wrap = styled.div`
   display: grid;
@@ -34,25 +33,26 @@ const TwoCol = styled.div`
   gap: 16px;
   grid-template-columns: 1fr;
   @media (min-width: 1024px) {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr; // ← dos gráficos lado a lado en desktop
   }
 `
 
 function daysBackSeries(days = 30) {
+  // contadores a 0, genera estructura base de 30 dias
   const out = []
   const now = new Date()
   for (let i = days - 1; i >= 0; i--) {
     const d = new Date(now)
     d.setDate(now.getDate() - i)
-    const key = d.toISOString().slice(0, 10)
-    out.push({ key, label: key.slice(5), count: 0, amount: 0 })
+    const key = d.toISOString().slice(0, 10) // YYYY-MM-DD
+    out.push({ key, label: key.slice(5), count: 0, amount: 0 }) // label = MM-DD
   }
   return out
 }
 
 export default function AdminOrders() {
-  const [recent, setRecent] = useState([])
-  const [metrics, setMetrics] = useState(daysBackSeries())
+  const [recent, setRecent] = useState([]) // ult pedidos para carro
+  const [metrics, setMetrics] = useState(daysBackSeries()) // serie 30  DIAS base
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState(null)
 
@@ -61,6 +61,8 @@ export default function AdminOrders() {
       try {
         setLoading(true)
         setErr(null)
+
+        //  1 pedidos recientes // maximo 15
         const r = await listOrders({ page: 1, limit: 15 })
         const last = Array.isArray(r?.orders)
           ? r.orders
@@ -69,14 +71,18 @@ export default function AdminOrders() {
           : []
         setRecent(last)
 
+        // 2 pedidos de los ultimos 30
         const last30 = await fetchOrdersForLastDays(30, 200)
         const base = daysBackSeries(30)
-        const map = new Map(base.map((d) => [d.key, d]))
+        const map = new Map(base.map((d) => [d.key, d])) // index por fecha
+
         for (const o of last30) {
           const k = new Date(o.createdAt).toISOString().slice(0, 10)
           const cell = map.get(k)
           if (cell) {
+            // suma pedidos
             cell.count += 1
+            // suma ingresos
             cell.amount += o.totalPrice || 0
           }
         }
@@ -88,14 +94,14 @@ export default function AdminOrders() {
         setLoading(false)
       }
     })()
-  }, [])
+  }, []) // on mount
 
   const countData = useMemo(
-    () => metrics.map((d) => ({ day: d.label, count: d.count })),
+    () => metrics.map((d) => ({ day: d.label, count: d.count })), // serie para grafica de barras
     [metrics]
   )
   const amountData = useMemo(
-    () => metrics.map((d) => ({ day: d.label, amount: d.amount })),
+    () => metrics.map((d) => ({ day: d.label, amount: d.amount })), // grafica area // ingresos dia
     [metrics]
   )
 
@@ -113,16 +119,18 @@ export default function AdminOrders() {
             <small>Resumen de actividad reciente</small>
           </div>
           <Button as={Link} to='/admin/orders/list'>
+            {/* listado completo */}
             Ver todos <ArrowRight size={16} />
           </Button>
         </SectionHead>
 
         <RecentOrdersCarousel loading={loading} err={err} recent={recent} />
+        {/* carro con tarjetas de pedido recientes */}
       </Section>
 
       <TwoCol>
-        <OrdersCountChart data={countData} />
-        <OrdersAmountChart data={amountData} />
+        <OrdersCountChart data={countData} /> {/* numero pedidos / dia */}
+        <OrdersAmountChart data={amountData} /> {/* area :  ingresos dia */}
       </TwoCol>
     </Wrap>
   )

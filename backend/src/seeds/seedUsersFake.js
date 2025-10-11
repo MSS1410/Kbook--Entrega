@@ -10,8 +10,8 @@ async function seedUsers() {
   await connectDB()
   console.log('✅ Conectado a MongoDB')
 
-  // Borrar usuarios de seed anteriores (opcionalmente conservar el admin)
-  await User.deleteMany({ email: { $ne: 'admin@kbook.com' } })
+  // elimina usuarios de seed anteriores conservamos admin
+  await User.deleteMany({ email: { $ne: 'helpkbook@kbook.com' } })
   console.log('🗑️  Usuarios de seed anteriores eliminados (salvo admin)')
 
   const usersToCreate = 30 // número de usuarios de prueba
@@ -20,7 +20,7 @@ async function seedUsers() {
   for (let i = 0; i < usersToCreate; i++) {
     const name = faker.person.fullName()
     const email = faker.internet.email({ length: 10 }).toLowerCase()
-    const password = 'password123' // verás que puede ser cualquier valor de prueba
+    const password = 'password123' //   puede ser cualquier valor de prueba
 
     await User.create({ name, email, password, role: 'user' })
     created++

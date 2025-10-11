@@ -35,15 +35,16 @@ const ViewToggle = styled.div`
     font-weight: 600;
   }
 `
+// switch de vista
 
 export default function AuthorsToolbar({
   q,
-  setQ,
+  setQ, //binding input de busqueda
   sortAZ,
-  setSortAZ,
+  setSortAZ, //boton toggle orden
   view,
-  setView,
-  onAdd
+  setView, // botones de vista
+  onAdd // modal crear
 }) {
   return (
     <Filters>
@@ -63,6 +64,7 @@ export default function AuthorsToolbar({
           placeholder='Buscar autores por nombre'
           value={q}
           onChange={(e) => {
+            // debouncing lo maneja el contenedor si quiere
             setQ(e.target.value)
           }}
         />
@@ -71,6 +73,7 @@ export default function AuthorsToolbar({
       <Button
         $variant='ghost'
         onClick={() => setSortAZ((v) => !v)}
+        v // altertna orden
         title={sortAZ ? 'Ordenar Z-A' : 'Ordenar A-Z'}
       >
         {sortAZ ? (

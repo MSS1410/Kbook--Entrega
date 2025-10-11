@@ -1,4 +1,3 @@
-// frontend/src/features/Books/SingularBook/components/AuthorMore.jsx
 import React from 'react'
 import styled, { useTheme } from 'styled-components'
 import { Link } from 'react-router-dom'
@@ -17,7 +16,7 @@ const GhostLink = styled(Link)`
   font-weight: 600;
   display: inline-block;
 `
-
+// carrusel mas del autor, mostramos los libros si tiene, en el web
 export default function AuthorMore({ author, authorBooks = [] }) {
   const theme = useTheme()
   if (!author?._id) return null

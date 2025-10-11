@@ -19,6 +19,7 @@ const Wrap = styled.div`
   display: grid;
   gap: 16px;
 `
+// layout vertical
 const Top = styled.div`
   display: grid;
   gap: 16px;
@@ -27,29 +28,30 @@ const Top = styled.div`
     grid-template-columns: 260px minmax(0, 1fr);
   }
 `
+// 2 columnas en desktop, avatar form
 
 export default function AdminAuthorDetail() {
-  const { id } = useParams()
+  const { id } = useParams() // id de la ruta
   const navigate = useNavigate()
-  const [author, setAuthor] = useState(null)
-  const [editing, setEditing] = useState(false)
+  const [author, setAuthor] = useState(null) // carga
+  const [editing, setEditing] = useState(false) // habilitar o no edicion
   const [model, setModel] = useState({
     name: '',
     biography: '',
     photo: '',
     featured: false
-  })
+  }) // modelo editado controlado
 
   const [newPhotoFile, setNewPhotoFile] = useState(null)
   const [previewUrl, setPreviewUrl] = useState('')
 
   const [saving, setSaving] = useState(false)
-  const [books, setBooks] = useState([])
+  const [books, setBooks] = useState([]) // libros del autor
 
   useEffect(() => {
-    let alive = true
+    let alive = true // guard para evitar setState tras desmontar
     ;(async () => {
-      const a = await getAuthor(id)
+      const a = await getAuthor(id) // cargo auth
       if (!alive) return
       setAuthor(a)
       setModel({
@@ -58,12 +60,12 @@ export default function AdminAuthorDetail() {
         photo: a?.photo || '',
         featured: !!a?.featured
       })
-      const allBooks = await listBooksAll()
+      const allBooks = await listBooksAll() // traigo todos los lbros en filtro local
       if (!alive) return
       const mine = allBooks.filter((b) => {
-        const auth = b.author
+        const auth = b.author // author puede venir como id o populado
         const aid = typeof auth === 'object' ? auth?._id : auth
-        return String(aid) === String(id)
+        return String(aid) === String(id) // libros que autor === id actual
       })
       setBooks(mine)
     })()
@@ -80,9 +82,9 @@ export default function AdminAuthorDetail() {
         name: model.name,
         biography: model.biography,
         featured: !!model.featured
-      })
-      if (newPhotoFile) await uploadAuthorPhoto(id, newPhotoFile)
-      const fresh = await getAuthor(id)
+      }) // guardo datos tal cual
+      if (newPhotoFile) await uploadAuthorPhoto(id, newPhotoFile) // si hay foto la subo
+      const fresh = await getAuthor(id) // recargo author fresh
       setAuthor(fresh)
       setModel({
         name: fresh.name || '',
@@ -93,9 +95,9 @@ export default function AdminAuthorDetail() {
       setNewPhotoFile(null)
       if (previewUrl) {
         URL.revokeObjectURL(previewUrl)
-        setPreviewUrl('')
+        setPreviewUrl('') // limpieza de preview
       }
-      setEditing(false)
+      setEditing(false) // modo lectura again
     } catch (e) {
       console.error(e)
       alert(
@@ -114,7 +116,7 @@ export default function AdminAuthorDetail() {
       biography: author.biography || '',
       photo: author.photo || '',
       featured: !!author.featured
-    })
+    }) // deshace cambios en el form
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl)
       setPreviewUrl('')
@@ -125,14 +127,14 @@ export default function AdminAuthorDetail() {
 
   const remove = async () => {
     if (!confirm('¿Eliminar este autor?')) return
-    await deleteAuthor(id)
-    navigate('/admin/authors')
+    await deleteAuthor(id) // elimino del backend
+    navigate('/admin/authors') // listado
   }
 
   const toggleFeatured = async () => {
-    const res = await toggleAuthorFeatured(id, !model.featured)
-    setModel((m) => ({ ...m, featured: !!res?.featured }))
-    setAuthor((a) => (a ? { ...a, featured: !!res?.featured } : a))
+    const res = await toggleAuthorFeatured(id, !model.featured) // API: toggle featured
+    setModel((m) => ({ ...m, featured: !!res?.featured })) // pasado al front
+    setAuthor((a) => (a ? { ...a, featured: !!res?.featured } : a)) // lo paso al elemento cargado
   }
 
   if (!author) return <div style={{ padding: 16 }}>Cargando…</div>
@@ -156,12 +158,14 @@ export default function AdminAuthorDetail() {
           onToggleFeatured={toggleFeatured}
           onEdit={() => setEditing(true)}
           onSave={save}
+          // botones segun modo
           onCancel={cancel}
           onDelete={remove}
         />
       </div>
 
       <Top>
+        {/* bloque foto + input file(edicion)  */}
         <AuthorAvatarUploader
           editing={editing}
           author={author}
@@ -170,6 +174,7 @@ export default function AdminAuthorDetail() {
           setNewPhotoFile={setNewPhotoFile}
           setPreviewUrl={setPreviewUrl}
         />
+        {/* inputs de nombre bio // lectura */}
         <AuthorFormFields
           author={author}
           model={model}
@@ -177,7 +182,7 @@ export default function AdminAuthorDetail() {
           editing={editing}
         />
       </Top>
-
+      {/* grid de related books */}
       <BooksGrid authorName={author.name} books={books} />
     </Wrap>
   )

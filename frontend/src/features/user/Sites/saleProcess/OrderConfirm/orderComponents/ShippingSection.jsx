@@ -44,11 +44,11 @@ const SmallNote = styled.p`
 `
 
 export default function ShippingSection({
-  useAltShipping,
-  onToggle,
-  form,
+  useAltShipping, // usar otra direccion
+  onToggle, // setter casilla
+  form, // objeto con los campos a rellenar
   errors,
-  onChange
+  onChange // setForm
 }) {
   return (
     <Card>
@@ -58,12 +58,12 @@ export default function ShippingSection({
           id='other-address'
           type='checkbox'
           checked={useAltShipping}
-          onChange={(e) => onToggle(e.target.checked)}
+          onChange={(e) => onToggle(e.target.checked)} // actua sobre ver / editar
         />
         <label htmlFor='other-address'>Usar otra dirección</label>
       </Row>
 
-      {!useAltShipping ? (
+      {!useAltShipping ? ( // resumen si no hemos editado
         <>
           <div style={{ display: 'grid', gap: 6 }}>
             <div
@@ -94,11 +94,11 @@ export default function ShippingSection({
             </div>
           </div>
           <SmallNote>
-            Origen: tu perfil/orden. Marca “Usar otra dirección” para cambiarla
-            sólo aquí.
+            Marca “Usar otra dirección” para cambiarla sólo aquí.
           </SmallNote>
         </>
       ) : (
+        // modo edit : inputs editables y errores
         <>
           {[
             ['fullName', 'Nombre completo'],
@@ -111,7 +111,7 @@ export default function ShippingSection({
               <Label>{label}</Label>
               <Input
                 value={form[key] || ''}
-                onChange={(e) => onChange(key, e.target.value)}
+                onChange={(e) => onChange(key, e.target.value)} // paso cambios al estado padre
               />
               {errors[key] && <ErrorText>{errors[key]}</ErrorText>}
             </Field>
