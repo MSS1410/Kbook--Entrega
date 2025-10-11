@@ -1,4 +1,3 @@
-// backend/src/controllers/admin/usersController.js
 import User from '../../models/User.js'
 import crypto from 'node:crypto'
 
@@ -12,13 +11,16 @@ export const adminListUsers = async (req, res, next) => {
       filter.$or = [{ name: new RegExp(q, 'i') }, { email: new RegExp(q, 'i') }]
     }
 
+    //busqueda por q por nombre o mail
+
     const skip = (Number(page) - 1) * Number(limit)
+    // me quedo solo con los campos que necesito
     const [itemsRaw, total] = await Promise.all([
       User.find(filter)
         .sort({ createdAt: sortDir })
         .skip(skip)
         .limit(Number(limit))
-        // 👇 AÑADIMOS avatar (y otros campos útiles)
+        // debo añadir avatar para poder mostrarlo
         .select(
           'name email role blocked createdAt lastLogin description avatar'
         )
@@ -26,7 +28,7 @@ export const adminListUsers = async (req, res, next) => {
       User.countDocuments(filter)
     ])
 
-    // 👇 Normalizamos: blocked -> isBlocked y garantizamos avatar como string
+    // he renombrado blocked a isblocked para asi poder asegurar el avatar del user.
     const users = itemsRaw.map((u) => ({
       _id: u._id,
       name: u.name,

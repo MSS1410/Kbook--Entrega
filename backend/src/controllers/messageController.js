@@ -1,5 +1,3 @@
-// backend/src/controllers/messageController.js
-
 // ADMIN
 export {
   adminSendMessage,

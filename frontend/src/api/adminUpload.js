@@ -1,4 +1,4 @@
-import api from './index.js' // tu axios con interceptores
+import api from './index.js' //  axios con interceptores
 
 // subidas multi part form data para admin libro cover
 export async function uploadBookCover(bookId, file) {

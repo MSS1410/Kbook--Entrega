@@ -1,4 +1,4 @@
-// backend/src/seeds/seed-reviews.js
+// mongo, borra reviws, crea reseñas falsas si hay 1 usuario y 1 libro
 import dotenv from 'dotenv'
 import connectDB from '../config/db.js'
 import User from '../models/User.js'
@@ -24,11 +24,11 @@ async function seedReviews() {
   await connectDB()
   console.log('✅ Conectado a MongoDB')
 
-  // Limpiar reseñas existentes
+  // limpio reseñas existentes
   await Review.deleteMany()
   console.log('🗑️  Todas las reseñas eliminadas')
 
-  // Usuarios y libros
+  // users y libros
   const users = await User.find().select('_id name')
   const books = await Book.find().select('_id title')
 
@@ -41,12 +41,12 @@ async function seedReviews() {
 
   let total = 0
   for (const book of books) {
-    // 2–6 reseñas por libro para que haya más material
+    // 2.6 reseñas por libro
     const count = faker.number.int({ min: 2, max: 6 })
     const usedForThisBook = new Set()
 
     for (let i = 0; i < count; i++) {
-      // Elige usuario evitando repetir hasta agotar el pool
+      // elegimos usuario sin repetir
       let user
       let tries = 0
       do {
@@ -63,7 +63,7 @@ async function seedReviews() {
         faker.number.int({ min: 1, max: 3 })
       )
       const avatar = faker.image.avatar()
-      const createdAt = randomRecentDate(180) // ← fecha aleatoria últimos 180 días
+      const createdAt = randomRecentDate(180) // atleatoriamos la fecha en los ultimos 180 days
 
       await Review.create({
         user: user._id,
@@ -71,7 +71,7 @@ async function seedReviews() {
         rating,
         comment,
         avatar,
-        createdAt // ← Mongoose respetará este valor aunque tengas timestamps:true
+        createdAt // mongoose respeta por encima del timestramps true
       })
       total++
     }

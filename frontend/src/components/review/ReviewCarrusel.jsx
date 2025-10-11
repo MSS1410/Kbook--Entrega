@@ -1,4 +1,3 @@
-// frontend/src/components/ReviewCarrusel.jsx
 import React, { useState, useEffect } from 'react'
 import { useWindowSize } from '@react-hook/window-size'
 import styled from 'styled-components'

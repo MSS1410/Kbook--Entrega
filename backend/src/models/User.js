@@ -1,4 +1,3 @@
-// backend/src/models/User.js
 import mongoose from 'mongoose'
 import bcrypt from 'bcrypt'
 
@@ -60,13 +59,14 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 )
 
+// hash de contraseña, bcrypt
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next()
   const salt = await bcrypt.genSalt(10)
   this.password = await bcrypt.hash(this.password, salt)
   next()
 })
-
+//comparacion instancia para login, comparara contraseña introducida en candidatePassword con el almacenado this.password, bcrypt hace su faena y se compara de manera segura
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password)
 }

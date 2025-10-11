@@ -1,4 +1,3 @@
-// backend/src/controllers/admin/ordersController.js
 import Order from '../../models/Order.js'
 
 export const adminListOrders = async (req, res, next) => {

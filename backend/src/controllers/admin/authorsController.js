@@ -1,4 +1,3 @@
-// backend/src/controllers/admin/authorsController.js
 import Author from '../../models/Author.js'
 
 export const adminCreateAuthor = async (req, res, next) => {
@@ -39,7 +38,7 @@ export const adminDeleteAuthor = async (req, res, next) => {
   }
 }
 
-// Compatibilidad si hay endpoint que cambia la URL de foto sin upload
+// me saltaba en error aveces porque por alguna razon creo que usaba la ruta vieja no-upload. Ya esta configurado front solo para aceptar imagen desde archivo no url
 export const adminUpdateAuthorPhoto = async (req, res, next) => {
   try {
     const { id } = req.params

@@ -1,4 +1,3 @@
-// backend/src/controllers/reviewController.js
 import Review from '../models/Review.js'
 import Order from '../models/Order.js'
 

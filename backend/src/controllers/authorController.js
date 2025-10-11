@@ -1,6 +1,3 @@
-// ================================
-// File: backend/src/controllers/authorController.js
-// ================================
 import Author from '../models/Author.js'
 import mongoose from 'mongoose'
 

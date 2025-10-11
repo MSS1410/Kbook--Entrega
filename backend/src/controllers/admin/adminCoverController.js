@@ -1,4 +1,3 @@
-// backend/src/controllers/admin/adminCoverController.js
 import Book from '../../models/Book.js'
 
 export const adminUploadBookCover = async (req, res, next) => {

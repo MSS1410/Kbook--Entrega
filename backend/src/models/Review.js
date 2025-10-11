@@ -1,4 +1,3 @@
-// backend/src/models/Review.js
 import mongoose from 'mongoose'
 
 const reviewSchema = new mongoose.Schema(
@@ -34,7 +33,7 @@ const reviewSchema = new mongoose.Schema(
   }
 )
 
-// ✅ Opcional: 1 reseña por usuario/libro (recomendado)
+// impedimos que un usuario deje mas de una reseña para un mismo libro
 reviewSchema.index({ user: 1, book: 1 }, { unique: true })
 
 const Review = mongoose.model('Review', reviewSchema)

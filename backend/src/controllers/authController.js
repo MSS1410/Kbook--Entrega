@@ -53,7 +53,7 @@ export const login = async (req, res, next) => {
         .json({ message: 'Tu cuenta esta bloqueada, Contacta con soporte' })
     }
 
-    // NUEVO: registrar última conexión
+    // regisrrar ultima cone del usuario
     user.lastLogin = new Date()
     await user.save({ validateBeforeSave: false })
 

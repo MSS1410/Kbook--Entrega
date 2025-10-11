@@ -1,4 +1,3 @@
-// backend/src/controllers/admin/dashboardController.js
 import User from '../../models/User.js'
 import Book from '../../models/Book.js'
 import Author from '../../models/Author.js'
@@ -41,7 +40,8 @@ export const adminDashboard = async (req, res, next) => {
       .select('title coverImage soldCount author')
       .populate('author', 'name')
     //devuelve campos que necesito y resuelve el autor
-    // totales (sin tocar)
+
+    // total globales
     const [totalUsuarios, totalLibros, totalAutores, totalPedidos] =
       await Promise.all([
         User.countDocuments(),
@@ -50,7 +50,7 @@ export const adminDashboard = async (req, res, next) => {
         Order.countDocuments()
       ])
 
-    // 💡 ventas totales (todos los pedidos, cualquier estado)
+    //  ventas historicas, todas las ventas, todos los pedidos en cualqueir estado,
     const salesAllAgg = await Order.aggregate([
       {
         $group: {
@@ -60,6 +60,7 @@ export const adminDashboard = async (req, res, next) => {
         }
       }
     ])
+    //total de cantidad y total de numero de pedidos
     const salesAll = {
       totalAmount: salesAllAgg?.[0]?.totalAmount || 0,
       totalOrders: salesAllAgg?.[0]?.totalOrders || 0

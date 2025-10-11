@@ -1,4 +1,3 @@
-// frontend/src/components/profile/PersonalSection.jsx
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import useAuth from '../../hooks/useAuth'

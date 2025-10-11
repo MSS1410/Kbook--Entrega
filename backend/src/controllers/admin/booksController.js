@@ -1,4 +1,3 @@
-// backend/src/controllers/admin/booksController.js
 import Book from '../../models/Book.js'
 import Author from '../../models/Author.js'
 

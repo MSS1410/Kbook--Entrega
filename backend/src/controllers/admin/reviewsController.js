@@ -1,4 +1,3 @@
-// backend/src/controllers/admin/reviewsController.js
 import Review from '../../models/Review.js'
 
 export const adminListReviews = async (req, res, next) => {

@@ -1,4 +1,3 @@
-// backend/src/routes/adminRoutes.js
 import express from 'express'
 import { isAuth } from '../middlewares/isAuth.js'
 import { isAdmin } from '../middlewares/isAdmin.js'

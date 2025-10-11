@@ -1,4 +1,5 @@
-// backend/src/seeds/seed-multiple-formats.js
+// multipart formats.js
+// conecto a mongo, borra Author Y Book. Lee Data/books.csv y  crea authors con libros y formatos.
 import fs from 'fs'
 import path from 'path'
 import csv from 'csv-parser'
@@ -16,9 +17,9 @@ dotenv.config()
 const authorMetaCache = new Map()
 
 /**
- en OpenLibrary por nombre de autor y devuelve { bio, photo }
-  - photo: URL de la foto (si existe); si no hay, string vacío
-  -bio: biografía completa o string vacío
+ en OpenLibrary por nombre de autor y devuelve bio photo:
+  - photo: URL de la foto o string vacio.
+  -bio: bio completa o string vacío
  */
 async function getAuthorMetaByName(name) {
   const key = name.trim().toLowerCase()
@@ -27,7 +28,7 @@ async function getAuthorMetaByName(name) {
   const empty = { bio: '', photo: '' }
 
   try {
-    // 1) Buscar autor por nombre
+    // Buscar autor por nombre
     const s = await axios.get('https://openlibrary.org/search/authors.json', {
       params: { q: name }
     })
@@ -39,14 +40,14 @@ async function getAuthorMetaByName(name) {
 
     // doc.key viene como "OL23919A"
     const olid = doc.key
-    // 2) Detalle del autor
+    // detalle del autor
     const d = await axios.get(`https://openlibrary.org/authors/${olid}.json`)
 
     let bioRaw = d.data?.bio
     const bio =
       typeof bioRaw === 'string' ? bioRaw : bioRaw?.value ? bioRaw.value : ''
 
-    // 3) Foto de autor por OLID (siempre que exista)
+    // foto de autor por OLID , si la hay
     const photo = olid
       ? `https://covers.openlibrary.org/a/olid/${olid}-M.jpg`
       : ''
@@ -65,7 +66,7 @@ async function seed() {
   await connectDB()
   console.log('✅ Conectado a MongoDB para seeding')
 
-  // Limpieza total
+  // limpiamos todo
   await Author.deleteMany()
   await Book.deleteMany()
   console.log('🗑️  Colecciones limpiadas')
@@ -83,7 +84,7 @@ async function seed() {
     .on('end', async () => {
       console.log(`✅ ${rows.length} registros leídos de books.csv`)
 
-      const authorsMap = new Map() // name -> authorId
+      const authorsMap = new Map() // name a authorId
       let count = 0
 
       for (const {
@@ -101,13 +102,13 @@ async function seed() {
         if (authorsMap.has(name)) {
           authorId = authorsMap.get(name)
         } else {
-          // Enriquecer autor desde OpenLibrary por nombre (sin fallback local)
+          // alimentamos a author por nombre
           const meta = await getAuthorMetaByName(name)
 
           const a = await Author.create({
             name,
             biography: meta.bio || '',
-            photo: meta.photo || '' // si viene vacío, NO mostraremos ese autor en el front
+            photo: meta.photo || '' // si viene empty, NO mostraremos ese autor en el front
           })
           authorId = a._id
           authorsMap.set(name, authorId)
@@ -142,12 +143,12 @@ async function seed() {
       )
 
       // Admin
-      const adminEmail = 'admin@kbook.com'
+      const adminEmail = 'kbookhelp@kbook.com'
       if (!(await User.findOne({ email: adminEmail }))) {
         await User.create({
-          name: 'Admin Seed',
+          name: 'KBOOK HELP',
           email: adminEmail,
-          password: 'admin123',
+          password: 'HelpKbook123',
           role: 'admin'
         })
         console.log('✅ Usuario admin creado')

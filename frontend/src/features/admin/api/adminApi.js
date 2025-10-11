@@ -37,15 +37,15 @@ const get = (url, params) => api.get(url, { params }).then((r) => r.data)
 /*  DASHBOARD  */
 export async function fetchAdminHome() {
   // tarjetas recientes
-  const usersReq = get('/api/admin/users', { order: 'desc', limit: 10 })
+  const usersReq = get('/api/admin/users', { order: 'desc', limit: 10 }) // ult usuarios
     .then((d) => pickArray(d, ['users', ...DEFAULT_ARRAY_KEYS]))
     .catch(() => [])
 
-  const ordersRecentReq = get('/api/admin/orders', { order: 'desc', limit: 10 })
+  const ordersRecentReq = get('/api/admin/orders', { order: 'desc', limit: 10 }) // ult orders
     .then((d) => pickArray(d, ['orders', ...DEFAULT_ARRAY_KEYS]))
     .catch(() => [])
 
-  const reviewsReq = get('/api/admin/reviews', { order: 'desc', limit: 10 })
+  const reviewsReq = get('/api/admin/reviews', { order: 'desc', limit: 10 }) // ult rev
     .then((d) => pickArray(d, ['reviews', ...DEFAULT_ARRAY_KEYS]))
     .catch(() => [])
 

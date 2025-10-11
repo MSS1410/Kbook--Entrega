@@ -1,4 +1,3 @@
-// backend/src/controllers/adminController.js
 export { adminDashboard } from './admin/dashboardController.js'
 
 export {
