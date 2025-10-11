@@ -1,4 +1,3 @@
-// backend/src/controllers/messages/adminMessagesController.js
 import mongoose from 'mongoose'
 import Message from '../../models/Message.js'
 import User from '../../models/User.js'
@@ -18,6 +17,9 @@ export const adminSendMessage = async (req, res, next) => {
       return res.status(404).json({ message: 'Usuario no encontrado' })
     }
 
+    // compruebo que el usuario exista y sea distinto,
+    //creo un mensaje fromAdmin = req.user._id to= :id, read false
+
     const msg = await Message.create({
       to: toUserId,
       fromAdmin: req.user._id,
@@ -32,7 +34,7 @@ export const adminSendMessage = async (req, res, next) => {
   }
 }
 
-// GET /api/admin/inbox?page=&limit=&unread=1
+// lista los mensajes que llegan al admin desde los user
 export const adminInbox = async (req, res, next) => {
   try {
     const page = Math.max(1, parseInt(req.query.page || '1', 10))
@@ -65,7 +67,7 @@ export const adminInbox = async (req, res, next) => {
   }
 }
 
-// GET /api/admin/users/:id/messages
+// ahora los mensajes del administrador a la vuelta para el usuario
 export const adminListMessagesToUser = async (req, res, next) => {
   try {
     const toUserId = req.params.id
@@ -93,7 +95,7 @@ export const adminListMessagesToUser = async (req, res, next) => {
   }
 }
 
-// GET /api/admin/users/:id/thread
+// mediante $or atraigo la conversacion entre admin usuario a doble banda. quiero ordenar para poder devolver array con lo qu em einteresa
 export const adminGetThreadWithUser = async (req, res, next) => {
   try {
     const otherId = req.params.id
@@ -101,8 +103,8 @@ export const adminGetThreadWithUser = async (req, res, next) => {
 
     const items = await Message.find({
       $or: [
-        { to: otherId, fromAdmin: me }, // admin → user
-        { to: me, fromUser: otherId } // user → admin
+        { to: otherId, fromAdmin: me }, // admin a user
+        { to: me, fromUser: otherId } // user a admin
       ]
     })
       .sort({ createdAt: 1 })
@@ -124,7 +126,7 @@ export const adminGetThreadWithUser = async (req, res, next) => {
   }
 }
 
-// PATCH /api/admin/messages/:id/read
+// los read false son no leidos
 export const adminMarkMessageRead = async (req, res, next) => {
   try {
     const { id } = req.params

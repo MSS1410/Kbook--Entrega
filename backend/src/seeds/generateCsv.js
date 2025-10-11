@@ -1,4 +1,3 @@
-// backend/src/seeds/generateRealCsv.js
 import fs from 'fs'
 import { createObjectCsvWriter } from 'csv-writer'
 import axios from 'axios'
@@ -50,7 +49,7 @@ async function generate() {
       const title = work.title
       const authorName = work.authors?.[0]?.name || 'Desconocido'
 
-      // Obtén sinopsis desde first_sentence o description del subject
+      // sinopsis desde primera linea o desde descripcion
       let synopsis = work.first_sentence?.value || ''
       if (!synopsis && work.description) {
         synopsis =
@@ -59,7 +58,7 @@ async function generate() {
             : work.description.value
       }
 
-      // Si aún no hay sinopsis, busca detalles del workKey
+      // sin sinopsis, busco detalles del work.key
       if (!synopsis) {
         const details = await fetchWorkDetails(work.key)
         if (details.description) {

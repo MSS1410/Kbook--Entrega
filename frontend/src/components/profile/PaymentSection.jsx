@@ -311,8 +311,7 @@ export default function PaymentSection() {
       </Row>
 
       <p style={{ margin: '8px 0 0', color: '#666', fontSize: 12 }}>
-        Nota académica: validaciones en cliente (Luhn, CVC, caducidad). En el
-        servidor solo guardamos <b>titular</b>, <b>caducidad</b> y{' '}
+        En el servidor solo guardamos <b>titular</b>, <b>caducidad</b> y{' '}
         <b>últimos 4 dígitos</b>.
       </p>
     </Card>

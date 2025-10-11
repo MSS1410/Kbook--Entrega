@@ -1,9 +1,8 @@
-// backend/src/controllers/messages/userMessagesController.js
 import Message from '../../models/Message.js'
 import User from '../../models/User.js'
 import { getCounterpart, resolveSupportAdmin } from './helpers.js'
 
-// POST /api/users/messages  (usuario → admin)
+// para elegir el admin de soporte, email directo o env
 export const userSendMessageToAdmin = async (req, res, next) => {
   try {
     const { subject = '', body = '', toEmail } = req.body || {}
@@ -23,7 +22,7 @@ export const userSendMessageToAdmin = async (req, res, next) => {
         .status(403)
         .json({ message: 'El administrador receptor está bloqueado' })
     }
-
+    //creamos mensaje
     const msg = await Message.create({
       to: admin._id,
       fromUser: req.user._id,
@@ -38,7 +37,7 @@ export const userSendMessageToAdmin = async (req, res, next) => {
   }
 }
 
-// GET /api/users/messages?limit=&page=&unread=1
+//lista bandeja de entrada usuario, con mensajes de adminm
 export const userListMessages = async (req, res, next) => {
   try {
     const page = Math.max(1, parseInt(req.query.page || '1', 10))
@@ -74,7 +73,7 @@ export const userListMessages = async (req, res, next) => {
   }
 }
 
-// PATCH /api/users/messages/:id/read   { read: true|false }
+// marcar mensaje como leido o no leido si el receptor es usuario del web to = req.user._id
 export const userReadMessage = async (req, res, next) => {
   try {
     const { id } = req.params
@@ -94,9 +93,8 @@ export const userReadMessage = async (req, res, next) => {
   }
 }
 
-/* ===== P2P (requiere isAuth) ===== */
-
-// POST /api/messages/threads/:participantId/messages
+//mensajeria de ysyarui a uysyruio.
+//necesito asegurar que no lo envie a mi mismo. Destinatario existe y creare mensaje
 export const userSendMessageToUser = async (req, res, next) => {
   try {
     const { participantId } = req.params
@@ -128,7 +126,7 @@ export const userSendMessageToUser = async (req, res, next) => {
   }
 }
 
-// POST /api/messages/threads   { participantId, firstMessage?, subject? }
+// Para generar si hace falta un chatcon otro usuario. Con opcion de enviar el primer mensaje, firstMessage, debo devolver con thread:{id, user, lastAt}
 export const startThread = async (req, res, next) => {
   try {
     const { participantId, firstMessage = '', subject = '' } = req.body
@@ -162,7 +160,8 @@ export const startThread = async (req, res, next) => {
   }
 }
 
-// GET /api/messages/threads
+// atrapo todos los mensajes donde yo soy to o fromUser.
+//fecha descend, con getCounterpart (meId) consigo lista de chats para tener al otro
 export const listThreads = async (req, res, next) => {
   try {
     const msgs = await Message.find({
@@ -190,7 +189,7 @@ export const listThreads = async (req, res, next) => {
   }
 }
 
-// GET /api/messages/threads/:participantId
+// devolver conversacion entre usuario act + participantId, en todas las direcciones que pueda ser de admin o usuario OK
 export const listThreadMessages = async (req, res, next) => {
   try {
     const { participantId } = req.params
@@ -221,7 +220,7 @@ export const listThreadMessages = async (req, res, next) => {
   }
 }
 
-// GET /api/messages/users/search?q=texto
+// me saco a mi mismo de la busqueda, por name o email. 20 results con datos necesarios de user.
 export const searchUsersForMessage = async (req, res, next) => {
   try {
     const q = (req.query.q || '').trim()

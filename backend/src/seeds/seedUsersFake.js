@@ -1,4 +1,4 @@
-// backend/src/seeds/seed-users.js
+// mongo, borra users menos admin, crea 30
 import dotenv from 'dotenv'
 import connectDB from '../config/db.js'
 import User from '../models/User.js'
@@ -11,10 +11,10 @@ async function seedUsers() {
   console.log('✅ Conectado a MongoDB')
 
   // elimina usuarios de seed anteriores conservamos admin
-  await User.deleteMany({ email: { $ne: 'helpkbook@kbook.com' } })
+  await User.deleteMany({ email: { $ne: ' kbookhelp@kbook.com ' } })
   console.log('🗑️  Usuarios de seed anteriores eliminados (salvo admin)')
 
-  const usersToCreate = 30 // número de usuarios de prueba
+  const usersToCreate = 30 // numero de usuarios de prueba
   let created = 0
 
   for (let i = 0; i < usersToCreate; i++) {

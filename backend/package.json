@@ -5,7 +5,13 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "set-admin":"node scripts/adminsetter.js"
+    "set-admin": "node scripts/adminsetter.js",
+    "reset-all": "node scripts/reset-all.js",
+    "seed:csv": "node src/seeds/generateCsv.js",
+    "seed:core": "node src/seeds/seed.js",
+    "seed:users": "node src/seeds/seedUsersFake.js",
+    "seed:reviews": "node src/seeds/seedReviewsFake.js",
+    "admin:ensure": "node scripts/ensureAdmin.js"
   },
   "keywords": [],
   "author": "",

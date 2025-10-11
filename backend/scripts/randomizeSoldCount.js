@@ -1,9 +1,8 @@
-// scripts/randomizeSoldCounts.js
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 dotenv.config()
 
-import Book from '../../backend/src/models/Book.js' // ajusta la ruta si difiere
+import Book from '../src/models/Book.js'
 
 const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min
 

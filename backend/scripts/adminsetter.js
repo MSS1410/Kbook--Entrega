@@ -1,7 +1,6 @@
-// BACKend/scripts/promote-admin.js
 import 'dotenv/config'
 import mongoose from 'mongoose'
-import User from '../src/models/User.js' // ajusta la ruta a tu modelo
+import User from '../src/models/User.js'
 
 const email = process.argv[2]
 if (!email) {
@@ -17,9 +16,7 @@ async function run() {
     process.exit(1)
   }
 
-  // Cambia una de estas dos líneas según tu chequeo de admin
-  user.role = 'admin' // <- si usas roles
-  // user.isAdmin = true               // <- si usas booleano
+  user.role = 'admin'
 
   await user.save()
   console.log('Seteado a admin:', email)
