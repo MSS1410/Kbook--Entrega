@@ -29,7 +29,6 @@ export default function ProfileActivitySection({ lastLogin }) {
       </Muted>
       <div style={{ color: '#9CA3AF', fontSize: 13, marginTop: 6 }}>
         Historial de acciones (solo muestreo).
-        <em>audit log</em>.
       </div>
     </Card>
   )
