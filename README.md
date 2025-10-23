@@ -11,14 +11,14 @@ KBOOKS es una aplicación web completa (**Full Stack MERN**) que permite a usuar
 2. [⚙️ Tecnologías y dependencias principales]
 3. [🧩 Arquitectura del proyecto]
 4. [🚀 Instalación y ejecución]
-5. [scripts de datos y automatización]
+5. [📟 scripts de datos y automatización]
 6. [👥 Flujo de usuario]
 7. [🧑‍💼 Flujo de administrador]
 8. [🔐 Seguridad y autenticación]  
 9. [🎨 Diseño y experiencia de usuario]
 10. [🧱 Uso de Styled Components)  
 11. [🔗 Conexión con la API: uso de Axios]
-12. Conclusión personal.
+12. [👍🏽 Conclusión personal.]
 
 ---
 
@@ -517,7 +517,7 @@ La configuración se centraliza en /frontend/src/api/index.js, donde se define l
 
 ### ️1️⃣2️⃣ Conclusión personal.
 
-No me esperaba que este proyecto me llebara tanto tiempo. Siendo sincero, el resultado final deja que desear teniendo en cuenta que casi han pasado 5/6 meses desde que lo empeze. 
+No me esperaba que este proyecto me llebara tanto tiempo. Siendo sincero, el resultado final deja que desear teniendo en cuenta que casi han pasado 5/6 meses desde que lo empecé. 
 El proyecto no es de mi agrado. Siento que a dia de hoy podria explorar otras opciones y podria ofrecer un resultado más profesional. 
 Pero antes de empezar el proyecto se me hacia una montaña lo que a dia de hoy me parece dos tardes de faena bien organizada.
 He aprendido nuevas tecnicas, nuevos metodos, nuevas librerias. He aprendido por encima de lo que me esperaba y por ello salgo satisfecho con la entrega. 
@@ -527,8 +527,9 @@ Añadiria funcionalidades, tanto en user como admin. Registro de pedidos real pa
 Seccion de administrador para contactar con el proveedor de libros. Inventario real de los ejemplares...
 
 Importante mejorar en la estructruacion del proyecto desde un inicio. Para evitar carpetas y carpetas.
-Enfin, una larga lista de aspectos que he tenido que dejar en la libreta porque se me tiraba el tiempo encima, y creo que con la entrega paso los requisitos para conseguir el aprobado.
-Agradecer a vuestro equipo por la dedicación sobre los alumnos y nuestros trabajos. 
+Enfin, una larga lista de aspectos que he tenido que dejar en la libreta porque se me tiraba el tiempo encima, y creo que con la entrega paso los requisitos para conseguir el aprobado. (No busco el aprobado y ya esta, por supuesto, pero si que tiene su cierta necesariedad para el titulo, a fin de cuentas lo que te dirije hacia la excelencia es la constancia y el trabajo, entiendo )
+
+Agradecer a el profesorado por la dedicacion sobre nuestro trabajo.
 
 Espero que les convenza la entrega. 
 
