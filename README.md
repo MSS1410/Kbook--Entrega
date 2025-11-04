@@ -164,18 +164,23 @@ Antes de ejecutar el proyecto, asegúrate de tener instalado:
 
 git clone https://github.com/tu-usuario/kbooks.git
 cd kbooks
+```
 
 ### 2️⃣ Configurar el Backend
 ```bash
 cd backend
 npm install
+```
 
-Luego, crea un archivo .env (si no existe) en la carpeta backend/ y completa las variables necesarias:
+Luego, crea un archivo .env  en la carpeta backend/ y completa las variables necesarias:
 ```bash
 
-MONGODB_URI=mongodb://localhost:27017/kbooks
-JWT_SECRET=tu_clave_segura_aqui
-PORT=4000
+MONGODB_URI=mongodb+srv://KBOOKAdmin:1uMScuPHEGJtVP8d@kbookscluster00.4ranlxk.mongodb.net/?retryWrites=true&w=majority&appName=KBooksCluster00
+JWT_SECRET=KBooksCluster00
+
+SUPPORT_ADMIN_EMAIL=kbookhelp@kbook.com
+ADMIN_EMAIL=kbookhelp@kbook.com
+ADMIN_PASSWORD=HelpKbook123
 
 Una vez configurado el entorno, inicia el servidor backend:
 ```bash
@@ -199,8 +204,8 @@ El frontend se ejecutará por defecto en:
 
 ### 4️⃣ Usuario administrador y datos iniciales
 
-🧠 Importante: El proyecto ya viene completamente configurado y poblado con datos reales.
-No es necesario crear manualmente un usuario administrador ni ejecutar scripts de seed.
+🧠 Importante: El proyecto ya viene configurado y poblado con datos falsos.
+No es necesario crear  un usuario administrador ni ejecutar scripts de seed.
 Durante el proceso de desarrollo he implementado scripts de inicialización (seeders) que,
 conectan con OpenLibrary para generar un catálogo de libros, autores y usuarios de prueba, 
 además de crear un administrador principal que puede acceder directamente al panel de gestión.
@@ -227,7 +232,15 @@ Estos scripts permiten regenerar o repoblar el sistema si fuera necesario:
 
 ## 🧩 Todos los scripts usan variables definidas en el archivo .env del backend, que centraliza las credenciales de conexión y los datos del administrador:
 ```bash
-MONGODB_URI=mongodb+srv://...
+
+MONGODB_URI=mongodb+srv://KBOOKAdmin:1uMScuPHEGJtVP8d@kbookscluster00.4ranlxk.mongodb.net/?retryWrites=true&w=majority&appName=KBooksCluster00
+JWT_SECRET=KBooksCluster00
+
+SUPPORT_ADMIN_EMAIL=kbookhelp@kbook.com
+ADMIN_EMAIL=kbookhelp@kbook.com
+ADMIN_PASSWORD=HelpKbook123
+
+
 JWT_SECRET=KBooksCluster00
 ADMIN_EMAIL=kbookhelp@kbook.com
 ADMIN_PASSWORD=HelpKbook123
