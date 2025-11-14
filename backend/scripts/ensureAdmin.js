@@ -1,4 +1,4 @@
-// backend/scripts/ensureAdmin.js
+
 import dotenv from 'dotenv'
 import mongoose from 'mongoose'
 import User from '../src/models/User.js'
@@ -21,7 +21,7 @@ async function run() {
   await mongoose.connect(MONGODB_URI)
   console.log('✅ Conectado a MongoDB')
 
-  // Busca estrictamente por email (normaliza a minúsculas si tu esquema lo hace)
+  // busco solamente el email, buscado en  minusculas
   const email = ADMIN_EMAIL.toLowerCase()
 
   let user = await User.findOne({ email })
@@ -31,7 +31,7 @@ async function run() {
     user = new User({
       name: 'Admin Kbook',
       email,
-      password: ADMIN_PASSWORD, // se hashea en pre('save')
+      password: ADMIN_PASSWORD, // "hashed" en pre-save
       role: 'admin',
       isBlocked: false
     })
@@ -47,7 +47,7 @@ async function run() {
       user.isBlocked = false
       changed = true
     }
-    // Fuerza nueva contraseña por si la anterior no matchea
+    // Fuerzo nuevo password, por si anterior no es correcta
     user.password = ADMIN_PASSWORD
     changed = true
 
