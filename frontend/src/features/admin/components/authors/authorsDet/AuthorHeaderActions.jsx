@@ -21,6 +21,7 @@ export default function AuthorHeaderActions({
       {editing ? (
         <>
           <Button disabled={saving} onClick={onSave}>
+            {/* feedback de saved */}
             <Save size={16} /> {saving ? 'Guardando…' : 'Guardar'}
           </Button>
           <Button $variant='ghost' onClick={onCancel}>

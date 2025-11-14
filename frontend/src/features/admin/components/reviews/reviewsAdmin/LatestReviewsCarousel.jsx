@@ -85,7 +85,7 @@ const Footer = styled.div`
   color: #475569;
 `
 
-const fmtDate = (iso) => new Date(iso).toLocaleDateString() // ← fecha corta
+const fmtDate = (iso) => new Date(iso).toLocaleDateString() // fecha corta
 
 export default function LatestReviewsCarousel({ items, loading }) {
   return (
@@ -112,7 +112,9 @@ export default function LatestReviewsCarousel({ items, loading }) {
             <MiniCard key={it.id} title={it.bookTitle}>
               <Row>
                 <Avatar
-                  src={absUrl(it.userAvatar || '') || AVATAR_PLACEHOLDER} // ← avatar usuario
+                   //  user avatar
+                  src={absUrl(it.userAvatar || '') || AVATAR_PLACEHOLDER} 
+               
                   alt={it.userName}
                 />
                 <div style={{ minWidth: 0 }}>

@@ -349,7 +349,7 @@ export default function AdminContact() {
         </Shell>
       </Wrap>
 
-      {/*  MODAL: NUEVO MSG  */}
+      {/*  MODAL: NUEVO MSGa  */}
       <NewMessageModal
         open={openNew}
         onClose={() => setOpenNew(false)}

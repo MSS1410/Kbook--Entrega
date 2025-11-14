@@ -230,10 +230,10 @@ export default function OrderConfirmPage() {
         user={user}
       />
 
-      {/* Revisión (datos mostrados + totales) */}
+      {/* revision datos  y totales */}
       <ReviewAndTotals
-        shipForm={shipForm}
-        useAltPayment={useAltPayment}
+        shipForm={shipForm}   // direccion a usar
+        useAltPayment={useAltPayment} // decido entre payForm o perfil
         payForm={payForm}
         user={user}
         order={order}

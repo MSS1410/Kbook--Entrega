@@ -26,6 +26,7 @@ const Bio = styled.div`
 `
 // resumen bio 2 lineas
 
+
 export default function AuthorRow({ a, onDelete }) {
   return (
     <Row>

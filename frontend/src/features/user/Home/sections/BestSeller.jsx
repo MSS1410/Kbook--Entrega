@@ -74,6 +74,7 @@ export default function BestsellerSection() {
 
   return (
     <HomeCarrusel
+    // render del carrusel con los libros mapeados, ancho y alto, 
       title='Más Vendidos'
       items={items}
       viewAllLink='/bestsellers'

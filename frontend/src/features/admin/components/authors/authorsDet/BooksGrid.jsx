@@ -88,6 +88,7 @@ export default function BooksGrid({ authorName, books }) {
         </GridBooks>
       ) : (
         <div style={{ color: '#64748b' }}>
+          {/* fall */}
           Este autor no tiene libros asociados.
         </div>
       )}

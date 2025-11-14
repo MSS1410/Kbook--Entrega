@@ -31,7 +31,7 @@ const Price = styled.p`
   margin: 0;
   font-weight: 700;
 `
-// grid fluido, card.active dibuja focus en el seleccionado. mostramos formastos
+// grid fluido, card.active dibuja focus en el seleccionado. mostramos formatos
 export default function FormatsPicker({ formats = [], selected, onSelect }) {
   return (
     <Grid>

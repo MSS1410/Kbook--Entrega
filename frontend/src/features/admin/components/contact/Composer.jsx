@@ -1,4 +1,3 @@
-// frontend/src/features/admin/pages/contact/Composer.jsx
 import React from 'react'
 import styled from 'styled-components'
 import Button from '../../components/Button.jsx'

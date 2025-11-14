@@ -105,8 +105,8 @@ export default function BookReviewsPage() {
     ;(async () => {
       try {
         const [{ data: b }, { data: rv }] = await Promise.all([
-          api.get(`/api/books/${id}`),
-          api.get(`/api/reviews/book/${id}`)
+          api.get(`/api/books/${id}`), // fetch del libro
+          api.get(`/api/reviews/book/${id}`) // fetch de reseñas
         ])
         setBook(b)
         setReviews(Array.isArray(rv) ? rv : [])
@@ -129,6 +129,7 @@ export default function BookReviewsPage() {
   return (
     <Wrap>
       <Header>
+
         <Cover src={book?.coverImage} alt={book?.title} />
         <div>
           <H1>Reseñas de “{book?.title || '—'}”</H1>
@@ -141,6 +142,7 @@ export default function BookReviewsPage() {
       {reviews.length === 0 ? (
         <p style={{ color: '#666' }}>Aún no hay reseñas para este libro.</p>
       ) : (
+        
         <Grid>
           {reviews.map((r) => {
             const avatar = r.user?.avatar || r.avatar || AVATAR_PLACEHOLDER

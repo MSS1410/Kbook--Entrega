@@ -2,7 +2,16 @@ import React, { useState, useEffect } from 'react'
 import styled, { css } from 'styled-components'
 import { Link } from 'react-router-dom'
 
-// Styled-components using transient props ($bg, $active) to avoid passing to DOM
+// usare props transitorias, "transients props". (slide, subtitle, title, button)
+// son props de uso interno, para estilos que no quiero pasar al DOM.
+// indico con "$" : $bg, $active.
+// styled-components, las utiliza para calcular estilos, pero para que no se vean reflejadas como errores html o warning de react, las filtra para que no sean atributos HTML.
+
+// props transitorias : 
+// 1. Evitar avisos de React. 2. No ensuciar HTML con atributos nonexist.
+// IMP: una transitoria prop es solo para estilo, no logica de funcionamiento.
+
+
 const Carousel = styled.div`
   position: relative;
   overflow: hidden;
@@ -18,6 +27,7 @@ const Slide = styled.div`
   height: 100%;
   background: url(${(props) => props.$bg}) center/cover no-repeat;
   display: ${(props) => (props.$active ? 'flex' : 'none')};
+  
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -25,8 +35,10 @@ const Slide = styled.div`
   text-align: center;
   transition: opacity 1s ease-in-out;
 `
+// linea 28,29. $bg y $active, si llegan al styled-component para calculo de css, pero no existiran como atributos del div final
 
 const Title = styled.h1`
+
   font-size: ${({ theme }) => theme.fontSizes.xxl};
   margin-bottom: ${({ theme }) => theme.spacing.md};
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
@@ -36,6 +48,10 @@ const Subtitle = styled.p`
   margin-bottom: ${({ theme }) => theme.spacing.lg};
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 `
+// en estos dos casos no son props transitorias. es INTERPOLACION DE STRINGS EN una template string de JS
+// ${ ... }, styled.components te deja meter codigo JS dentro de css
+// en font-size: ${({ theme }) => theme.fontSizes.xxl}; , recibo las props del componente y devuelvo valor css.
+// exactamente = lee de theme el tamaño xxl y lo pone como fontSize
 const Button = styled(Link)`
   padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.lg};
   background: ${({ theme }) => theme.colors.primary};
@@ -61,7 +77,7 @@ const Dot = styled.span`
     props.$active ? props.theme.colors.primary : '#ffffff80'};
   cursor: pointer;
 `
-
+// array statico con imagen , titulo, subt y enlace (CTA), por cada slide.
 const slides = [
   {
     bg: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1950&q=80',
@@ -102,6 +118,8 @@ const slides = [
 ]
 
 export default function BannerSect() {
+
+  // state index cada 8.5 segs avanza slide
   const [index, setIndex] = useState(0)
   useEffect(() => {
     const timer = setInterval(
@@ -113,6 +131,7 @@ export default function BannerSect() {
 
   return (
     <Carousel>
+      {/* monto todas las diapos, solo mostrando la que este active en ese momento */}
       {slides.map((s, i) => (
         <Slide key={i} $bg={s.bg} $active={i === index}>
           <Title>{s.title}</Title>
@@ -120,6 +139,7 @@ export default function BannerSect() {
           <Button to={s.btnLink}>{s.btnText}</Button>
         </Slide>
       ))}
+       {/*barrita para cambiar manual  */}
       <Dots>
         {slides.map((_, i) => (
           <Dot key={i} $active={i === index} onClick={() => setIndex(i)} />

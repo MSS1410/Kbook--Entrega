@@ -1,12 +1,12 @@
 import React, { Suspense, lazy } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 
-// Layout (también lazy)
+// Layout lazy also
 const AdminLayout = lazy(() =>
   import('../features/admin/layout/AdminLayout.jsx')
 )
 
-// Páginas admin (ajusta paths si cambian)
+// admin Pages
 const AdminHome = lazy(() => import('../features/admin/pages/AdminHome.jsx'))
 const AdminBooks = lazy(() =>
   import('../features/admin/pages/books/AdminBooks.jsx')
@@ -49,37 +49,37 @@ export default function AdminRoutes() {
   return (
     <Suspense fallback={<div>Cargando área de administración…</div>}>
       <Routes>
-        {/* Todas las rutas admin comparten el mismo layout */}
+        {/* mismo layout shared para todas las rutas */}
         <Route element={<AdminLayout />}>
           <Route index element={<AdminHome />} />
 
-          {/* Profile */}
+          {/* profile */}
           <Route path='profile' element={<AdminMyProfile />} />
 
-          {/* Libros */}
+          {/* books */}
           <Route path='books' element={<AdminBooks />} />
           <Route path='books/:id' element={<AdminBookDetail />} />
 
-          {/* Autores */}
+          {/* autores */}
           <Route path='authors' element={<AdminAuthors />} />
           <Route path='authors/:id' element={<AdminAuthorDetail />} />
 
-          {/* Usuarios */}
+          {/* usdrs */}
           <Route path='users' element={<AdminUsers />} />
           <Route path='users/:id' element={<AdminUserDetail />} />
 
-          {/* Pedidos */}
+          {/* orders pedidos */}
           <Route path='orders' element={<AdminOrders />} />
           <Route path='orders/list' element={<AdminOrdersList />} />
 
-          {/* Reviews */}
+          {/* reviews */}
           <Route path='reviews' element={<AdminReviews />} />
           <Route path='reviews/list' element={<AdminReviewsList />} />
 
-          {/* Contacto */}
+          {/* contact inbox */}
           <Route path='contact' element={<AdminContact />} />
 
-          {/* Fallback dentro de /admin */}
+          {/* salve dentro de admin */}
           <Route path='*' element={<Navigate to='/admin' replace />} />
         </Route>
       </Routes>

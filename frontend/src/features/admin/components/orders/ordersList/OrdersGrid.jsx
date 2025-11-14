@@ -13,6 +13,7 @@ export default function OrdersGrid({ orders }) {
   return (
     <Grid>
       {orders.map((o) => (
+        // cada pedido a su tarjet
         <OrderCard key={o._id} o={o} />
       ))}
     </Grid>

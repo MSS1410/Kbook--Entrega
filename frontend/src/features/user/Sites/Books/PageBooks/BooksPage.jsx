@@ -74,19 +74,22 @@ const chooseFormat = (book) => {
 /*  page  */
 export default function BooksPage() {
   // estado principal
-  const qp = useQueryParams()
+  const qp = useQueryParams() // 1 = query de search, dispara el useEffect de carga, cada vez q cambia q
   const navigate = useNavigate()
-  const q = qp.get('search') || ''
+  const q = qp.get('search') || '' // qp es URLSearchParms q viene de helper useQueryP, intenta leer el parametro search de url, Si no existe pondra cadena vacia
 
   const urlView = qp.get('view')
-  const [view, setView] = useState(
+  const [view, setView] = useState( 
+    // view : guarda vista actual, grid o list
     urlView || localStorage.getItem('booksView') || 'list'
+    // inicializado : primero view de url, si no hay usara localstorage
   )
 
-  const [items, setItems] = useState([])
-  const [loading, setLoading] = useState(false)
+  const [items, setItems] = useState([]) // guarda el array de libros que llegan del back tras buscar
+  
+  const [loading, setLoading] = useState(false) // guarda si la pagina esta cargando, camvia a true: antes de llamar a api/books, false, al terminar
   const [error, setError] = useState(null)
-  const [total, setTotal] = useState(0)
+  const [total, setTotal] = useState(0) // TOTAL De resultados reportado x backend
 
   const { addOrUpdate, openDrawer } = useCart()
 
@@ -165,11 +168,12 @@ export default function BooksPage() {
         </Empty>
       )}
 
-      {/* ===== LISTA ===== */}
+      {/*  LISTA  */}
       {view === 'list' && (
         <ListWrap>
           {items.map((b) => (
             <SearchListItem
+            // mapearemos cada libro en modo list
               key={b._id}
               book={b}
               minPrice={pickMinPrice(b.formats)}
@@ -179,9 +183,10 @@ export default function BooksPage() {
         </ListWrap>
       )}
 
-      {/* ===== REJILLA ===== */}
+      {/*  REJILLA  */}
       {view === 'grid' && (
         <GridWrap>
+          {/* mapeado para cuadrilla */}
           {items.map((b) => (
             <SearchGridItem
               key={b._id}

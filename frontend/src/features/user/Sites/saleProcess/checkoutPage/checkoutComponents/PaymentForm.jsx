@@ -1,4 +1,3 @@
-// components/PaymentForm.jsx
 import React from 'react'
 import styled from 'styled-components'
 import {
@@ -33,6 +32,7 @@ const ErrorText = styled.div`
   font-size: 0.75rem;
   margin-top: 2px;
 `
+
 const ButtonRow = styled.div`
   display: flex;
   gap: ${({ theme }) => theme.spacing.md};
@@ -56,14 +56,15 @@ const SecondaryButton = styled.button`
 `
 
 export default function PaymentForm({
-  hasProfilePayment,
-  useAltPayment,
-  onToggleAlt,
-  brand,
+  hasProfilePayment,  // true si perfil tiene holder/last4/expiry
+  useAltPayment, // true si user  nuevos datos
+  onToggleAlt, // setter
+  brand, // marca detectada
   values,
   errors,
   editable,
-  formatCardNumber,
+  formatCardNumber, // helper (espacia cada 4)
+
   onChange,
   setErrors,
   onBack,
@@ -73,7 +74,7 @@ export default function PaymentForm({
     <FormSection>
       <h2>2. Información de pago</h2>
 
-      {hasProfilePayment && (
+      {hasProfilePayment && (   /* mismo funcionamiento que envio */
         <label
           style={{
             display: 'flex',
@@ -95,31 +96,31 @@ export default function PaymentForm({
       <Field>
         <Label>Nombre del titular</Label>
         <Input
-          value={values.holderName || ''}
+          value={values.holderName || ''}         /* perfil o nuevo */
           onChange={(e) => editable && onChange('holderName', e.target.value)}
           hasError={!!errors.holderName}
-          disabled={!editable}
-          autoComplete='cc-name'
+          disabled={!editable}             /* bloqueado si  perfil */
+          autoComplete='cc-name'    // hint nav
         />
         {errors.holderName && <ErrorText>{errors.holderName}</ErrorText>}
       </Field>
 
-      {/* Número */}
+      {/* numero */}
       <Field>
         <Label>Número de tarjeta {brand ? `(${brand})` : ''}</Label>
         <Input
-          value={values.cardNumber || ''}
+          value={values.cardNumber || ''}    /* mask en perfil // nuevo*/
           onChange={(e) => {
             if (!editable) return
             onChange('cardNumber', formatCardNumber(e.target.value))
           }}
           hasError={!!errors.cardNumber}
           disabled={!editable}
-          placeholder={editable ? '1234 5678 9012 3456' : ''}
-          inputMode='numeric'
-          autoComplete='cc-number'
-          onKeyDown={blockNonNumericKeys}
-          onPaste={(e) => {
+          placeholder={editable ? '1234 5678 9012 3456' : ''}   /*  hint si editable */
+          inputMode='numeric'               // teclado num en mobiles
+          autoComplete='cc-number'           
+          onKeyDown={blockNonNumericKeys}          // bloqueo letras y simb
+          onPaste={(e) => {            // limpipa y format
             if (!editable) return
             const text = (e.clipboardData || window.clipboardData).getData(
               'text'
@@ -127,19 +128,19 @@ export default function PaymentForm({
             e.preventDefault()
             onChange('cardNumber', formatCardNumber(text))
           }}
-          maxLength={editable ? 23 : undefined}
+          maxLength={editable ? 23 : undefined}    // 19 digits, 4 spaces, = 23
         />
         {errors.cardNumber && <ErrorText>{errors.cardNumber}</ErrorText>}
       </Field>
 
-      {/* Caducidad */}
+      {/* caducidad trjt */}
       <Field>
         <Label>Fecha de caducidad (MM/AA)</Label>
         <Input
           value={values.expiry || ''}
           onChange={(e) => {
             if (!editable) return
-            onChange('expiry', formatExpiry(e.target.value))
+            onChange('expiry', formatExpiry(e.target.value))   // auto y normalizo a mm
           }}
           hasError={!!errors.expiry}
           disabled={!editable}
@@ -147,7 +148,7 @@ export default function PaymentForm({
           inputMode='numeric'
           autoComplete='cc-exp'
           onKeyDown={blockNonNumericKeys}
-          onPaste={(e) => {
+          onPaste={(e) => {      // aseguramos formato al pegar
             if (!editable) return
             const text = (e.clipboardData || window.clipboardData).getData(
               'text'
@@ -155,7 +156,7 @@ export default function PaymentForm({
             e.preventDefault()
             onChange('expiry', formatExpiry(text))
           }}
-          maxLength={5}
+          maxLength={5}    // 4 digits y /
           onBlur={() => {
             if (!editable) return
             setErrors((prev) => ({ ...prev, expiry: undefined }))
@@ -171,11 +172,11 @@ export default function PaymentForm({
           value={values.cvc || ''}
           onChange={(e) => {
             if (!editable) return
-            onChange('cvc', formatCVC(e.target.value, brand))
+            onChange('cvc', formatCVC(e.target.value, brand))  // 3 digits o 4 si AMEX
           }}
           hasError={!!errors.cvc}
           disabled={!editable}
-          placeholder={editable ? (brand === 'AMEX' ? '****' : '***') : ''}
+          placeholder={editable ? (brand === 'AMEX' ? '****' : '***') : ''} // hint por marca
           inputMode='numeric'
           autoComplete='cc-csc'
           onKeyDown={blockNonNumericKeys}
@@ -187,7 +188,7 @@ export default function PaymentForm({
             e.preventDefault()
             onChange('cvc', formatCVC(text, brand))
           }}
-          maxLength={brand === 'AMEX' ? 4 : 3}
+          maxLength={brand === 'AMEX' ? 4 : 3}    
           onBlur={() => {
             if (!editable) return
             setErrors((prev) => ({ ...prev, cvc: undefined }))
@@ -197,7 +198,8 @@ export default function PaymentForm({
       </Field>
 
       <ButtonRow>
-        <SecondaryButton onClick={onBack}>Atrás</SecondaryButton>
+        <SecondaryButton onClick={onBack}>Atrás</SecondaryButton>  
+        
         <PrimaryButton onClick={onNext}>Siguiente</PrimaryButton>
       </ButtonRow>
     </FormSection>

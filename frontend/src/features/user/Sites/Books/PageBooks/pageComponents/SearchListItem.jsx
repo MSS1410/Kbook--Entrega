@@ -117,6 +117,7 @@ const AddBtn = styled.button`
 `
 
 const getAuthorName = (a) => (typeof a === 'string' ? a : a?.name || '')
+// extracto de la sinopsis respetanto espacio y cortando si hace falta 
 const excerpt = (s, n = 180) => {
   if (!s) return ''
   if (s.length <= n) return s
@@ -132,6 +133,7 @@ export default function SearchListItem({ book, minPrice, onAdd }) {
 
   return (
     <RowCard>
+      {/* listado de busqueda en horizontal */}
       <ThumbWrap>
         {cover ? <Thumb src={cover} alt={book.title} /> : null}
       </ThumbWrap>
@@ -141,6 +143,7 @@ export default function SearchListItem({ book, minPrice, onAdd }) {
         <Meta>
           {authorName && <span>{authorName}</span>}
           {book.category && <Badge>{book.category}</Badge>}
+          {/* Badge = insignia, para resaltar categoria con color distinto */}
         </Meta>
         <Excerpt>{excerpt(book.synopsis)}</Excerpt>
 
@@ -149,6 +152,7 @@ export default function SearchListItem({ book, minPrice, onAdd }) {
             {minPrice != null ? `Desde ${minPrice.toFixed(2)} €` : ''}
           </Price>
           <BtnRow>
+            {/* action buttons */}
             <AddBtn onClick={onAdd} aria-label='Añadir al carrito'>
               Añadir al carrito
             </AddBtn>

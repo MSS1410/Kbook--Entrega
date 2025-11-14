@@ -45,7 +45,7 @@ const Name = styled.div`
   -webkit-box-orient: vertical;
   overflow: hidden;
 `
-
+// recibo author, construyo un link que me enviara al page del aurthor, avatar circular y name
 export default function AuthorSingCard({ author }) {
   const to = `/authors/${author._id}`
   return (

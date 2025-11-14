@@ -1,4 +1,4 @@
-// components/ReviewsPager.jsx
+
 import React from 'react'
 import styled from 'styled-components'
 
@@ -34,7 +34,7 @@ export default function ReviewsPager({
         ‹ Anterior
       </PageBtn>
 
-      {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
+      {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => ( // genera 1...N
         <PageBtn key={n} $active={n === page} onClick={() => onGoto(n)}>
           {n}
         </PageBtn>

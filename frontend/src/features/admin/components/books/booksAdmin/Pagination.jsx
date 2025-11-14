@@ -20,6 +20,7 @@ const Pager = styled.div`
 `
 
 export default function Pagination({ page, totalPages, onPrev, onNext }) {
+  // mismo flow que authors
   return (
     <Pager>
       <button disabled={page <= 1} onClick={onPrev}>

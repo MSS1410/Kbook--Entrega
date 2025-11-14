@@ -57,20 +57,21 @@ export default function NewMessageModal({
       }
     >
       <div style={{ display: 'grid', gap: 10 }}>
-        {/*  user searcher*/}
+        {/*  user searcher  */}
+
         <div style={{ display: 'flex', gap: 8 }}>
           <Input
             placeholder='Buscar usuario por nombre o email…'
             value={q}
-            onChange={(e) => setQ(e.target.value)} // ← escribe query
-            onKeyDown={(e) => e.key === 'Enter' && onSearch()} // ← enter = buscar
+            onChange={(e) => setQ(e.target.value)} // escribe query
+            onKeyDown={(e) => e.key === 'Enter' && onSearch()} // enter aplica buscar
           />
           <Button onClick={onSearch} disabled={searching}>
             {searching ? 'Buscando…' : 'Buscar'}
           </Button>
         </div>
 
-        {/* ======== Resultados de búsqueda (selección de destinatario) ======== */}
+        {/* Selecciono destinatario tras search */}
         {!!results.length && (
           <div
             style={{
@@ -83,7 +84,7 @@ export default function NewMessageModal({
             {results.map((u) => (
               <div
                 key={u._id}
-                onClick={() => setNewTo(u)} // ← elegir destinatario
+                onClick={() => setNewTo(u)} // tria de destinatario
                 style={{
                   padding: 8,
                   border: '1px solid #e5e7eb',
@@ -93,7 +94,7 @@ export default function NewMessageModal({
                   gap: 8,
                   cursor: 'pointer',
                   background:
-                    String(newTo?._id) === String(u._id) ? '#f5f3ff' : '#fff' // ← resalta seleccionado
+                    String(newTo?._id) === String(u._id) ? '#f5f3ff' : '#fff' // resalta select
                 }}
                 title={u.email}
               >
@@ -101,7 +102,7 @@ export default function NewMessageModal({
                   src={u.avatar || AVATAR_PLACEHOLDER}
                   alt={u.name || u.email}
                   onError={(e) => {
-                    // ← fallback avatar
+                    // fallback avatar
                     if (e.currentTarget.src !== AVATAR_PLACEHOLDER)
                       e.currentTarget.src = AVATAR_PLACEHOLDER
                   }}
@@ -124,19 +125,19 @@ export default function NewMessageModal({
           </div>
         )}
 
-        {/* ======== Asunto + cuerpo ======== */}
+        {/*  ASUNTO Y CUERTPO */}
         <Input
           placeholder='Asunto'
           value={newSubject}
-          onChange={(e) => setNewSubject(e.target.value)} // ← 2-way
+          onChange={(e) => setNewSubject(e.target.value)} // 2 way
         />
         <Textarea
           placeholder='Escribe el mensaje…'
           value={newBody}
-          onChange={(e) => setNewBody(e.target.value)} // ← 2-way
+          onChange={(e) => setNewBody(e.target.value)} // ← 2 way
         />
 
-        {/* ======== Ayuda de contexto ======== */}
+        {/*  help por si ... */}
         {newTo ? (
           <div style={{ fontSize: 12, color: '#64748b' }}>
             Para: <b>{newTo.name || newTo.email}</b>

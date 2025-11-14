@@ -1,7 +1,8 @@
 import React, { createContext, useState, useEffect, useContext } from 'react'
 import api from '../api/index'
 
-// Helpers ----------------------------------------
+// Helpers
+// intento leer sesion storage 
 export const getStoredUser = () => {
   try {
     const raw = sessionStorage.getItem('user')
@@ -11,14 +12,14 @@ export const getStoredUser = () => {
   }
 }
 
-// Context ----------------------------------------
+//auth context y authProvider, almaceno el estado token y usuario, para poder exponer acciones;
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => sessionStorage.getItem('token'))
   const [user, setUser] = useState(() => getStoredUser())
 
-  // Sincroniza token con axios y storage
+  // sincro token con axios y storage
   useEffect(() => {
     if (token) {
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`
@@ -29,7 +30,7 @@ export function AuthProvider({ children }) {
     }
   }, [token])
 
-  // Sincroniza user con storage
+  // sincro user con storage
   useEffect(() => {
     if (user) {
       sessionStorage.setItem('user', JSON.stringify(user))
@@ -38,7 +39,7 @@ export function AuthProvider({ children }) {
     }
   }, [user])
 
-  // ✅ Devuelve el usuario para que el caller decida adónde navegar
+  // login, register, usan api para pegarle al backend, guardo token del usuario en sesionstorage
   const login = async ({ email, password }) => {
     const { data } = await api.post('/api/auth/login', { email, password })
     setToken(data.token)
@@ -56,7 +57,7 @@ export function AuthProvider({ children }) {
     setUser(data.user)
     return data.user
   }
-
+// borro token usuario limpio estado
   const logout = () => {
     setToken(null)
     setUser(null)

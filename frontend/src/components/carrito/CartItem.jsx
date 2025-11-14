@@ -40,7 +40,7 @@ const Format = styled.div`
   color: ${({ theme }) => theme.colors.onSurfaceVariant};
 `
 
-const Quantity = styled.input`
+const Quantity = styled.input`   
   width: 60px;
   padding: ${({ theme }) => theme.spacing.xs};
   border: 1px solid ${({ theme }) => theme.colors.onSurfaceVariant};
@@ -59,7 +59,7 @@ const RemoveBtn = styled.button`
   cursor: pointer;
   font-size: ${({ theme }) => theme.fontSizes.sm};
 `
-
+// fila dentro del carrito aside
 export default function CartItem({ item, onQuantityChange, onRemove }) {
   return (
     <Row>
@@ -70,6 +70,7 @@ export default function CartItem({ item, onQuantityChange, onRemove }) {
           <Format>
             {item.label} — {item.format}
           </Format>
+     
         </Details>
         <div>
           <div>

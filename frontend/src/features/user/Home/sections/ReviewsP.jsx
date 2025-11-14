@@ -23,16 +23,19 @@ const User = styled.strong`
 
 export default function ReviewsPreview() {
   const [reviews, setReviews] = useState([])
-
+// reviews como state
   useEffect(() => {
     api
+    // get por fecha creada
       .get('/api/reviews?limit=4&sort=-createdAt')
+      // set de reviews con res.data, sin normalizar
       .then((res) => setReviews(res.data))
       .catch((err) => console.error(err))
   }, [])
 
   return (
     <SectionRev>
+      {/* render de lista por reseña, user name r.user.name, text r.comment */}
       <TitleRev>¿Quieres dejar tu huella en KbooK?</TitleRev>
       <List>
         {reviews.map((r) => (

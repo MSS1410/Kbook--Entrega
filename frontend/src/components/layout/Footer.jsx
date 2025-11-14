@@ -433,3 +433,9 @@ export default function Footer() {
     </Wrap>
   )
 }
+
+
+// WRAP + INNER
+
+// wrap es el footer que pinta el fondo morado 100% pantalla
+// inner contenedor, centro y limito contenido para q no se pegue ni bordes ni se me re estire demasiado

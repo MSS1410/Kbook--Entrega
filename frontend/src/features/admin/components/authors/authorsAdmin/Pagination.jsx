@@ -24,11 +24,13 @@ export default function Pagination({ page, totalPages, onPrev, onNext }) {
     <Pager>
       <button disabled={page <= 1} onClick={onPrev}>
         Anterior
+        {/* disabled si no puede haber anterior*/}
       </button>
       <strong>
         Página {page}/{totalPages}
       </strong>
       <button disabled={page >= totalPages} onClick={onNext}>
+        {/* igual al inverso, proteje limites superiores */}
         Siguiente
       </button>
     </Pager>

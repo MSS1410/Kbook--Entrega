@@ -114,6 +114,7 @@ export default function ReviewAndTotals({
           </LV>
           <LV>
             <b>Caducidad:</b>
+
             <div>
               {useAltPayment
                 ? payForm.expiry || '—'
@@ -125,7 +126,9 @@ export default function ReviewAndTotals({
 
       <Section>
         <h3>Entrega</h3>
-        <div style={{ marginTop: 4 }}>{shippingLabel}</div>
+        {/* tipo elegido envio */}
+        <div style={{ marginTop: 4 }}>{shippingLabel}</div> 
+                {/* tiempon a recibir */}
         <p style={{ marginTop: 6 }}>{deliveryPhrase}</p>
       </Section>
 
